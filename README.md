@@ -1,23 +1,25 @@
-# TÍTULO DO PROJETO
+SaveFood
 
-`CURSO`
+Análise e Desenvolvimento de Sistemas - PUC Minas
 
-`DISCIPLINA`
+Desenvolvimento de uma Aplicação Interativa
 
-`SEMESTRE`
+1º semestre/2026
 
-Descrever resumidamente, em um ou dois parágrafos, o projeto que está sendo desenvolvido.
+O objetivo primordial deste projeto é estabelecer um ecossistema digital que mitigue o desperdício de alimentos na fonte (comércios locais) e combata a fome de forma direta.
 
 ## Integrantes
 
-* Nome completo do aluno 1
-* Nome completo do aluno 2
-* Nome completo do aluno 3
-* Nome completo do aluno 4
+* Artur da Silva Nascimento
+* Deivid Araújo Nascimento
+* Gabriel Medeiros de Aguiar
+* Paulo Henrique Torquato Reis Leonardo
+* Victor Otávio Braga Tôrres
+* Wadahan Nascimento
 
 ## Orientador
 
-* Nome completo do professor
+* Claudio Faria
 
 ## Instruções de Instalação, Execução e Acesso
 
