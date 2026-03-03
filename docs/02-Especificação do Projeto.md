@@ -1,6 +1,6 @@
 # Especificações do Projeto
 
-A definição exata do problema e os pontos mais relevantes a serem tratados na plataforma Despensa Solidária foram consolidados com a participação ativa de diferentes atores da cadeia de consumo e assistência social. Por meio de pesquisas de campo, entrevistas e análise do cenário atual de insegurança alimentar e desperdício , mapeamos as necessidades de proprietários de comércios locais (padarias, hortifrútis e supermercados) , coordenadores de instituições receptoras (ONGs e cozinhas comunitárias) , além de cidadãos comuns dispostos a doar e famílias em situação de vulnerabilidade.
+A definição exata do problema e os pontos mais relevantes a serem tratados na plataforma Doalim foram consolidados com a participação ativa de diferentes atores da cadeia de consumo e assistência social. Por meio de pesquisas de campo, entrevistas e análise do cenário atual de insegurança alimentar e desperdício , mapeamos as necessidades de proprietários de comércios locais (padarias, hortifrútis e supermercados) , coordenadores de instituições receptoras (ONGs e cozinhas comunitárias) , além de cidadãos comuns dispostos a doar e famílias em situação de vulnerabilidade.
 
 Para garantir a viabilidade legal e operacional, também foram analisados os parâmetros da Lei nº 14.016/2020 (Lei de Combate ao Desperdício de Alimentos) e as métricas de impacto ambiental. Todos os detalhes, dores e expectativas levantados nesse processo de elicitação foram consolidados na forma de personas e histórias de usuários, orientando o desenvolvimento da aplicação para que ela resolva problemas reais com empatia, segurança e eficiência logística.
 
@@ -73,30 +73,21 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 |EU COMO... `PERSONA`| QUERO/PRECISO ... `FUNCIONALIDADE` |PARA ... `MOTIVO/VALOR`                 |
 |--------------------|------------------------------------|----------------------------------------|
-|Ana e Ricardo Doadores/ João e Marta Beneficiários  |Deseja se cadastrar na plataforma por meio de inclusão de dados/informações próprias.   | Para ter acesso a plataforma como doador ou receptor das mercadorias.               |
-|Ana e Ricardo Doadores       | Deseja cadastrar doações em lote através da importação de uma planilha.                | Para otimizar o tempo da equipe, cadastrando de um item a centenas de itens próximos ao vencimento de uma única vez. |
-|Ana e Ricardo Doadores       | Precisa cadastrar doações individualmente, informando foto, validade, tipo de armazenamento e demais classificações.                 | Para conseguir publicar excedentes pontuais de forma rápida e direta na vitrine. |
-|Ana e Ricardo Doadores       | Necessita validar a doação com um código ou QR Code apresentado pelo beneficiário no momento da entrega.                 | Para dar baixa no sistema, confirmar a entrega de forma segura e manter a rastreabilidade da doação. |
-|Ana e Ricardo Doadores       | Necessita confirmar ou recusar a reserva solicitada pelo receptor.                 | Para que possa confirmar a disponibilidade ou preparar a logistica de entrega. |
-|Ana e Ricardo Doadores       | Deseja visualizar um painel com métricas do seu impacto (como kg doados e CO₂ evitado).                | Para ter controle da sua ação social e comprovar a redução de resíduos orgânicos para relatórios de sustentabilidade. |
-|Ana e Ricardo Doadores       | Desejo delimitar a quantidade que cada beneficiario pode retirar de determinado produto.                 | Para que não sejam realizados pedidos de forma abusiva pelo beneficiario. |
-|João e Marta Beneficiários       | Deseja visualizar quantidade de mercadorias recebidas pelos doadores.                 | Para ter o controle da quantidade de alimentos que recebeu. |
-|João e Marta Beneficiários       | Deseja visualizar uma vitrine de doações e filtrá-las por distância e categoria.                 | Para encontrar de forma rápida os alimentos disponíveis mais próximos à sua localização atual. |
-|João e Marta Beneficiários       | Precisa fazer a reserva de uma doação específica listada no site.                 | Para ter a garantia de que o alimento estará disponível ao chegar no local de retirada, evitando viagens perdidas. |
-|Ana e Ricardo Doadores/ João e Marta Beneficiários       | Necessita receber notificações (e-mail ou mensagem) sobre o status de suas reservas.                | Para ser notificado qual o status de como está a reserva ou doação. |
-|Ana e Ricardo Doadores/ João e Marta Beneficiários       | Precisa avaliar a experiência com o doador ou beneficiario.                 | Para indicar aos demais usuários a experiencia com da entrega ou recebimento das doações. |
-|Carlos Administrador       | Deseja validar os documentos enviados pelas ONGs e instituições no momento do cadastro.                 | Para garantir a integridade da plataforma, assegurando que os beneficiários sejam entidades reais e confiáveis. |
-|Carlos Administrador       | Deseja extrair os dados gerados pelas doações realizadas pela plataforma.                | Para validar o impacto gerado pelo sistema na sociedade. |
-|Doadores/Beneficiários/Administrador       | Desejo visualizar o perfil publico dos demais usuários.                | Para visualizar as informações publicas e a media de avaliações do perfil. |
-
-Apresente aqui as histórias de usuário que são relevantes para o projeto de sua solução. As Histórias de Usuário consistem em uma ferramenta poderosa para a compreensão e elicitação dos requisitos funcionais e não funcionais da sua aplicação. Se possível, agrupe as histórias de usuário por contexto, para facilitar consultas recorrentes à essa parte do documento.
-
-> **Links Úteis**:
-> - [Histórias de usuários com exemplos e template](https://www.atlassian.com/br/agile/project-management/user-stories)
-> - [Como escrever boas histórias de usuário (User Stories)](https://medium.com/vertice/como-escrever-boas-users-stories-hist%C3%B3rias-de-usu%C3%A1rios-b29c75043fac)
-> - [User Stories: requisitos que humanos entendem](https://www.luiztools.com.br/post/user-stories-descricao-de-requisitos-que-humanos-entendem/)
-> - [Histórias de Usuários: mais exemplos](https://www.reqview.com/doc/user-stories-example.html)
-> - [9 Common User Story Mistakes](https://airfocus.com/blog/user-story-mistakes/)
+|Doador/ Beneficiário  |Deseja se cadastrar na plataforma por meio de inclusão de dados/informações próprias.   | Para ter acesso a plataforma como doador ou receptor das mercadorias.               |
+|Doador      | Deseja cadastrar doações em lote através da importação de uma planilha.                | Para otimizar o tempo da equipe, cadastrando de um item a centenas de itens próximos ao vencimento de uma única vez. |
+|Doador       | Precisa cadastrar doações individualmente, informando foto, validade, tipo de armazenamento e demais classificações.                 | Para conseguir publicar excedentes pontuais de forma rápida e direta na vitrine. |
+|Doador       | Necessita validar a doação com um código ou QR Code apresentado pelo beneficiário no momento da entrega.                 | Para dar baixa no sistema, confirmar a entrega de forma segura e manter a rastreabilidade da doação. |
+|Doador    | Necessita confirmar ou recusar a reserva solicitada pelo receptor.                 | Para que possa confirmar a disponibilidade ou preparar a logistica de entrega. |
+|Doador       | Deseja visualizar um painel com métricas do seu impacto (como kg doados e CO₂ evitado).                | Para ter controle da sua ação social e comprovar a redução de resíduos orgânicos para relatórios de sustentabilidade. |
+|Doador      | Desejo delimitar a quantidade que cada beneficiario pode retirar de determinado produto.                 | Para que não sejam realizados pedidos de forma abusiva pelo beneficiario. |
+|Beneficiário       | Deseja visualizar quantidade de mercadorias recebidas pelos doadores.                 | Para ter o controle da quantidade de alimentos que recebeu. |
+|Beneficiário       | Deseja visualizar uma vitrine de doações e filtrá-las por distância e categoria.                 | Para encontrar de forma rápida os alimentos disponíveis mais próximos à sua localização atual. |
+|Beneficiário       | Precisa fazer a reserva de uma doação específica listada no site.                 | Para ter a garantia de que o alimento estará disponível ao chegar no local de retirada, evitando viagens perdidas. |
+|Doador/ Beneficiário      | Necessita receber notificações (e-mail ou mensagem) sobre o status de suas reservas.                | Para ser notificado qual o status de como está a reserva ou doação. |
+|Doador/ Beneficiário      | Precisa avaliar a experiência com o doador ou beneficiario.                 | Para indicar aos demais usuários a experiencia com da entrega ou recebimento das doações. |
+|Administrador       | Deseja validar os documentos enviados pelas ONGs e instituições no momento do cadastro.                 | Para garantir a integridade da plataforma, assegurando que os beneficiários sejam entidades reais e confiáveis. |
+|Administrador       | Deseja extrair os dados gerados pelas doações realizadas pela plataforma.                | Para validar o impacto gerado pelo sistema na sociedade. |
+|Doador/Beneficiário/Administrador       | Desejo visualizar o perfil publico dos demais usuários.                | Para visualizar as informações publicas e a media de avaliações do perfil. |
 
 ## Requisitos
 
@@ -139,7 +130,7 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 |ID| Restrição                                             |
 |--|-------------------------------------------------------|
 |01| O projeto deverá ser entregue até o final do semestre |
-|02| Não pode ser desenvolvido um módulo de backend        |
+|02| Para o desenvolvimento do Back-end deverá ser utilizado C#.   |
 
 
 Enumere as restrições à sua solução. Lembre-se de que as restrições geralmente limitam a solução candidata.
