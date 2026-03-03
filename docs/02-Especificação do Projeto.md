@@ -1,12 +1,52 @@
 # Especificações do Projeto
 
-<span style="color:red">Pré-requisitos: <a href="1-Documentação de Contexto.md"> Documentação de Contexto</a></span>
+A definição exata do problema e os pontos mais relevantes a serem tratados na plataforma Despensa Solidária foram consolidados com a participação ativa de diferentes atores da cadeia de consumo e assistência social. Por meio de pesquisas de campo, entrevistas e análise do cenário atual de insegurança alimentar e desperdício , mapeamos as necessidades de proprietários de comércios locais (padarias, hortifrútis e supermercados) , coordenadores de instituições receptoras (ONGs e cozinhas comunitárias) , além de cidadãos comuns dispostos a doar e famílias em situação de vulnerabilidade.
 
-Definição do problema e ideia de solução a partir da perspectiva do usuário. É composta pela definição do  diagrama de personas, histórias de usuários, requisitos funcionais e não funcionais além das restrições do projeto.
-
-Apresente uma visão geral do que será abordado nesta parte do documento, enumerando as técnicas e/ou ferramentas utilizadas para realizar a especificações do projeto
+Para garantir a viabilidade legal e operacional, também foram analisados os parâmetros da Lei nº 14.016/2020 (Lei de Combate ao Desperdício de Alimentos) e as métricas de impacto ambiental. Todos os detalhes, dores e expectativas levantados nesse processo de elicitação foram consolidados na forma de personas e histórias de usuários, orientando o desenvolvimento da aplicação para que ela resolva problemas reais com empatia, segurança e eficiência logística.
 
 ## Personas
+
+Ricardo, o Comerciante (Doador PJ)
+
+- Proprietário de uma padaria local de médio porte. Focado na gestão comercial e no fluxo de caixa.
+
+- Quer reduzir perdas operacionais , atuar com responsabilidade social  e ser reconhecido na comunidade.
+
+- Sente-se mal ao descartar pães e doces no fim do dia, mas teme multas ou implicações jurídicas se alguém passar mal com a doação
+
+
+Marta, a Gestora Social (Receptora PJ)
+
+- Coordenadora de uma ONG que atende 50 famílias. Muito ativa, mas sempre com recursos e tempo escassos.
+
+- Precisa de doações constantes para garantir o fornecimento para as ações assistenciais.
+
+- Perde muito tempo buscando doadores por telefone e tem dificuldade em organizar a logística de coleta no dia a dia.
+
+Carlos, o Administrador (Sistema)
+
+- Analista de sistemas e gestor operacional da plataforma Despensa Solidária.
+  
+- Perfil técnico e analítico.Garantir a segurança da plataforma e comprovar a efetividade do sistema através da geração de relatórios de impacto ambiental.
+  
+- Dificuldade em auditar todas as atividades do sistema  e garantir que apenas estabelecimentos e pessoas sérias participem da rede.
+
+Ana, a Cidadã Consciente (Doadora PF)
+
+- Mora em apartamento, trabalha em escritório e odeia o desperdício. Engajada com pautas de sustentabilidade.
+  
+- Quer destinar corretamente os alimentos que sabe que não vai consumir, contribuindo para diminuir o lixo orgânico.
+
+- Compra itens em excesso que acabam próximos da validade. Quer doar, mas não conhece quem precisa por perto e tem receio de entregar a desconhecidos.
+
+João, o Chefe de Família (Receptor PF)
+
+- Trabalhador informal/desempregado, sustenta 3 filhos. Possui smartphone com hardware modesto e pacote de dados limitado.
+
+- Busca acesso a alimentos em condições adequadas para consumo, com custo zero, garantindo o sustento da família.
+
+- Sente vergonha de pedir auxílio alimentar em locais públicos. Precisa de um aplicativo muito leve, simples de usar e que consuma pouca internet.
+
 
 Identifique, em torno de, 5 personas. Para cada persona, lembre-se de descrever suas angústicas, frustrações e expectativas de vida relacionadas ao problema. Além disso, defina uma "aparência" para a persona. Para isso, você poderá utilizar sites como [https://this-person-does-not-exist.com/pt#google_vignette](https://this-person-does-not-exist.com/pt) ou https://thispersondoesnotexist.com/ 
 
@@ -33,8 +73,21 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 |EU COMO... `PERSONA`| QUERO/PRECISO ... `FUNCIONALIDADE` |PARA ... `MOTIVO/VALOR`                 |
 |--------------------|------------------------------------|----------------------------------------|
-|Ana Clara  | Uma forma de identificar se uma agência é realmente confiável           | Me sentir mais segura ao contratar seus serviços               |
-|Ana Clara       | Ter um mecanismo eficiente e rápido de comunicação                 | Que eu possa sanar todas as minhas dúvidas rapidamente |
+|Ana e Ricardo Doadores/ João e Marta Beneficiários  |Deseja se cadastrar na plataforma por meio de inclusão de dados/informações próprias.   | Para ter acesso a plataforma como doador ou receptor das mercadorias.               |
+|Ana e Ricardo Doadores       | Deseja cadastrar doações em lote através da importação de uma planilha.                | Para otimizar o tempo da equipe, cadastrando de um item a centenas de itens próximos ao vencimento de uma única vez. |
+|Ana e Ricardo Doadores       | Precisa cadastrar doações individualmente, informando foto, validade, tipo de armazenamento e demais classificações.                 | Para conseguir publicar excedentes pontuais de forma rápida e direta na vitrine. |
+|Ana e Ricardo Doadores       | Necessita validar a doação com um código ou QR Code apresentado pelo beneficiário no momento da entrega.                 | Para dar baixa no sistema, confirmar a entrega de forma segura e manter a rastreabilidade da doação. |
+|Ana e Ricardo Doadores       | Necessita confirmar ou recusar a reserva solicitada pelo receptor.                 | Para que possa confirmar a disponibilidade ou preparar a logistica de entrega. |
+|Ana e Ricardo Doadores       | Deseja visualizar um painel com métricas do seu impacto (como kg doados e CO₂ evitado).                | Para ter controle da sua ação social e comprovar a redução de resíduos orgânicos para relatórios de sustentabilidade. |
+|Ana e Ricardo Doadores       | Desejo delimitar a quantidade que cada beneficiario pode retirar de determinado produto.                 | Para que não sejam realizados pedidos de forma abusiva pelo beneficiario. |
+|João e Marta Beneficiários       | Deseja visualizar quantidade de mercadorias recebidas pelos doadores.                 | Para ter o controle da quantidade de alimentos que recebeu. |
+|João e Marta Beneficiários       | Deseja visualizar uma vitrine de doações e filtrá-las por distância e categoria.                 | Para encontrar de forma rápida os alimentos disponíveis mais próximos à sua localização atual. |
+|João e Marta Beneficiários       | Precisa fazer a reserva de uma doação específica listada no site.                 | Para ter a garantia de que o alimento estará disponível ao chegar no local de retirada, evitando viagens perdidas. |
+|Ana e Ricardo Doadores/ João e Marta Beneficiários       | Necessita receber notificações (e-mail ou mensagem) sobre o status de suas reservas.                | Para ser notificado qual o status de como está a reserva ou doação. |
+|Ana e Ricardo Doadores/ João e Marta Beneficiários       | Precisa avaliar a experiência com o doador ou beneficiario.                 | Para indicar aos demais usuários a experiencia com da entrega ou recebimento das doações. |
+|Carlos Administrador       | Deseja validar os documentos enviados pelas ONGs e instituições no momento do cadastro.                 | Para garantir a integridade da plataforma, assegurando que os beneficiários sejam entidades reais e confiáveis. |
+|Carlos Administrador       | Deseja extrair os dados gerados pelas doações realizadas pela plataforma.                | Para validar o impacto gerado pelo sistema na sociedade. |
+|Doadores/Beneficiários/Administrador       | Desejo visualizar o perfil publico dos demais usuários.                | Para visualizar as informações publicas e a media de avaliações do perfil. |
 
 Apresente aqui as histórias de usuário que são relevantes para o projeto de sua solução. As Histórias de Usuário consistem em uma ferramenta poderosa para a compreensão e elicitação dos requisitos funcionais e não funcionais da sua aplicação. Se possível, agrupe as histórias de usuário por contexto, para facilitar consultas recorrentes à essa parte do documento.
 
