@@ -4,7 +4,7 @@ O desperdício de alimentos no Brasil e no mundo configura-se como um dos princi
 
 No contexto brasileiro, o problema apresenta dupla complexidade: a necessidade de otimização da logística de distribuição de excedentes alimentares e a garantia de que esses produtos cheguem às pessoas que deles necessitam antes de perderem o valor para consumo.
 
-Nesse cenário, a plataforma Despensa Solidária surge como uma solução tecnológica voltada à conexão entre empresas do setor alimentício (supermercados, padarias, mercados e hortifrutis) e pessoas físicas ou instituições. Por meio da digitalização do estoque de produtos próximos ao vencimento, o projeto busca transformar o desperdício potencial em uma rede de apoio à segurança alimentar, alinhando-se às metas globais de desenvolvimento sustentável.
+Nesse cenário, a plataforma Daoalim surge como uma solução tecnológica voltada à conexão entre empresas do setor alimentício (supermercados, padarias, mercados e hortifrutis) e pessoas físicas ou instituições. Por meio da digitalização do estoque de produtos próximos ao vencimento, o projeto busca transformar o desperdício potencial em uma rede de apoio à segurança alimentar, alinhando-se às metas globais de desenvolvimento sustentável.
 
 
 ## Problema
