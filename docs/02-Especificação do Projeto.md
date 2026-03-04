@@ -97,31 +97,38 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 
 |ID    | Descrição do Requisito  | Prioridade |
 |------|-----------------------------------------|----|
-|RF-001| A aplicação deve permitir que o usuário avalie uma agência de intercâmbio com base na sua experiência| ALTA | 
-|RF-002| A aplicação deve permitir que o usuário inclua comentários ao fazer uma avaliação de uma agência de intercâmbio    | ALTA |
-|RF-003| A aplicação deve permitir que o usuário consulte todas as agências de intercâmbio cadastradas ordenando-as com base em suas notas | ALTA |
+|RF-001| A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha.| ALTA | 
+|RF-002| A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador.| ALTA |
+|RF-003| A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador.| ALTA |
+|RF-004| A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos.  | ALTA |
+|RF-005| A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros. | ALTA |
+|RF-006| A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento. | ALTA |
+|RF-007| A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada. | ALTA |
+|RF-008| A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. | ALTA |
+|RF-009| A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. | MÉDIA |
+|RF-010| A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte. | MÉDIA |
+|RF-011| A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos. | MÉDIA |
+|RF-012| A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item. | BAIXA |
+|RF-013| A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos. | BAIXA |
+|RF-014| A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada. | BAIXA |
+|RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário. | BAIXA |
 
 ### Requisitos não Funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
 |-------|-------------------------|----|
-|RNF-001| A aplicação deve ser responsiva | MÉDIA | 
-|RNF-002| A aplicação deve processar requisições do usuário em no máximo 3s |  BAIXA | 
-
-Com base nas Histórias de Usuário, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
-
-- [Requisitos Funcionais
- (RF)](https://pt.wikipedia.org/wiki/Requisito_funcional):
- correspondem a uma funcionalidade que deve estar presente na
-  plataforma (ex: cadastro de usuário).
-- [Requisitos Não Funcionais
-  (RNF)](https://pt.wikipedia.org/wiki/Requisito_n%C3%A3o_funcional):
-  correspondem a uma característica técnica, seja de usabilidade,
-  desempenho, confiabilidade, segurança ou outro (ex: suporte a
-  dispositivos iOS e Android).
-Lembre-se que cada requisito deve corresponder à uma e somente uma
-característica alvo da sua solução. Além disso, certifique-se de que
-todos os aspectos capturados nas Histórias de Usuário foram cobertos.
+|RNF-001| A aplicação deve conseguir acessar API's | ALTA | 
+|RNF-002| A aplicação deve ser desenvolvida utilizando a linguagem C# no back-end e a tríade JavaScript, HTML e CSS (com framework Bootstrap) no front-end. |  ALTA | 
+|RNF-003| A aplicação deve estar em total conformidade com a LGPD, garantindo o tratamento seguro de dados sensíveis de famílias cadastradas e políticas claras de privacidade. |  ALTA |
+|RNF-004| A aplicação deve possuir uma interface "mobile-first", sendo responsiva e adaptável a telas de celulares, considerando que muitos receptores usarão o sistema via smartphone. |  ALTA |
+|RNF-005| A aplicação deve garantir transações no banco de dados e evitar "double booking" (reservas simultâneas da mesma doação). |  ALTA |
+|RNF-006| A aplicação deve estar disponível 24 horas por dia, 7 dias por semana. |  ALTA |
+|RNF-007| A aplicação deve ser compatível com os principais navegadores (Chrome, Firefox e Edge). |  ALTA |
+|RNF-008| A aplicação deve utilizar o Microsoft SQL Server para armazenamento de dados. |  ALTA |
+|RNF-009| A aplicação deve ter capacidade de receber multiplos acessos simultaneos. |  ALTA |
+|RNF-010| A aplicação deve ter um tempo de resposta inferior a 5 segundos para buscas e listagens de doações na vitrine em condições normais de tráfego. |  MÉDIA |
+|RNF-011| A aplicação deve seguir diretrizes básicas de acessibilidade (WCAG), possuindo bom contraste de cores e navegação por teclado. |  MÉDIA |
+|RNF-012| A aplicação deve garantir a segurança dos dados utilizando senhas com hash forte e comunicação via protocolo TLS/HTTPS. |  MÉDIA |
 
 ## Restrições
 
