@@ -1,7 +1,7 @@
 
 # Metodologia
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Documentação de Especificação</a></span>
+<span style="color:red">Pré-requisitos: <a href="https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/02-Especifica%C3%A7%C3%A3o%20do%20Projeto.md"> Documentação de Especificação</a></span>
 
 A metodologia selecionada para o desenvolvimento deste projeto foi o SCRUM, o qual oferece agilidade e previsibilidade ao desenvolvimento de aplicações interativas, garantindo que o produto final esteja alinhado às expectativas reais do usuário por meio de ciclos de entrega rápidos. O framework potencializa a qualidade técnica e a produtividade da equipe ao promover o aprendizado contínuo e a redução de riscos operacionais (SUTHERLAND, 2014). Segundo Schwaber e Sutherland (2020), essa abordagem maximiza o valor do negócio ao permitir adaptações imediatas a mudanças, transformando o processo de software em um fluxo colaborativo e altamente eficiente.
 
@@ -27,15 +27,6 @@ etiquetas:
 - `infrastructure`: organização da estrutura do projeto
 - `task`: uma funcionalidade precisa ser melhorada
 - `test`: teste de funcionalidades
-
-Discuta como a configuração do projeto foi feita na ferramenta de versionamento escolhida. Exponha como a gerência de tags, merges, commits e branchs é realizada. Discuta como a gerência de issues foi realizada.
-
-> **Links Úteis**:
-> - [Tutorial GitHub](https://guides.github.com/activities/hello-world/)
-> - [Git e Github](https://www.youtube.com/playlist?list=PLHz_AreHm4dm7ZULPAmadvNhH6vk9oNZA)
->  - [Comparando fluxos de trabalho](https://www.atlassian.com/br/git/tutorials/comparing-workflows)
-> - [Understanding the GitHub flow](https://guides.github.com/introduction/flow/)
-> - [The gitflow workflow - in less than 5 mins](https://www.youtube.com/watch?v=1SXpE08hvGs)
 
 ## Gerenciamento de Projeto
 
