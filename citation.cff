@@ -1,29 +1,37 @@
-message: Please cite this software using these metadata.
-title:
+cff-version: "1.2.0"
+message: "Please cite this software using these metadata."
+title: "Doalim"
+version: "1.0.0"
+date-released: "2026-06-21"
+repository-code: "https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim"
 authors:
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
-  - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
+  - family-names: "da Silva Nascimento"
+    given-names: "Artur"
+  - family-names: "Araujo Nascimento"
+    given-names: "Deivid"
+  - family-names: "Medeiros de Aguiar"
+    given-names: "Gabriel"
+  - family-names: "Torquato Reis Leonardo"
+    given-names: "Paulo Henrique"
+  - family-names: "Otávio Braga Tôrres"
+    given-names: "Victor"
+  - family-names: "Nascimento"
+    given-names: "Wadahan"
+  - name-suffix: "Professor"
+    affiliation: "PUC Minas"
+    family-names: "Faria"
+    given-names: "Claudio"
 keywords:
-  - 
-  - 
-repository-code: 
-version: 1.0.0
-date-released: 2023-10-31
+  - Doação
+  - Alimento
+  - Beneficiário
+  - ONG
+  - Disperdicio
+  - Estabelecimentos 
+  - Meio Ambiente
+  - Redistribuição
+  - Sustentabilidade
+  - Conscientização
+  - Solidariedade
+  - Fome
+  - Ação Social
