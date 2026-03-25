@@ -31,7 +31,7 @@ Login/Autenticação
 <img width="1074" height="763" alt="image" src="https://github.com/user-attachments/assets/ef29afbd-a98d-4c3d-8274-030f11fbd21e" />
 
 Cadastro de Usuário
-<img width="1071" height="762" alt="image" src="https://github.com/user-attachments/assets/55fda3c7-b148-425e-881f-b4385820eb49" />
+<img width="1068" height="759" alt="image" src="https://github.com/user-attachments/assets/baa9a689-f48d-4ed6-9509-4299e39dbf15" />
 
 
 
@@ -39,7 +39,7 @@ Cadastro de Usuário
   - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador.
 
 Perfil (Editar)
-<img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/d3261270-d2c1-4da2-98e5-700956f38a40" />
+<img width="1071" height="759" alt="image" src="https://github.com/user-attachments/assets/440bde3e-afad-4bb8-9262-2f0aff279002" />
 
 
 
@@ -49,7 +49,7 @@ Perfil (Editar)
   - A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item.
 
 Cadastro de Produto
-<img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/35b7e69a-4c57-4e86-a429-d00b0006471a" />
+<img width="1068" height="760" alt="image" src="https://github.com/user-attachments/assets/a99e5289-8911-4e2b-b1ab-35645684c40b" />
 
 
 
@@ -70,7 +70,7 @@ Histórico de Doações
 <img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/1e5c7096-ad9b-4d81-bb3f-133b564ec483" />
 
 Detalhes da Doação
-<img width="1070" height="762" alt="image" src="https://github.com/user-attachments/assets/5b1bdfbe-81dd-4b17-82e4-83f1cfa3fb4a" />
+<img width="1069" height="754" alt="image" src="https://github.com/user-attachments/assets/39aa8a7f-f974-4008-951a-e5c9ce3acf2b" />
 
 
 
@@ -90,6 +90,9 @@ Detalhes da Doação
 HomePage/Dashboard
  <img width="1075" height="757" alt="image" src="https://github.com/user-attachments/assets/fa1f8cc8-0629-4619-b2c1-403ecdd3986e" />
 
+Painel de Impacto Ambiental
+<img width="1072" height="730" alt="image" src="https://github.com/user-attachments/assets/e845ccb5-2804-4ff5-9bcb-a31e02b4c250" />
+
 
 
 + RF-011
@@ -103,10 +106,12 @@ HomePage/Dashboard
   - A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada.
 
 Perfil (Público)
-<img width="1072" height="760" alt="image" src="https://github.com/user-attachments/assets/47357004-0057-4eb9-843d-a0db4d407c4f" />
+<img width="1065" height="758" alt="image" src="https://github.com/user-attachments/assets/570557f2-1fea-4897-ac6c-46a5d1faa0a0" />
 
 
 
 + RF-015
   - A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.
+Chat
+<img width="1072" height="758" alt="image" src="https://github.com/user-attachments/assets/f2fb739a-a238-462a-bca6-faeb5fde1102" />
 
