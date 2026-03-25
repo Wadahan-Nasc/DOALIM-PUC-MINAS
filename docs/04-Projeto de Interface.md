@@ -22,18 +22,91 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Diagramas d
 
 ## Wireframes
 
-![Exemplo de Wireframe](img/wireframe-example.png)
++ RF-001
+  - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha.
++ RF-002
+  - A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador.
 
-Os wireframes são protótipos utilizados no design de interfaces para representar a estrutura de um site e o relacionamento entre suas páginas. Eles funcionam como ilustrações do layout e da disposição dos elementos essenciais da interface.
+Login/Autenticação
+<img width="1074" height="763" alt="image" src="https://github.com/user-attachments/assets/ef29afbd-a98d-4c3d-8274-030f11fbd21e" />
 
-**Nesta seção, é FUNDAMENTAL indicar, para CADA tela/wireframe proposto, QUAIS REQUISITOS estão sendo contemplados por ela.**
+Cadastro de Usuário
+<img width="1071" height="762" alt="image" src="https://github.com/user-attachments/assets/55fda3c7-b148-425e-881f-b4385820eb49" />
 
 
-> **Links Úteis**:
-> - [Protótipos vs Wireframes](https://www.nngroup.com/videos/prototypes-vs-wireframes-ux-projects/)
-> - [Ferramentas de Wireframes](https://rockcontent.com/blog/wireframes/)
-> - [MarvelApp](https://marvelapp.com/developers/documentation/tutorials/)
-> - [Figma](https://www.figma.com/)
-> - [Adobe XD](https://www.adobe.com/br/products/xd.html#scroll)
-> - [Axure](https://www.axure.com/edu) (Licença Educacional)
-> - [InvisionApp](https://www.invisionapp.com/) (Licença Educacional)
+
++ RF-003
+  - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador.
+
+Perfil (Editar)
+<img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/d3261270-d2c1-4da2-98e5-700956f38a40" />
+
+
+
++ RF-004
+  - A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos.
++ RF-012
+  - A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item.
+
+Cadastro de Produto
+<img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/35b7e69a-4c57-4e86-a429-d00b0006471a" />
+
+
+
++ RF-005
+  - A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros.
+
+
+
++ RF-006
+  - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento.
+
+
+
++ RF-007
+  - A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada.
+
+Histórico de Doações
+<img width="1072" height="761" alt="image" src="https://github.com/user-attachments/assets/1e5c7096-ad9b-4d81-bb3f-133b564ec483" />
+
+Detalhes da Doação
+<img width="1070" height="762" alt="image" src="https://github.com/user-attachments/assets/5b1bdfbe-81dd-4b17-82e4-83f1cfa3fb4a" />
+
+
+
++ RF-008
+  - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários.
+
+
+
++ RF-009
+  - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas.
+
+
+
++ RF-010
+  - A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte.
+
+HomePage/Dashboard
+ <img width="1075" height="757" alt="image" src="https://github.com/user-attachments/assets/fa1f8cc8-0629-4619-b2c1-403ecdd3986e" />
+
+
+
++ RF-011
+  - A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos.
+
+
+
++ RF-013
+  - A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos.
++ RF-014
+  - A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada.
+
+Perfil (Público)
+<img width="1072" height="760" alt="image" src="https://github.com/user-attachments/assets/47357004-0057-4eb9-843d-a0db4d407c4f" />
+
+
+
++ RF-015
+  - A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.
+
