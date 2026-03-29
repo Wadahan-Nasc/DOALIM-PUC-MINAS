@@ -55,6 +55,7 @@ As ferramentas empregadas no projeto são:
 - LucidChart
 - Mermaid
 - Marvel App
+- Diagrams
 
 O editor de código foi escolhido porque ele possui uma integração com o
 sistema de versão. As ferramentas de comunicação utilizadas possuem
