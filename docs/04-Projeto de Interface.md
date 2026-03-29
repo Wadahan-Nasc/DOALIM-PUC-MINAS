@@ -9,8 +9,19 @@ Visão geral da interação do usuário pelas telas do sistema e protótipo inte
 
 ## Diagrama de Fluxo
 
+Login/Cadastro
+<img width="4363" height="2258" alt="Login_Cadastro" src="https://github.com/user-attachments/assets/296397c8-4f3f-47a6-83db-8ac23254815f" />
+
+Navegação do Doador
+<img width="4738" height="2361" alt="Navegação_Doador" src="https://github.com/user-attachments/assets/a30d4118-15de-4182-89c1-cffc4f7177c5" />
+
+Navegação do Beneficiario
 ![Navegação Beneficiário Doalim](https://github.com/user-attachments/assets/b9c38a10-13ce-49f9-83c7-8576961e52d4)
 
+Navegação do Administrador
+<img width="3488" height="1864" alt="Navegação_Administrador" src="https://github.com/user-attachments/assets/4272c3e2-82da-467e-93df-05e1c331ea9a" />
+
+Vitrine/Reserva
 ![Vitrine - Reserva](https://github.com/user-attachments/assets/149d263a-d3b5-4630-bef3-d809d6265532)
 
 Diagrama de fluxo elaborado na plataforma Lucidchart.
