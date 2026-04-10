@@ -153,6 +153,7 @@ Perfil (Público)
 
 + RF-015
   - A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.
+
 Chat
 <img width="1072" height="758" alt="image" src="https://github.com/user-attachments/assets/f2fb739a-a238-462a-bca6-faeb5fde1102" />
 
