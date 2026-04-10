@@ -27,6 +27,18 @@ Vitrine/Reserva
 Diagrama de fluxo elaborado na plataforma Lucidchart.
 
 ## Wireframes
+Link para a aplicação interativa no Marvelapp: https://marvelapp.com/prototype/11h45d0e
+
+(Observação: Por uma limitação do Marvelapp, para que possa visualizar as telas de Admin, Doador e Beneficiário, deverá seguir de acordo com a legenda e imagem abaixo)
+
+1- Doador
+
+2- Administrador
+
+3- Beneficiário
+
+<img width="899" height="640" alt="image" src="https://github.com/user-attachments/assets/44580fe6-918e-48ed-954e-43c873bbb6f7" />
+
 
 + RF-001
   - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha.
