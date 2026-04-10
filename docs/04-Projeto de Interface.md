@@ -61,11 +61,13 @@ Cadastro de Produto
 
 + RF-005
   - A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros.
+<img width="1076" height="773" alt="image" src="https://github.com/user-attachments/assets/26a77c97-15e1-4035-a527-5bb0ff25edd1" />
 
 
 
 + RF-006
   - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento.
+<img width="1077" height="769" alt="image" src="https://github.com/user-attachments/assets/8a1a6cd7-90fa-49a9-9412-e24583fba13b" />
 
 
 
@@ -82,6 +84,17 @@ Detalhes da Doação
 
 + RF-008
   - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários.
+
+ Painel do Administrador
+<img width="1072" height="781" alt="image" src="https://github.com/user-attachments/assets/6a14f405-32ef-4fe1-aa85-16fb27a2f07e" />
+
+Gerenciamento de usuários
+<img width="1072" height="775" alt="image" src="https://github.com/user-attachments/assets/e01c370f-79f8-4b50-aec4-48fc7a61961e" />
+<img width="1078" height="766" alt="image" src="https://github.com/user-attachments/assets/af933748-1460-446c-9aa9-d14683850807" />
+<img width="1069" height="765" alt="image" src="https://github.com/user-attachments/assets/17bf5bbd-c840-476b-b0e2-4b6004e16075" />
+
+
+
 
 
 
@@ -103,6 +116,16 @@ Painel de Impacto Ambiental
 
 + RF-011
   - A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos.
+<img width="1078" height="771" alt="image" src="https://github.com/user-attachments/assets/c52f803c-ac92-46c3-906e-6499d9bab8b4" />
+
+Detalhes da reserva recebida
+<img width="1071" height="763" alt="image" src="https://github.com/user-attachments/assets/705cfaa5-e208-4704-b943-199640e9ec95" />
+
+Histórico de doações recebidas
+<img width="1079" height="769" alt="image" src="https://github.com/user-attachments/assets/9f4f2758-4a76-4163-9b31-b9c4cea513a0" />
+
+
+
 
 
 
