@@ -48,7 +48,7 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 | Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta previamente cadastrada <br> - Acessar o perfil através da foto de perfil no cabeçalho <br> - Anexar os documentos de Comprovação de Identificação através do campo destinado <br> Clicar em "Salvar" |
 |Critério de Êxito | - Visualizar a mensagem de "arquivo anexado com êxito" |
 
-| **Caso de Teste** 	| **CT07 – Visualização de histórico - Benificiário** 	|
+| **Caso de Teste** 	| **CT07 – Visualização de histórico - Beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
 | Objetivo do Teste 	| Verificar se o beneficiário consegue visualizar seu histórico de solicitações de reserva. |
@@ -145,6 +145,55 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 | Objetivo do Teste 	| Verificar se os usuários conseguem visualizar o perfil público dos demais usuários |
 | Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - Acessar a vitrine e buscar por um produto desejado <br> Selecionar um produto disponivel e clicar no ícone do doador <br> Alternativamente, a partir do histórico de requisição de reservas, clicar em um item do histórico <br> - Nas informações da reserva, clicar no ícone do doador |
 |Critério de Êxito | - Acesso ao perfil público do usuário doador ofertante |
+
+| Caso de Teste | CT21 – Avaliação de Usuário (Doador/Beneficiário) |
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada. |
+| Objetivo do Teste 	| Verificar se o sistema permite o envio de nota e comentário após o encerramento da doação. |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Acessar uma doação já marcada como "Concluída" através do histórico <br> - Clicar no botão "Avaliar Experiência" <br> - Selecionar uma nota (ex: 1 a 5 estrelas) <br> - Escrever um comentário curto <br> - Clicar em "Enviar Avaliação" |
+|Critério de Êxito | - A avaliação é salva com sucesso <br> - A avaliação passa a ser exibida no perfil público do usuário avaliado |
+
+| Caso de Teste | CT22 – Comunicação via Chat Interno |
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-015 - A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário. |
+| Objetivo do Teste 	| Verificar se as mensagens são enviadas e recebidas corretamente entre as duas partes. |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Beneficiário <br> - Acessar uma reserva ativa <br> - Clicar no ícone de "Chat" ou "Enviar Mensagem" <br> - Digitar uma mensagem de texto e enviar <br> - Acessar a área de mensagens/notificações para verificar o recebimento |
+|Critério de Êxito | - A mensagem é entregue em tempo real <br> - A notificação é exibida corretamente no ícone de mensagens do destinatário |
+
+| Caso de Teste | CT-23 – Acesso a APIs externas|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-001 - A aplicação deve conseguir acessar API's |
+| Objetivo do Teste 	| Verificar se o sistema realiza comunicação bem-sucedida com serviços externos. |
+| Passos 	| - Acessar a página com o formulário que consome a API (ex: preenchimento de CEP no cadastro) <br> - Inserir um dado válido <br> - Abrir as ferramentas de desenvolvedor do navegador (Aba Network/Rede) <br> - Clicar em buscar ou fora do campo |
+|Critério de Êxito | - A requisição deve retornar status OK e os dados da API devem preencher a interface corretamente |
+
+| Caso de Teste | CT-24 – Tecnologias utilizadas no desenvolvimento|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-002 - A aplicação deve ser desenvolvida utilizando a linguagem C# no back-end e a tríade JavaScript, HTML e CSS (com framework Bootstrap) no front-end. |
+| Objetivo do Teste 	| Analisar se a tecnológica definida está sendo cumprida. |
+| Passos 	| - Acessar o Visual Studio ou repositório do projeto <br> - Verificar o nome e extensão dos arquivos de back-end <br> - Verificar os arquivos de front-end e a importação das bibliotecas |
+|Critério de Êxito | - Os arquivos do servidor devem ter extensão .cs (C#) e os arquivos de interface devem utilizar .html, .css, .js, além de conter a importação/classes do Bootstrap |
+
+| Caso de Teste | CT-25 – Conformidade com LGPD|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-003 - A aplicação deve estar em total conformidade com a LGPD, garantindo o tratamento seguro de dados sensíveis de famílias cadastradas e políticas claras de privacidade. |
+| Objetivo do Teste 	| Verificar a presença de termos claros de consentimento e ferramentas de privacidade. |
+| Passos 	| - Acessar o site e verificar aviso de Cookies <br> - Acessar a tela de cadastro e identificar a "Política de Privacidade" e os Termos de Responsabilidade <br> - Logar no sistema e acessar as configurações do perfil <br> - Procurar a opção de exclusão de dados |
+|Critério de Êxito | - Documentos legais disponíveis para aceite no momento do cadastro e presença de botão funcional para o usuário solicitar a remoção de seus dados |
+
+| Caso de Teste | CT-26 – Analisar responsividade da aplicação (Mobile-first)|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-004 - A aplicação deve possuir uma interface "mobile-first", sendo responsiva e adaptável a telas de celulares, considerando que muitos receptores usarão o sistema via smartphone. |
+| Objetivo do Teste 	| Verificar a responsividade da aplicação em telas menores. |
+| Passos 	| - Acessar a URL da aplicação <br> - Redimensionar a janela do navegador (ou usar o F12 em modo mobile) para dimensões de um smartphone <br> - Navegar pelas páginas da vitrine, perfil e reserva de doações |
+|Critério de Êxito | - A interface não devem apresentar falhas de posicionamento, quebra de botões ou exigir rolagem horizontal |
+
+| Caso de Teste | CT-27 – Banco de dados utilizando SQL Server|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-008 - A aplicação deve utilizar o Microsoft SQL Server para armazenamento de dados. |
+| Objetivo do Teste 	| Verificar o SGBD utilizado para a persistência de dados. |
+| Passos 	| - Acessar as configurações do back-end <br> - Mostrar a string de conexão configurada <br> - Acessar a URL da aplicação e cadastrar um produto para doação <br> - Executar uma consulta (SELECT) através do SQL |
+|Critério de Êxito | - A conexão deve apontar para o provedor SQL Server e o cadastro do produto deve aparecer imediatamente na tabela correta do banco |
 
 
 =============================== APAGAR DAQUI PARA BAIXO AO FINALIZAR ===============================
