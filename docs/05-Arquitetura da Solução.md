@@ -1,7 +1,5 @@
 # Arquitetura da Solução
 
-<span style="color:red">Pré-requisitos: <a href="3-Projeto de Interface.md"> Projeto de Interface</a></span>
-
 Definição de como o software é estruturado em termos dos componentes que fazem parte da solução e do ambiente de hospedagem da aplicação.
 
 ## Diagrama de Classes
@@ -14,30 +12,31 @@ O diagrama de classes ilustra graficamente como será a estrutura do software, e
 
 <img width="1025" height="756" alt="image" src="https://github.com/user-attachments/assets/70e567e3-1480-4ace-916e-2e4c7f8e1dd2" />
 
-
 ## Projeto da Base de Dados
 
-O projeto da base de dados corresponde à representação das entidades e relacionamentos identificadas no Modelo ER, no formato de tabelas, com colunas e chaves primárias/estrangeiras necessárias para representar corretamente as restrições de integridade.
- 
-Para mais informações, consulte o microfundamento "Modelagem de Dados".
+![Diagrama sem nome jpg](https://github.com/user-attachments/assets/82529c39-cb3b-4b31-93b1-165bbde880e1)
 
-## ATENÇÃO!!!
-
-Os três artefatos — **Diagrama de Classes, Modelo ER e Projeto da Base de Dados** — devem ser desenvolvidos de forma sequencial e integrada, garantindo total coerência e compatibilidade entre eles. O diagrama de classes orienta a estrutura e o comportamento do software; o modelo ER traduz essa estrutura para o nível conceitual dos dados; e o projeto da base de dados materializa essas definições no formato físico (tabelas, colunas, chaves e restrições). A construção isolada ou desconexa desses elementos pode gerar inconsistências, dificultar a implementação e comprometer a qualidade do sistema.
+Link para acesso ao projeto da Base de Dados: https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1HTR5DVg1O6MPMhO3lk_NyygZYyFTwgDU%26export%3Ddownload#%7B%22pageId%22%3A%22lNUuNkisNMaThYJe329l%22%7D
 
 ## Tecnologias Utilizadas
 
-Descreva aqui qual(is) tecnologias você vai usar para resolver o seu problema, ou seja, implementar a sua solução. Liste todas as tecnologias envolvidas, linguagens a serem utilizadas, serviços web, frameworks, bibliotecas, IDEs de desenvolvimento, e ferramentas.
+As tecnologias escolhidas para este projeto são:
 
-Apresente também uma figura explicando como as tecnologias estão relacionadas ou como uma interação do usuário com o sistema vai ser conduzida, por onde ela passa até retornar uma resposta ao usuário.
+Front-end: HTML5, CSS3 e JavaScript com o framework Bootstrap. Responsável pela interface do usuário — vitrine, formulários de cadastro, painéis de reserva e perfil.
+
+Back-end: C# com ASP.NET Core (API REST). Contém toda a lógica de negócio: autenticação, validação, geração de código de entrega, relatórios de impacto e notificações.
+
+Banco de dados: MySQL (banco relacional para armazenar os usuários e transações do sistema)
+
+Ferramentas de desenvolvimento:Visual Studio (desenvolvimento backend), VS Code (frontend), Git e GitHub (documentação do projeto, gestão ágil com Kanban e versionamento de código).
+
+Hospedagem: a definir conforme o ambiente do projeto.
+
+APIs externas: a definir.
+
+<img width="740" height="612" alt="image" src="https://github.com/user-attachments/assets/813ec629-9c33-46e5-8538-62ae2685d328" />
 
 ## Hospedagem
 
-Explique como a hospedagem e o lançamento da plataforma foi feita.
+Hospedagem e o lançamento da plataforma ainda não foi feita.
 
-> **Links Úteis**:
->
-> - [Website com GitHub Pages](https://pages.github.com/)
-> - [Programação colaborativa com Repl.it](https://repl.it/)
-> - [Getting Started with Heroku](https://devcenter.heroku.com/start)
-> - [Publicando Seu Site No Heroku](http://pythonclub.com.br/publicando-seu-hello-world-no-heroku.html)
