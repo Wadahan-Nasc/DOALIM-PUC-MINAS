@@ -1,0 +1,54 @@
+@* =========================================================
+   Views/Auth/RecuperarSenha.cshtml — Passo 1
+   ========================================================= *@
+@model Doalim_dev.ViewModels.RecuperarSenhaViewModel
+@{
+    ViewData["Title"] = "Recuperar Senha";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Recuperar Senha</h2>
+            <p class="text-muted">
+                Informe seu e-mail cadastrado e enviaremos um link para redefinir sua senha.
+            </p>
+        </div>
+
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="alert alert-success">
+                <strong>E-mail enviado!</strong><br />
+                @TempData["Sucesso"]
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <form asp-action="RecuperarSenha" asp-controller="Auth" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="seu@email.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-success btn-lg">Enviar Link</button>
+            </div>
+
+            <p class="text-center text-muted small">
+                <a asp-action="Login" asp-controller="Auth" class="text-decoration-none">
+                    Voltar para o login
+                </a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

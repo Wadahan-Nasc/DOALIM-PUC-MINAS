@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Termo de Responsabilidade";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-9 col-lg-8">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Termo de Responsabilidade</h2>
+            <span class="badge bg-secondary">Versão 1.0 — 2026</span>
+        </div>
+
+        <div class="alert alert-info small mb-4">
+            Este Termo é baseado na <strong>Lei nº 14.016/2020</strong> —
+            Lei de Combate ao Desperdício de Alimentos.
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold">1. Identificação e Finalidade</h5>
+                <p>
+                    A plataforma <strong>Doalim</strong> é um sistema digital de conexão entre doadores
+                    de alimentos excedentes (pessoas físicas e jurídicas) e beneficiários (pessoas físicas,
+                    ONGs e instituições de assistência social), com o objetivo de reduzir o desperdício
+                    alimentar e contribuir para a segurança alimentar.
+                </p>
+
+                <h5 class="fw-bold mt-4">2. Responsabilidades do Doador</h5>
+                <p>Ao aceitar este Termo, o Doador declara que:</p>
+                <ul>
+                    <li>Os alimentos doados estão em condições adequadas para consumo humano no momento da doação;</li>
+                    <li>As informações de validade, tipo de armazenamento e quantidade cadastradas são verídicas;</li>
+                    <li>Os alimentos serão armazenados adequadamente até o momento da retirada pelo beneficiário;</li>
+                    <li>Não serão doados alimentos vencidos, deteriorados ou impróprios para consumo.</li>
+                </ul>
+
+                <h5 class="fw-bold mt-4">3. Proteção Legal ao Doador (Lei nº 14.016/2020)</h5>
+                <p>
+                    Em conformidade com a <strong>Lei nº 14.016, de 23 de junho de 2020</strong>, o doador
+                    que agir de boa-fé está isento de responsabilidade civil por eventuais danos causados
+                    ao consumidor, desde que não haja dolo ou negligência na doação.
+                </p>
+                <p>
+                    A plataforma Doalim recomenda que o Doador mantenha registros fotográficos e
+                    informações precisas dos alimentos doados como evidência de boa-fé.
+                </p>
+
+                <h5 class="fw-bold mt-4">4. Privacidade e LGPD</h5>
+                <p>
+                    O aceite deste Termo será registrado com data, hora e endereço IP de origem
+                    para fins de conformidade legal. Os dados coletados são tratados em conformidade
+                    com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD)</strong>.
+                </p>
+
+                <h5 class="fw-bold mt-4">5. Limitações e Vedações</h5>
+                <p>É vedado ao Doador:</p>
+                <ul>
+                    <li>Cadastrar produtos com informações falsas ou enganosas;</li>
+                    <li>Utilizar a plataforma para fins comerciais disfarçados de doação;</li>
+                    <li>Discriminar beneficiários no processo de confirmação de reservas.</li>
+                </ul>
+
+                <h5 class="fw-bold mt-4">6. Aceitação</h5>
+                <p>
+                    Ao marcar a opção "Li e aceito o Termo de Responsabilidade" no formulário de
+                    cadastro, o usuário declara ter lido, compreendido e concordado com todas as
+                    condições estabelecidas neste documento.
+                </p>
+
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button onclick="window.close()" class="btn btn-outline-secondary me-2">
+                Fechar
+            </button>
+            <a asp-action="Registro" asp-controller="Auth" class="btn btn-success">
+                Voltar ao Cadastro
+            </a>
+        </div>
+
+    </div>
+</div>

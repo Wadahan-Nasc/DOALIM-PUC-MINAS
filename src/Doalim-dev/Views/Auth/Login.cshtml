@@ -1,0 +1,68 @@
+@model Doalim_dev.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Entrar";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Entrar no Doalim</h2>
+            <p class="text-muted">Faça login para continuar</p>
+        </div>
+
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="alert alert-success">@TempData["Sucesso"]</div>
+        }
+        @if (TempData["Erro"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Erro"]</div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <form asp-action="Login" asp-controller="Auth" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="seu@email.com" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Senha" class="form-label"></label>
+                <input asp-for="Senha" class="form-control" placeholder="Sua senha" autocomplete="current-password" />
+                <span asp-validation-for="Senha" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                    <input asp-for="LembrarMe" class="form-check-input" />
+                    <label asp-for="LembrarMe" class="form-check-label">Lembrar de mim</label>
+                </div>
+                <a asp-action="RecuperarSenha" asp-controller="Auth" class="small text-decoration-none">
+                    Esqueceu a senha?
+                </a>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-success btn-lg">Entrar</button>
+            </div>
+
+            <p class="text-center text-muted small">
+                Não tem conta?
+                <a asp-action="Registro" asp-controller="Auth" class="text-decoration-none fw-bold">
+                    Cadastre-se
+                </a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -30,6 +30,7 @@
   <ItemGroup>
     <Folder Include="Services\" />
     <Folder Include="ViewModels\" />
+    <Folder Include="Views\Auth\" />
   </ItemGroup>
 
 </Project>

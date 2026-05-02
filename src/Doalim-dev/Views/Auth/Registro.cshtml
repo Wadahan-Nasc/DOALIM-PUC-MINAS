@@ -1,0 +1,145 @@
+@model Doalim_dev.ViewModels.RegistroViewModel
+@using Doalim_dev.Models
+@{
+    ViewData["Title"] = "Criar Conta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-7 col-lg-6">
+
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Criar Conta no Doalim</h2>
+            <p class="text-muted">Preencha os dados abaixo para se cadastrar</p>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <form asp-action="Registro" asp-controller="Auth" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="TipoUsuario" class="form-label"></label>
+                <select asp-for="TipoUsuario" class="form-select" id="TipoUsuario"
+                        asp-items="Html.GetEnumSelectList<TipoUsuario>()">
+                    <option value="">— Selecione —</option>
+                </select>
+                <span asp-validation-for="TipoUsuario" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label"></label>
+                <input asp-for="Nome" class="form-control" placeholder="Nome completo" />
+                <span asp-validation-for="Nome" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="seu@email.com" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Telefone" class="form-label"></label>
+                <input asp-for="Telefone" class="form-control" placeholder="(11) 99999-9999" />
+                <span asp-validation-for="Telefone" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Endereco" class="form-label"></label>
+                <input asp-for="Endereco" class="form-control" placeholder="Rua, número, bairro, cidade" />
+                <span asp-validation-for="Endereco" class="text-danger small"></span>
+            </div>
+
+            @* Campo CPF — exibido apenas para PF *@
+            <div class="mb-3" id="campoCpf" style="display:none;">
+                <label asp-for="Cpf" class="form-label"></label>
+                <input asp-for="Cpf" class="form-control" placeholder="000.000.000-00" />
+                <span asp-validation-for="Cpf" class="text-danger small"></span>
+            </div>
+
+            @* Campo CNPJ — exibido apenas para PJ *@
+            <div class="mb-3" id="campoCnpj" style="display:none;">
+                <label asp-for="Cnpj" class="form-label"></label>
+                <input asp-for="Cnpj" class="form-control" placeholder="00.000.000/0001-00" />
+                <span asp-validation-for="Cnpj" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Senha" class="form-label"></label>
+                <input asp-for="Senha" class="form-control" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                <span asp-validation-for="Senha" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmaSenha" class="form-label"></label>
+                <input asp-for="ConfirmaSenha" class="form-control" placeholder="Repita a senha" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmaSenha" class="text-danger small"></span>
+            </div>
+
+            @* RF-002: Checkbox do Termo — exibido apenas para Doadores *@
+            <div class="mb-3 p-3 border rounded bg-light" id="campoTermo" style="display:none;">
+                <div class="form-check">
+                    <input asp-for="AceitouTermo" class="form-check-input" id="checkTermo" />
+                    <label asp-for="AceitouTermo" class="form-check-label">
+                        Li e aceito o
+                        <a asp-action="Termo" asp-controller="Auth" target="_blank"
+                           class="fw-bold text-success text-decoration-none">
+                            Termo de Responsabilidade
+                        </a>
+                        (Lei 14.016/2020)
+                    </label>
+                </div>
+                <span asp-validation-for="AceitouTermo" class="text-danger small d-block mt-1"></span>
+                <small class="text-muted d-block mt-1">
+                    Obrigatório para doadores. Recomendamos ler antes de aceitar.
+                </small>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-success btn-lg">Criar Conta</button>
+            </div>
+
+            <p class="text-center text-muted small">
+                Já tem conta?
+                <a asp-action="Login" asp-controller="Auth" class="text-decoration-none fw-bold">
+                    Faça login
+                </a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        const tipoPerfil = document.getElementById('TipoUsuario');
+        const campoCpf   = document.getElementById('campoCpf');
+        const campoCnpj  = document.getElementById('campoCnpj');
+        const campoTermo = document.getElementById('campoTermo');
+
+        function atualizarCampos() {
+            const val = tipoPerfil.value;
+
+            // 0=DoadorPF, 1=DoadorPJ, 2=BeneficiarioPF, 3=BeneficiarioPJ
+            const ehPF     = val === '0' || val === '2';
+            const ehPJ     = val === '1' || val === '3';
+            const ehDoador = val === '0' || val === '1';
+
+            campoCpf.style.display   = ehPF ? 'block' : 'none';
+            campoCnpj.style.display  = ehPJ ? 'block' : 'none';
+            campoTermo.style.display = ehDoador ? 'block' : 'none';
+
+            // Limpa os campos ocultos para não enviar dados desnecessários
+            if (!ehPF)  document.getElementById('Cpf').value   = '';
+            if (!ehPJ)  document.getElementById('Cnpj').value  = '';
+            if (!ehDoador) document.getElementById('AceitouTermo').checked = false;
+        }
+
+        tipoPerfil.addEventListener('change', atualizarCampos);
+
+        // Executa na carga da página (caso haja erro de validação e o form seja re-exibido)
+        atualizarCampos();
+    </script>
+}
