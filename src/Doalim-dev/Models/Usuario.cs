@@ -1,51 +1,77 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Doalim_dev.Models
 {
-    [Table ("Usuarios")]
+    [Table("Usuarios")]
     public class Usuario
     {
         [Key]
         public int IdUsuario { get; set; }
 
         [Required(ErrorMessage = "Obrigatório informar o nome!")]
-        public string Nome { get; set; }
+        [MaxLength(150)]
+        public string Nome { get; set; } = string.Empty;
 
-        [Required(ErrorMessage ="Obrigatório informar o CNPJ!")]
-        [Display(Name = "CNPJ")]
-        public string Cnpj { get; set; }
-
-        [Required(ErrorMessage = "Obrigatório informar o CPF!")]
+        // CPF — obrigatório apenas para PF (validado no controller/ViewModel)
         [Display(Name = "CPF")]
-        public string Cpf { get; set; }
-              
+        [MaxLength(14)]
+        public string? Cpf { get; set; }
+
+        // CNPJ — obrigatório apenas para PJ (validado no controller/ViewModel)
+        [Display(Name = "CNPJ")]
+        [MaxLength(18)]
+        public string? Cnpj { get; set; }
+
         [Required(ErrorMessage = "Obrigatório informar o e-mail!")]
         [Display(Name = "E-mail")]
-        public string Email { get; set; }
+        [EmailAddress]
+        [MaxLength(200)]
+        public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Obrigatório informar o telefone!")]
-        public string Telefone { get; set; }
+        [MaxLength(20)]
+        public string Telefone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Obrigatório informar o endereço!")]
         [Display(Name = "Endereço")]
-        public string Endereco { get; set; }
+        [MaxLength(300)]
+        public string Endereco { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Obrigatório adicionar a foto do perfil!")]
-        [Display(Name ="Foto do Perfil")]
-        public string FotoPerfil { get; set; }
+        [Display(Name = "Foto do Perfil")]
+        [MaxLength(500)]
+        public string? FotoPerfil { get; set; }
 
-        [Required(ErrorMessage = "Obrigatório enviar o arquivo de comprovação(CNH, Identidade, Cadastro único, Cartao CNPJ!")]
         [Display(Name = "Arquivo de Comprovação")]
-        public string Arquivocomprovacao { get; set; }
+        [MaxLength(500)]
+        public string? Arquivocomprovacao { get; set; }
 
+        // Armazena o hash BCrypt — NUNCA a senha em texto puro
+        [Required]
+        [Display(Name = "Senha")]
+        public string SenhaHash { get; set; } = string.Empty;
+
+        // Tipo de perfil usando enum (salvo como int no banco)
         [Required(ErrorMessage = "Obrigatório selecionar o tipo de usuário!")]
         [Display(Name = "Tipo de Usuário")]
-        public int TipoUsuario { get; set; }
+        public TipoUsuario TipoUsuario { get; set; }
 
-        [Required(ErrorMessage = "Obrigatório criar senha!")]
-        [Display(Name = "Senha")]
-        public string SenhaHash { get; set; }
+        // Status de verificação pelo Admin (RF-008)
+        [Display(Name = "Status de Verificação")]
+        public StatusVerificacao StatusVerificacao { get; set; } = StatusVerificacao.NaoAplicavel;
 
+        // Soft delete — Admin pode suspender sem excluir
+        public bool Ativo { get; set; } = true;
+
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
+
+        // Campos para recuperação de senha (RF-001)
+        [MaxLength(200)]
+        public string? TokenRecuperacao { get; set; }
+
+        public DateTime? TokenExpiracao { get; set; }
+
+        // Navegação para termos aceitos (RF-002)
+        public ICollection<TermoAceitacao> TermosAceitados { get; set; } = new List<TermoAceitacao>();
     }
 }

@@ -10,6 +10,12 @@
     <h4>Usuário</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Nome)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Nome)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Cnpj)
         </dt>
@@ -21,13 +27,7 @@
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Cpf)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
+        </dd>        
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Email)
         </dt>
@@ -73,6 +73,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdUsuario" class="btn btn-warning">Vizualizar</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.IdUsuario" class="btn btn-warning">Editar</a> |
     <a asp-action="Index" class="btn btn-info">Voltar</a>
 </div>

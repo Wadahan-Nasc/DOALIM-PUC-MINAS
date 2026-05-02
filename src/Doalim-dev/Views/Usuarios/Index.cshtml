@@ -16,10 +16,10 @@
                 @Html.DisplayNameFor(model => model.Nome)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Cpf)
+                @Html.DisplayNameFor(model => model.Cnpj)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Cnpj)
+                @Html.DisplayNameFor(model => model.Cpf)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Email)
@@ -49,14 +49,14 @@
 @foreach (var item in Model) {
         <tr>
             <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Cnpj)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Cpf)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
+            </td>           
             <td>
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
@@ -80,8 +80,8 @@
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-warning">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-primary">Visualizar</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger">Apagar</a>
+                <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-primary">Visualizar</a> |
+                <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger">Apagar</a>
             </td>
         </tr>
 }
