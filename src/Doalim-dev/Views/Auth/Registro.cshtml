@@ -19,11 +19,37 @@
             @Html.AntiForgeryToken()
 
             <div class="mb-3">
-                <label asp-for="TipoUsuario" class="form-label"></label>
-                <select asp-for="TipoUsuario" class="form-select" id="TipoUsuario"
-                        asp-items="Html.GetEnumSelectList<TipoUsuario>()">
-                    <option value="">— Selecione —</option>
-                </select>
+                <label class="form-label">Tipo de Usuário <span class="text-danger">*</span></label>
+                <div class="d-flex gap-4 align-items-center flex-wrap">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="perfilRadio"
+                               id="radioDoador" value="doador" checked />
+                        <label class="form-check-label fw-bold" for="radioDoador">Doador</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="perfilRadio"
+                               id="radioBeneficiario" value="beneficiario" />
+                        <label class="form-check-label fw-bold" for="radioBeneficiario">Beneficiário</label>
+                    </div>
+                </div>
+
+                @* Aparece só para Doador *@
+                <div class="form-check mt-2" id="campoEmpresa" style="display:none;">
+                    <input class="form-check-input" type="checkbox" id="checkEmpresa" />
+                    <label class="form-check-label" for="checkEmpresa">
+                        Pessoa Jurídica (empresa/comércio)
+                    </label>
+                </div>
+
+                @* Aparece só para Beneficiário *@
+                <div class="form-check mt-2" id="campoOng" style="display:none;">
+                    <input class="form-check-input" type="checkbox" id="checkOng" />
+                    <label class="form-check-label" for="checkOng">
+                        ONG / Instituição
+                    </label>
+                </div>
+
+                <input type="hidden" id="TipoUsuario" name="TipoUsuario" value="0" />
                 <span asp-validation-for="TipoUsuario" class="text-danger small"></span>
             </div>
 
@@ -114,32 +140,54 @@
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
     <script>
-        const tipoPerfil = document.getElementById('TipoUsuario');
-        const campoCpf   = document.getElementById('campoCpf');
-        const campoCnpj  = document.getElementById('campoCnpj');
-        const campoTermo = document.getElementById('campoTermo');
+        const radioDoador   = document.getElementById('radioDoador');
+        const radioBenefic  = document.getElementById('radioBeneficiario');
+        const checkOng      = document.getElementById('checkOng');
+        const checkEmpresa  = document.getElementById('checkEmpresa');
+        const campoOng      = document.getElementById('campoOng');
+        const campoEmpresa  = document.getElementById('campoEmpresa');
+        const hiddenTipo    = document.getElementById('TipoUsuario');
+        const campoCpf      = document.getElementById('campoCpf');
+        const campoCnpj     = document.getElementById('campoCnpj');
+        const campoTermo    = document.getElementById('campoTermo');
 
         function atualizarCampos() {
-            const val = tipoPerfil.value;
+            const ehDoador     = radioDoador.checked;
+            const ehOng        = checkOng.checked;
+            const ehEmpresa    = checkEmpresa.checked;
 
+            // Mostra/esconde opções extras conforme o perfil
+            campoEmpresa.style.display = ehDoador ? 'block' : 'none';
+            campoOng.style.display     = !ehDoador ? 'block' : 'none';
+
+            // Limpa checkboxes ao trocar de perfil
+            if (ehDoador)  checkOng.checked     = false;
+            if (!ehDoador) checkEmpresa.checked = false;
+
+            // Define o enum:
             // 0=DoadorPF, 1=DoadorPJ, 2=BeneficiarioPF, 3=BeneficiarioPJ
-            const ehPF     = val === '0' || val === '2';
-            const ehPJ     = val === '1' || val === '3';
-            const ehDoador = val === '0' || val === '1';
+            if (ehDoador && !ehEmpresa)       hiddenTipo.value = '0'; // DoadorPF
+            else if (ehDoador && ehEmpresa)   hiddenTipo.value = '1'; // DoadorPJ
+            else if (!ehDoador && !ehOng)     hiddenTipo.value = '2'; // BeneficiarioPF
+            else                              hiddenTipo.value = '3'; // BeneficiarioPJ
+
+            const ehPF = hiddenTipo.value === '0' || hiddenTipo.value === '2';
+            const ehPJ = hiddenTipo.value === '1' || hiddenTipo.value === '3';
 
             campoCpf.style.display   = ehPF ? 'block' : 'none';
             campoCnpj.style.display  = ehPJ ? 'block' : 'none';
             campoTermo.style.display = ehDoador ? 'block' : 'none';
 
-            // Limpa os campos ocultos para não enviar dados desnecessários
-            if (!ehPF)  document.getElementById('Cpf').value   = '';
-            if (!ehPJ)  document.getElementById('Cnpj').value  = '';
+            if (!ehPF) document.getElementById('Cpf').value   = '';
+            if (!ehPJ) document.getElementById('Cnpj').value  = '';
             if (!ehDoador) document.getElementById('AceitouTermo').checked = false;
         }
 
-        tipoPerfil.addEventListener('change', atualizarCampos);
+        radioDoador.addEventListener('change', atualizarCampos);
+        radioBenefic.addEventListener('change', atualizarCampos);
+        checkOng.addEventListener('change', atualizarCampos);
+        checkEmpresa.addEventListener('change', atualizarCampos);
 
-        // Executa na carga da página (caso haja erro de validação e o form seja re-exibido)
         atualizarCampos();
     </script>
 }

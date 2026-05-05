@@ -29,3 +29,57 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+:root {
+    --doalim-verde-escuro: #3A7D2C;
+    --doalim-verde-claro: #8DC63F;
+    --doalim-laranja: #F47920;
+    --doalim-amarelo: #F9B234;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #fff !important;
+    border-bottom: 3px solid var(--doalim-verde-claro) !important;
+}
+
+/* Botões verdes */
+.btn-success {
+    background-color: var(--doalim-verde-escuro) !important;
+    border-color: var(--doalim-verde-escuro) !important;
+}
+
+    .btn-success:hover {
+        background-color: var(--doalim-verde-claro) !important;
+        border-color: var(--doalim-verde-claro) !important;
+    }
+
+/* Links hover */
+.nav-link:hover {
+    color: var(--doalim-laranja) !important;
+}
+
+/* Rodapé */
+.footer {
+    border-top: 3px solid var(--doalim-verde-claro) !important;
+}
+
+/* Títulos em verde escuro */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--doalim-verde-escuro);
+}
+
+/* Links de navegação em verde */
+.nav-link {
+    color: var(--doalim-verde-escuro) !important;
+}
+
+    .nav-link:hover {
+        color: var(--doalim-laranja) !important;
+    }
+
+/* Labels dos formulários em verde escuro */
+.form-label {
+    color: var(--doalim-verde-escuro);
+    font-weight: 500;
+}
