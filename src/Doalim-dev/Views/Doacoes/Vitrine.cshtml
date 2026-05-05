@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Doalim_dev.ViewModels.VitrineDoacoesViewModel>
+﻿@model Doalim_dev.ViewModels.VitrineCompletaViewModel
 
 @{
     ViewData["Title"] = "Alimentos Disponíveis";
@@ -6,9 +6,56 @@
 
 <h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
 
-@if (!Model.Any())
+{{-- Formulário de Filtros --}}
+<form method="get" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
+    <div class="row g-3 align-items-end">
+
+        {{-- Busca por nome --}}
+        <div class="col-md-4">
+            <label class="form-label fw-semibold"> Buscar por nome</label>
+            <input type="text"
+                   name="NomeBusca"
+                   value="@Model.Filtros.NomeBusca"
+                   class="form-control"
+                   placeholder="Ex: Arroz, feijão, macarrão..."/>
+        </div>
+
+        {{-- Quantidade Mínima --}}
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Quantidade Mínima</label>
+            <input type="number"
+                   name="QuantidadeMinima"
+                   value="@Model.Filtros.QuantidadeMinima"
+                   class="form-control"
+                   placeholder="Ex: 10"/>
+        </div>
+
+        {{-- Ordenação por Validade --}}
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Ordernar por validade</label>
+            <select name="OrdemValidade" class="form-select">
+                <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">
+                    Mais próxima de vencer
+                </option>
+                <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">
+                    Mais distante de vencer
+                </option>
+            </select>
+        </div>
+
+        {{-- Botões --}}
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <a asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
+        </div>
+
+    </div>
+</form>
+
+{{-- Lista de Produtos --}}
+@if (!Model.Produtos.Any())
 {
-    <div class="alert alert-info">Nenhum alimento disponível no momento.</div>
+    <div class="alert alert-info">Nenhum alimento encontrado para os filtros aplicados.</div>
 }
 else
 {
@@ -28,7 +75,7 @@ else
         </div>
 
         {{-- Linhas --}}
-        @foreach (var alimento in Model)
+        @foreach (var alimento in Model.Produtos)
         {
             <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
 
