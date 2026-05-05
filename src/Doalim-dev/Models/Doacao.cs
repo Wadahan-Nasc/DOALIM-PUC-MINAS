@@ -29,7 +29,7 @@ namespace Doalim_dev.Models
         [MaxLength(15, ErrorMessage = "O campo Marca do Produto deve ter no máximo 15 caracteres.")]
         public string MarcaProduto { get; set; } = string.Empty;
 
-        string FotoProduto { get; set; } = string.Empty;
+        public string FotoProduto { get; set; }
 
         [Required]
         public int QuantidadeDisponivel { get; set; }
