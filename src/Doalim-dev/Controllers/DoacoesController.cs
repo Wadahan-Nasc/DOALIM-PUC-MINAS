@@ -15,7 +15,7 @@ namespace Doalim_dev.Controllers
         }
 
         // GET: Doacoes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Vitrine()
         {
             var doacoes = await _context.Doacoes
                 .Include(a => a.Doador)

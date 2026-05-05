@@ -1,0 +1,89 @@
+﻿@model IEnumerable<Doalim_dev.ViewModels.VitrineDoacoesViewModel>
+
+@{
+    ViewData["Title"] = "Alimentos Disponíveis";
+}
+
+<h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Nenhum alimento disponível no momento.</div>
+}
+else
+{
+    <div class="container">
+
+        {{-- Cabeçalho --}}
+        <div class="row fw-bold border-bottom pb-2 mb-2 text-muted d-none d-md-flex">
+            <div class="col-md-1"></div>              {{-- foto --}}
+            <div class="col-md-2">Alimento</div>
+            <div class="col-md-1">Marca</div>
+            <div class="col-md-2">Categoria</div>
+            <div class="col-md-2">Armazenamento</div>
+            <div class="col-md-1 text-center">Qtd.</div>
+            <div class="col-md-1 text-center">Validade</div>
+            <div class="col-md-1">Doador</div>
+            <div class="col-md-1"></div>              {{-- botão --}}
+        </div>
+
+        {{-- Linhas --}}
+        @foreach (var alimento in Model)
+        {
+            <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
+
+                {{-- Foto miniatura --}}
+                <div class="col-md-1 text-center">
+                    @if (!string.IsNullOrEmpty(alimento.FotoProduto))
+                    {
+                        <img src="@alimento.FotoProduto"
+                             alt="@alimento.Nome"
+                             class="rounded"
+                             style="width:56px; height:56px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                             style="width:56px; height:56px; font-size:1.4rem;">
+                            🍱
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-2">
+                    <strong>@alimento.Nome</strong>
+                </div>
+
+                <div class="col-md-1 text-muted small">
+                    @alimento.MarcaProduto
+                </div>
+
+                <div class="col-md-2">
+                    <span class="badge bg-secondary">@alimento.Categoria</span>
+                </div>
+
+                <div class="col-md-2 text-muted small">
+                    @alimento.TipoArmazenamento
+                </div>
+
+                <div class="col-md-1 text-center">
+                    @alimento.QuantidadeDisponivel
+                </div>
+
+                <div class="col-md-1 text-center small">
+                    @alimento.DataValidade.ToString("dd/MM/yyyy")
+                </div>
+
+                <div class="col-md-1 small">
+                    @alimento.NomeDoador
+                </div>
+
+                <div class="col-md-1 text-end">
+                    <a asp-action="Reservar" asp-route-id="@alimento.IdProduto"
+                       class="btn btn-success btn-sm">Reservar</a>
+                </div>
+
+            </div>
+        }
+    </div>
+}
