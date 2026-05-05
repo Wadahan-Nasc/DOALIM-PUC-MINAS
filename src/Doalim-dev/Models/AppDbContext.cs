@@ -8,6 +8,10 @@ namespace Doalim_dev.Models
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<TermoAceitacao> TermosAceitacao { get; set; }
+        public DbSet<Doador> Doadores { get; set; }
+        public DbSet<Beneficiario> Beneficiarios { get; set; }
+        public DbSet<Administrador> Administradores { get; set; }
+        public DbSet<Doacao> Doacoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +27,34 @@ namespace Doalim_dev.Models
                 .HasOne(t => t.Usuario)
                 .WithMany(u => u.TermosAceitados)
                 .HasForeignKey(t => t.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Doador é uma extensão de Usuario (1:1)
+            modelBuilder.Entity<Doador>()
+                .HasOne(d => d.Usuario)
+                .WithOne()
+                .HasForeignKey<Doador>(d => d.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Beneficiario é uma extensão de Usuario (1:1)
+            modelBuilder.Entity<Beneficiario>()
+                .HasOne(b => b.Usuario)
+                .WithOne()
+                .HasForeignKey<Beneficiario>(b => b.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Administrador é uma extensão de Usuario (1:1)
+            modelBuilder.Entity<Administrador>()
+                .HasOne(a => a.Usuario)
+                .WithOne()
+                .HasForeignKey<Administrador>(a => a.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento 1:N entre Doador e Doacao
+            modelBuilder.Entity<Doacao>()
+                .HasOne(d => d.Doador)
+                .WithMany(dc => dc.Doacoes)
+                .HasForeignKey(d => d.IdDoador)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
