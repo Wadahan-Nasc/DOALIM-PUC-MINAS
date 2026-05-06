@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -154,5 +155,62 @@ namespace Doalim_dev.Controllers
         {
             return _context.Usuarios.Any(e => e.IdUsuario == id);
         }
+
+        // GET: /Usuarios/MeuPerfil
+        [AllowAnonymous]
+        public async Task<IActionResult> MeuPerfil()
+        {
+            if (!User.Identity!.IsAuthenticated)
+                return RedirectToAction("Login", "Auth");
+
+            var email = User.FindFirstValue(ClaimTypes.Email)
+                     ?? User.Identity.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null) return NotFound();
+
+            return View(usuario);
+        }
+
+        // POST: /Usuarios/MeuPerfil
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MeuPerfil(Usuario model)
+        {
+            if (!User.Identity!.IsAuthenticated)
+                return RedirectToAction("Login", "Auth");
+
+            ModelState.Remove("SenhaHash");
+            ModelState.Remove("Arquivocomprovacao");
+            ModelState.Remove("TermosAceitados");
+
+            if (!ModelState.IsValid) return View(model);
+
+            var email = User.FindFirstValue(ClaimTypes.Email)
+                     ?? User.Identity.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null) return NotFound();
+
+            usuario.Nome = model.Nome;
+            usuario.Email = model.Email;
+            usuario.Telefone = model.Telefone;
+            usuario.Endereco = model.Endereco;
+            usuario.Cpf = model.Cpf;
+            usuario.Cnpj = model.Cnpj;
+            usuario.FotoPerfil = model.FotoPerfil;
+
+            _context.Update(usuario);
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Perfil atualizado com sucesso!";
+            return RedirectToAction("MeuPerfil");
+        }
     }
 }
+
