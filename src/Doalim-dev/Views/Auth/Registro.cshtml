@@ -19,11 +19,37 @@
             @Html.AntiForgeryToken()
 
             <div class="mb-3">
-                <label asp-for="TipoUsuario" class="form-label"></label>
-                <select asp-for="TipoUsuario" class="form-select" id="TipoUsuario"
-                        asp-items="Html.GetEnumSelectList<TipoUsuario>()">
-                    <option value="">— Selecione —</option>
-                </select>
+                <label class="form-label">Tipo de Usuário <span class="text-danger">*</span></label>
+                <div class="d-flex gap-4 align-items-center flex-wrap">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="perfilRadio"
+                               id="radioDoador" value="doador" checked />
+                        <label class="form-check-label fw-bold" for="radioDoador">Doador</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="perfilRadio"
+                               id="radioBeneficiario" value="beneficiario" />
+                        <label class="form-check-label fw-bold" for="radioBeneficiario">Beneficiário</label>
+                    </div>
+                </div>
+
+                @* Aparece só para Doador *@
+                <div class="form-check mt-2" id="campoEmpresa" style="display:none;">
+                    <input class="form-check-input" type="checkbox" id="checkEmpresa" />
+                    <label class="form-check-label" for="checkEmpresa">
+                        Pessoa Jurídica (empresa/comércio)
+                    </label>
+                </div>
+
+                @* Aparece só para Beneficiário *@
+                <div class="form-check mt-2" id="campoOng" style="display:none;">
+                    <input class="form-check-input" type="checkbox" id="checkOng" />
+                    <label class="form-check-label" for="checkOng">
+                        ONG / Instituição
+                    </label>
+                </div>
+
+                <input type="hidden" id="TipoUsuario" name="TipoUsuario" value="0" />
                 <span asp-validation-for="TipoUsuario" class="text-danger small"></span>
             </div>
 
@@ -111,35 +137,152 @@
 </div>
 
 @section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
-        const tipoPerfil = document.getElementById('TipoUsuario');
-        const campoCpf   = document.getElementById('campoCpf');
-        const campoCnpj  = document.getElementById('campoCnpj');
-        const campoTermo = document.getElementById('campoTermo');
+        // Elementos do DOM
+        const radioDoador   = document.getElementById('radioDoador');
+        const radioBenefic  = document.getElementById('radioBeneficiario');
+        const checkOng      = document.getElementById('checkOng');
+        const checkEmpresa  = document.getElementById('checkEmpresa');
+        const campoOng      = document.getElementById('campoOng');
+        const campoEmpresa  = document.getElementById('campoEmpresa');
+        const hiddenTipo    = document.getElementById('TipoUsuario');
+        const campoCpf      = document.getElementById('campoCpf');
+        const campoCnpj     = document.getElementById('campoCnpj');
+        const campoTermo    = document.getElementById('campoTermo');
+        const inputCpf      = document.getElementById('Cpf');
+        const inputCnpj     = document.getElementById('Cnpj');
+        const inputTelefone = document.getElementById('Telefone');
 
+        // Máscara CPF: 000.000.000-00 
+        inputCpf.addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            if (v.length > 9)      v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+            else if (v.length > 6) v = v.replace(/^(\d{3})(\d{3})(\d{0,3})/,        '$1.$2.$3');
+            else if (v.length > 3) v = v.replace(/^(\d{3})(\d{0,3})/,               '$1.$2');
+            this.value = v;
+        });
+
+        //  Máscara CNPJ: 00.000.000/0001-00 
+        inputCnpj.addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 14);
+            if (v.length > 12)      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+            else if (v.length > 8)  v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/,        '$1.$2.$3/$4');
+            else if (v.length > 5)  v = v.replace(/^(\d{2})(\d{3})(\d{0,3})/,               '$1.$2.$3');
+            else if (v.length > 2)  v = v.replace(/^(\d{2})(\d{0,3})/,                       '$1.$2');
+            this.value = v;
+        });
+
+        //  Máscara Telefone: (11) 99999-9999
+        inputTelefone.addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            if (v.length > 10)     v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+            else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/,        '($1) $2');
+            else if (v.length > 0) v = v.replace(/^(\d{0,2})/,               '($1');
+            this.value = v;
+        });
+
+        // Validação CPF (dígitos verificadores) 
+        function cpfValido(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+            let soma = 0, resto;
+            for (let i = 1; i <= 9; i++) soma += parseInt(cpf[i-1]) * (11 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf[9])) return false;
+            soma = 0;
+            for (let i = 1; i <= 10; i++) soma += parseInt(cpf[i-1]) * (12 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            return resto === parseInt(cpf[10]);
+        }
+
+        // Validação CNPJ (dígitos verificadores)
+        function cnpjValido(cnpj) {
+            cnpj = cnpj.replace(/\D/g, '');
+            if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+            const calc = (c, n) => {
+                let s = 0, p = n - 7;
+                for (let i = 0; i < n; i++) {
+                    s += parseInt(c[i]) * p--;
+                    if (p < 2) p = 9;
+                }
+                const r = s % 11;
+                return r < 2 ? 0 : 11 - r;
+            };
+            return calc(cnpj, 12) === parseInt(cnpj[12]) &&
+                   calc(cnpj, 13) === parseInt(cnpj[13]);
+        }
+
+        // Validação no submit 
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const ehPF = hiddenTipo.value === '0' || hiddenTipo.value === '2';
+            const ehPJ = hiddenTipo.value === '1' || hiddenTipo.value === '3';
+
+            if (ehPF && inputCpf.value) {
+                if (!cpfValido(inputCpf.value)) {
+                    e.preventDefault();
+                    inputCpf.setCustomValidity('CPF inválido.');
+                    inputCpf.reportValidity();
+                    return;
+                }
+            }
+            if (ehPJ && inputCnpj.value) {
+                if (!cnpjValido(inputCnpj.value)) {
+                    e.preventDefault();
+                    inputCnpj.setCustomValidity('CNPJ inválido.');
+                    inputCnpj.reportValidity();
+                    return;
+                }
+            }
+            // Limpa validação customizada se passou
+            inputCpf.setCustomValidity('');
+            inputCnpj.setCustomValidity('');
+        });
+
+        // Limpa erro customizado ao digitar
+        inputCpf.addEventListener('input',  () => inputCpf.setCustomValidity(''));
+        inputCnpj.addEventListener('input', () => inputCnpj.setCustomValidity(''));
+
+        // Lógica de tipo de perfil
         function atualizarCampos() {
-            const val = tipoPerfil.value;
+            const ehDoador  = radioDoador.checked;
+            const ehOng     = checkOng.checked;
+            const ehEmpresa = checkEmpresa.checked;
 
-            // 0=DoadorPF, 1=DoadorPJ, 2=BeneficiarioPF, 3=BeneficiarioPJ
-            const ehPF     = val === '0' || val === '2';
-            const ehPJ     = val === '1' || val === '3';
-            const ehDoador = val === '0' || val === '1';
+            campoEmpresa.style.display = ehDoador ? 'block' : 'none';
+            campoOng.style.display     = !ehDoador ? 'block' : 'none';
+
+            if (ehDoador)  checkOng.checked     = false;
+            if (!ehDoador) checkEmpresa.checked = false;
+
+            if      (ehDoador && !ehEmpresa)  hiddenTipo.value = '0';
+            else if (ehDoador && ehEmpresa)   hiddenTipo.value = '1';
+            else if (!ehDoador && !ehOng)     hiddenTipo.value = '2';
+            else                              hiddenTipo.value = '3';
+
+            const ehPF = hiddenTipo.value === '0' || hiddenTipo.value === '2';
+            const ehPJ = hiddenTipo.value === '1' || hiddenTipo.value === '3';
 
             campoCpf.style.display   = ehPF ? 'block' : 'none';
             campoCnpj.style.display  = ehPJ ? 'block' : 'none';
             campoTermo.style.display = ehDoador ? 'block' : 'none';
 
-            // Limpa os campos ocultos para não enviar dados desnecessários
-            if (!ehPF)  document.getElementById('Cpf').value   = '';
-            if (!ehPJ)  document.getElementById('Cnpj').value  = '';
+            if (!ehPF) inputCpf.value  = '';
+            if (!ehPJ) inputCnpj.value = '';
             if (!ehDoador) document.getElementById('AceitouTermo').checked = false;
         }
 
-        tipoPerfil.addEventListener('change', atualizarCampos);
+        radioDoador.addEventListener('change',  atualizarCampos);
+        radioBenefic.addEventListener('change', atualizarCampos);
+        checkOng.addEventListener('change',     atualizarCampos);
+        checkEmpresa.addEventListener('change', atualizarCampos);
 
-        // Executa na carga da página (caso haja erro de validação e o form seja re-exibido)
         atualizarCampos();
     </script>
 }
