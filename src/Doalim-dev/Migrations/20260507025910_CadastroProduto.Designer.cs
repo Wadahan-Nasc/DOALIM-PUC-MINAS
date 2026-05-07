@@ -4,6 +4,7 @@ using Doalim_dev.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doalim_dev.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507025910_CadastroProduto")]
+    partial class CadastroProduto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,50 +184,6 @@ namespace Doalim_dev.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("Doalim_dev.Models.Administrador", "IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Beneficiario", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("Doalim_dev.Models.Beneficiario", "IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Doacao", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Doador", "Doador")
-                        .WithMany("Doacoes")
-                        .HasForeignKey("IdDoador")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Doador");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("Doalim_dev.Models.Doador", "IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("Doalim_dev.Models.TermoAceitacao", b =>
                 {
                     b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
@@ -234,11 +193,6 @@ namespace Doalim_dev.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
-                {
-                    b.Navigation("Doacoes");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Usuario", b =>

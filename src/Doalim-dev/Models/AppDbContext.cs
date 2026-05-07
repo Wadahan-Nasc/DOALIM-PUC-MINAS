@@ -13,6 +13,8 @@ namespace Doalim_dev.Models
         public DbSet<Administrador> Administradores { get; set; }
         public DbSet<Doacao> Doacoes { get; set; }
 
+        public DbSet<Produto> Produtos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
