@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Doalim_dev.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Doalim_dev.Controllers
 {
@@ -51,7 +52,6 @@ namespace Doalim_dev.Controllers
         }
 
         // POST: Usuarios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash")] Usuario usuario)
@@ -83,7 +83,6 @@ namespace Doalim_dev.Controllers
         }
 
         // POST: Usuarios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash")] Usuario usuario)
@@ -153,6 +152,61 @@ namespace Doalim_dev.Controllers
         private bool UsuarioExists(int id)
         {
             return _context.Usuarios.Any(e => e.IdUsuario == id);
+        }
+
+        // GET: /Usuarios/MeuPerfil
+        [AllowAnonymous]
+        public async Task<IActionResult> MeuPerfil()
+        {
+            if (!User.Identity!.IsAuthenticated)
+                return RedirectToAction("Login", "Auth");
+
+            var email = User.FindFirstValue(ClaimTypes.Email)
+                     ?? User.Identity.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null) return NotFound();
+
+            return View(usuario);
+        }
+
+        // POST: /Usuarios/MeuPerfil
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MeuPerfil(Usuario model)
+        {
+            if (!User.Identity!.IsAuthenticated)
+                return RedirectToAction("Login", "Auth");
+
+            ModelState.Remove("SenhaHash");
+            ModelState.Remove("Arquivocomprovacao");
+            ModelState.Remove("TermosAceitados");
+
+            if (!ModelState.IsValid) return View(model);
+
+            var email = User.FindFirstValue(ClaimTypes.Email)
+                     ?? User.Identity.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null) return NotFound();
+
+            usuario.Nome = model.Nome;
+            usuario.Email = model.Email;
+            usuario.Telefone = model.Telefone;
+            usuario.Endereco = model.Endereco;
+            usuario.FotoPerfil = model.FotoPerfil;
+            // Cpf e Cnpj não são atualizados — campos somente leitura
+
+            _context.Update(usuario);
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Perfil atualizado com sucesso!";
+            return RedirectToAction("MeuPerfil");
         }
     }
 }

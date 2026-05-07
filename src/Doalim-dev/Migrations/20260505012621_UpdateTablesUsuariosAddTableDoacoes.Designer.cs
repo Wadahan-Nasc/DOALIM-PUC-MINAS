@@ -4,6 +4,7 @@ using Doalim_dev.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doalim_dev.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505012621_UpdateTablesUsuariosAddTableDoacoes")]
+    partial class UpdateTablesUsuariosAddTableDoacoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,36 @@ namespace Doalim_dev.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Doalim_dev.Models.Produto", b =>
+            modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Administradores");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Beneficiario", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CadastroUnico")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Eong")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuantidadeAlimentosRecebidos")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Beneficiarios");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doacao", b =>
                 {
                     b.Property<int>("IdProduto")
                         .ValueGeneratedOnAdd()
@@ -30,12 +62,9 @@ namespace Doalim_dev.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProduto"));
 
-                    b.Property<string>("CategoriaProduto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CodigoBarras")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Categoria")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("datetime2");
@@ -43,37 +72,49 @@ namespace Doalim_dev.Migrations
                     b.Property<DateTime>("DataValidade")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte[]>("FotoProduto")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("FotoProduto")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IdDoador")
+                        .HasColumnType("int");
 
                     b.Property<string>("MarcaProduto")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("NomeProduto")
+                    b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantidadePessoaFisica")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantidadePessoaJuridica")
+                    b.Property<int>("QuantidadeDisponivel")
                         .HasColumnType("int");
 
                     b.Property<bool>("StatusProduto")
                         .HasColumnType("bit");
 
                     b.Property<string>("TipoArmazenamento")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UnidadeMedida")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("IdProduto");
 
-                    b.ToTable("Produtos");
+                    b.HasIndex("IdDoador");
+
+                    b.ToTable("Doacoes");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QtdAlimentosDoados")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Doadores");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.TermoAceitacao", b =>

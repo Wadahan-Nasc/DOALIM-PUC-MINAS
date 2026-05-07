@@ -1,0 +1,136 @@
+﻿@model Doalim_dev.ViewModels.VitrineCompletaViewModel
+
+@{
+    ViewData["Title"] = "Alimentos Disponíveis";
+}
+
+<h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
+
+@*Formulário de Filtros *@
+<form method="get" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
+    <div class="row g-3 align-items-end">
+
+        @* Busca por nome *@
+        <div class="col-md-4">
+            <label class="form-label fw-semibold"> Buscar por nome</label>
+            <input type="text"
+                   name="NomeBusca"
+                   value="@Model.Filtros.NomeBusca"
+                   class="form-control"
+                   placeholder="Ex: Arroz, feijão, macarrão..."/>
+        </div>
+
+        @* Quantidade Mínima *@
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Quantidade Mínima</label>
+            <input type="number"
+                   name="QuantidadeMinima"
+                   value="@Model.Filtros.QuantidadeMinima"
+                   class="form-control"
+                   placeholder="Ex: 10"/>
+        </div>
+
+        @* Ordenação por Validade *@
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Ordernar por validade</label>
+            <select name="OrdemValidade" class="form-select">
+                <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">
+                    Mais próxima de vencer
+                </option>
+                <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">
+                    Mais distante de vencer
+                </option>
+            </select>
+        </div>
+
+        @* Botões *@
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <a asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
+        </div>
+
+    </div>
+</form>
+
+@* Lista de Produtos *@
+@if (!Model.Produtos.Any())
+{
+    <div class="alert alert-info">Nenhum alimento encontrado para os filtros aplicados.</div>
+}
+else
+{
+    <div class="container">
+
+        @* Cabeçalho *@
+        <div class="row fw-bold border-bottom pb-2 mb-2 text-muted d-none d-md-flex">
+            <div class="col-md-1"></div>              @* foto *@
+            <div class="col-md-2">Alimento</div>
+            <div class="col-md-1">Marca</div>
+            <div class="col-md-2">Categoria</div>
+            <div class="col-md-2">Armazenamento</div>
+            <div class="col-md-1 text-center">Qtd.</div>
+            <div class="col-md-1 text-center">Validade</div>
+            <div class="col-md-1">Doador</div>
+            <div class="col-md-1"></div>              @* botão *@
+        </div>
+
+        @* Linhas *@
+        @foreach (var alimento in Model.Produtos)
+        {
+            <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
+
+                @* Foto miniatura *@
+                <div class="col-md-1 text-center">
+                    @if (!string.IsNullOrEmpty(alimento.FotoProduto))
+                    {
+                        <img src="@alimento.FotoProduto"
+                             alt="@alimento.Nome"
+                             class="rounded"
+                             style="width:56px; height:56px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                             style="width:56px; height:56px; font-size:1.4rem;">
+                            🍱
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-2">
+                    <strong>@alimento.Nome</strong>
+                </div>
+
+                <div class="col-md-1 text-muted small">
+                    @alimento.MarcaProduto
+                </div>
+
+                <div class="col-md-2">
+                    <span class="badge bg-secondary">@alimento.Categoria</span>
+                </div>
+
+                <div class="col-md-2 text-muted small">
+                    @alimento.TipoArmazenamento
+                </div>
+
+                <div class="col-md-1 text-center">
+                    @alimento.QuantidadeDisponivel
+                </div>
+
+                <div class="col-md-1 text-center small">
+                    @alimento.DataValidade.ToString("dd/MM/yyyy")
+                </div>
+
+                <div class="col-md-1 small">
+                    @alimento.NomeDoador
+                </div>
+
+                <div class="col-md-1 text-end">
+                    <a asp-action="Reservar" asp-route-id="@alimento.IdProduto"
+                       class="btn btn-success btn-sm">Reservar</a>
+                </div>
+
+            </div>
+        }
+    </div>
+}
