@@ -14,6 +14,6 @@ namespace Doalim_dev.Models
         [ForeignKey(nameof(IdUsuario))]
         public Usuario Usuario { get; set; }
 
-        public ICollection<Doacao> Doacoes { get; set; } = new List<Doacao>();
+        public ICollection<Produto> Produtos { get; set; } = new List<Produto>();
     }
 }

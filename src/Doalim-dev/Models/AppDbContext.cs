@@ -11,7 +11,6 @@ namespace Doalim_dev.Models
         public DbSet<Doador> Doadores { get; set; }
         public DbSet<Beneficiario> Beneficiarios { get; set; }
         public DbSet<Administrador> Administradores { get; set; }
-        public DbSet<Doacao> Doacoes { get; set; }
 
         public DbSet<Produto> Produtos { get; set; }
 
@@ -52,10 +51,10 @@ namespace Doalim_dev.Models
                 .HasForeignKey<Administrador>(a => a.IdUsuario)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relacionamento 1:N entre Doador e Doacao
-            modelBuilder.Entity<Doacao>()
+            // Relacionamento 1:N entre Doador e Produto
+            modelBuilder.Entity<Produto>()
                 .HasOne(d => d.Doador)
-                .WithMany(dc => dc.Doacoes)
+                .WithMany(dc => dc.Produtos)
                 .HasForeignKey(d => d.IdDoador)
                 .OnDelete(DeleteBehavior.Cascade);
         }
