@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Doalim_dev.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Doalim_dev.Controllers
 {
@@ -52,7 +52,6 @@ namespace Doalim_dev.Controllers
         }
 
         // POST: Usuarios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash")] Usuario usuario)
@@ -84,7 +83,6 @@ namespace Doalim_dev.Controllers
         }
 
         // POST: Usuarios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash")] Usuario usuario)
@@ -201,9 +199,8 @@ namespace Doalim_dev.Controllers
             usuario.Email = model.Email;
             usuario.Telefone = model.Telefone;
             usuario.Endereco = model.Endereco;
-            usuario.Cpf = model.Cpf;
-            usuario.Cnpj = model.Cnpj;
             usuario.FotoPerfil = model.FotoPerfil;
+            // Cpf e Cnpj não são atualizados — campos somente leitura
 
             _context.Update(usuario);
             await _context.SaveChangesAsync();
@@ -213,4 +210,3 @@ namespace Doalim_dev.Controllers
         }
     }
 }
-

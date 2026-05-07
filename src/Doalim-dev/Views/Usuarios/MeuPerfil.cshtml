@@ -50,23 +50,17 @@
             <span asp-validation-for="Endereco" class="text-danger"></span>
         </div>
 
-        @if (Model.TipoUsuario.ToString() != "PessoaJuridica")
-        {
-            <div class="mb-3">
-                <label asp-for="Cpf" class="form-label"></label>
-                <input asp-for="Cpf" class="form-control" />
-                <span asp-validation-for="Cpf" class="text-danger"></span>
-            </div>
-        }
+        <div class="mb-3">
+            <label asp-for="Cpf" class="form-label"></label>
+            <input asp-for="Cpf" class="form-control bg-light" readonly />
+            <span asp-validation-for="Cpf" class="text-danger"></span>
+        </div>
 
-        @if (Model.TipoUsuario.ToString() != "PessoaFisica")
-        {
-            <div class="mb-3">
-                <label asp-for="Cnpj" class="form-label"></label>
-                <input asp-for="Cnpj" class="form-control" />
-                <span asp-validation-for="Cnpj" class="text-danger"></span>
-            </div>
-        }
+        <div class="mb-3">
+            <label asp-for="Cnpj" class="form-label"></label>
+            <input asp-for="Cnpj" class="form-control bg-light" readonly />
+            <span asp-validation-for="Cnpj" class="text-danger"></span>
+        </div>
 
         <div class="mb-3">
             <label asp-for="FotoPerfil" class="form-label"></label>
