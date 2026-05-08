@@ -16,4 +16,12 @@ namespace Doalim_dev.Models
         Aprovado = 2,
         Rejeitado = 3
     }
+
+    public enum StatusDoacao
+    {
+        Disponivel = 1,
+        Reservado = 2,
+        Entregue = 3,
+        Cancelado = 4
+    }
 }

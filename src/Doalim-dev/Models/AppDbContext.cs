@@ -7,6 +7,7 @@ namespace Doalim_dev.Models
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Doacao> Doacoes { get; set; }
         public DbSet<TermoAceitacao> TermosAceitacao { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
