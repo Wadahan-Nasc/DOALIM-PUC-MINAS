@@ -3,7 +3,8 @@
 <div class="container mt-4">
     <h1>Cadastrar Novo Produto</h1>
     <hr />
-    <form asp-action="Create" enctype="multipart/form-data">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
         <div class="row">
             <div class="col-md-4 text-center border-end">
                 <div class="p-3 bg-light rounded shadow-sm mb-3">
@@ -23,38 +24,47 @@
                     <div class="col-md-6 mb-3">
                         <label asp-for="CodigoBarras" class="form-label"></label>
                         <input asp-for="CodigoBarras" class="form-control" />
+                        <span asp-validation-for="CodigoBarras" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="MarcaProduto" class="form-label"></label>
                         <input asp-for="MarcaProduto" class="form-control" />
+                        <span asp-validation-for="MarcaProduto" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="CategoriaProduto" class="form-label"></label>
                         <input asp-for="CategoriaProduto" class="form-control" />
+                        <span asp-validation-for="CategoriaProduto" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="DataValidade" class="form-label"></label>
                         <input asp-for="DataValidade" type="date" class="form-control" />
+                        <span asp-validation-for="DataValidade" class="text-danger"></span>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label asp-for="Quantidade" class="form-label"></label>
                         <input asp-for="Quantidade" class="form-control" />
+                        <span asp-validation-for="Quantidade" class="text-danger"></span>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label asp-for="UnidadeMedida" class="form-label"></label>
                         <input asp-for="UnidadeMedida" class="form-control" placeholder="Kg, Unid..." />
+                        <span asp-validation-for="UnidadeMedida" class="text-danger"></span>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label asp-for="TipoArmazenamento" class="form-label"></label>
                         <input asp-for="TipoArmazenamento" class="form-control" />
+                        <span asp-validation-for="TipoArmazenamento" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="QuantidadePessoaFisica" class="form-label"></label>
                         <input asp-for="QuantidadePessoaFisica" class="form-control" />
+                        <span asp-validation-for="QuantidadePessoaFisica" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="QuantidadePessoaJuridica" class="form-label"></label>
                         <input asp-for="QuantidadePessoaJuridica" class="form-control" />
+                        <span asp-validation-for="QuantidadePessoaJuridica" class="text-danger"></span>
                     </div>
                     <div class="col-md-12 mb-3 form-check ms-3">
                         <input asp-for="StatusProduto" class="form-check-input" checked />

@@ -1,8 +1,12 @@
 ﻿using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,13 +38,50 @@ namespace Doalim_dev.Controllers
         }
 
         // CRIAR (GET)
+        [Authorize]
         public IActionResult Create() => View();
 
         // CRIAR (POST)
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Produto produto, IFormFile arquivoFoto)
         {
+            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+                return RedirectToAction("Login", "Auth");
+
+            var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.IdUsuario == usuarioId);
+            if (!usuarioExiste)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["Erro"] = "Sua sessão estava vinculada a um usuário que não existe mais. Faça login novamente.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString())
+                || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
+
+            if (!ehDoador)
+                ModelState.AddModelError(string.Empty, "Apenas usuários doadores podem cadastrar produtos.");
+
+            produto.IdDoador = usuarioId;
+
+            var doador = await _context.Doadores.FindAsync(usuarioId);
+            if (doador == null && ehDoador)
+            {
+                doador = new Doador
+                {
+                    IdUsuario = usuarioId,
+                    QtdAlimentosDoados = "0"
+                };
+                _context.Doadores.Add(doador);
+            }
+
+            ModelState.Remove(nameof(Produto.IdDoador));
+            ModelState.Remove(nameof(Produto.Doador));
+
             if (arquivoFoto != null && arquivoFoto.Length > 0)
             {
                 using (var ms = new MemoryStream())
