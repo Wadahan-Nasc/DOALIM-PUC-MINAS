@@ -152,7 +152,9 @@ namespace Doalim_dev.Controllers
                 ? query.OrderByDescending(a => a.DataValidade)
                 : query.OrderBy(a => a.DataValidade);
 
-            var produtos = await query
+            var produtos = await query.ToListAsync();
+
+            var produtosViewModel = produtos
                 .Select(a => new VitrineDoacoesViewModel
                 {
                     IdProduto = a.IdProduto,
@@ -161,16 +163,18 @@ namespace Doalim_dev.Controllers
                     Categoria = a.CategoriaProduto ?? "",
                     MarcaProduto = a.MarcaProduto ?? "",
                     TipoArmazenamento = a.TipoArmazenamento ?? "",
-                    FotoProduto = a.FotoProduto ?? new byte[0],
+                    FotoProduto = a.FotoProduto == null || a.FotoProduto.Length == 0
+                        ? ""
+                        : $"data:image/jpeg;base64,{Convert.ToBase64String(a.FotoProduto)}",
                     QuantidadeDisponivel = a.Quantidade,
                     NomeDoador = a.Doador.Usuario.Nome
                 })
-                .ToListAsync();
+                .ToList();
 
             var viewModel = new VitrineCompletaViewModel
             {
                 Filtros = filtros,
-                Produtos = produtos
+                Produtos = produtosViewModel
             };
 
             return View(viewModel);
