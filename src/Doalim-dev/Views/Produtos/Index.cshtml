@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Doalim_dev.Models.Produto>
+
+<div class="container mt-4">
+    <h1>Lista de Produtos</h1>
+    <p><a asp-action="Create" class="btn btn-primary">Cadastrar Novo</a></p>
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Foto</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Qtd</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (item.FotoProduto != null)
+                        {
+                            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(item.FotoProduto))" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />
+                        }
+                        else
+                        {
+                            <small class="text-muted">Sem foto</small>
+                        }
+                    </td>
+                    <td>@item.NomeProduto</td>
+                    <td>@item.CategoriaProduto</td>
+                    <td>@item.Quantidade @item.UnidadeMedida</td>
+                    <td>@(item.StatusProduto ? "Ativo" : "Inativo")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.IdProduto" class="btn btn-sm btn-warning">Editar</a>
+                        <a asp-action="Details" asp-route-id="@item.IdProduto" class="btn btn-sm btn-info">Detalhes</a>
+                        <a asp-action="Delete" asp-route-id="@item.IdProduto" class="btn btn-sm btn-danger">Excluir</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

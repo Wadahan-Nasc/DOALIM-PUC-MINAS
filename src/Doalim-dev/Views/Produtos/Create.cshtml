@@ -1,0 +1,93 @@
+﻿@model Doalim_dev.Models.Produto
+
+<div class="container mt-4">
+    <h1>Cadastrar Novo Produto</h1>
+    <hr />
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        <div class="row">
+            <div class="col-md-4 text-center border-end">
+                <div class="p-3 bg-light rounded shadow-sm mb-3">
+                    <label class="fw-bold mb-2">Prévia da Imagem</label><br />
+                    <img id="imgPreview" src="~/images/sem-foto.png" class="img-thumbnail mb-3" style="max-height: 250px; width: 100%; object-fit: contain;" />
+                    <input type="file" name="arquivoFoto" id="fotoInput" class="form-control" accept="image/*" />
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="NomeProduto" class="form-label"></label>
+                        <input asp-for="NomeProduto" class="form-control" />
+                        <span asp-validation-for="NomeProduto" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CodigoBarras" class="form-label"></label>
+                        <input asp-for="CodigoBarras" class="form-control" />
+                        <span asp-validation-for="CodigoBarras" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MarcaProduto" class="form-label"></label>
+                        <input asp-for="MarcaProduto" class="form-control" />
+                        <span asp-validation-for="MarcaProduto" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoriaProduto" class="form-label"></label>
+                        <input asp-for="CategoriaProduto" class="form-control" />
+                        <span asp-validation-for="CategoriaProduto" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DataValidade" class="form-label"></label>
+                        <input asp-for="DataValidade" type="date" class="form-control" />
+                        <span asp-validation-for="DataValidade" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Quantidade" class="form-label"></label>
+                        <input asp-for="Quantidade" class="form-control" />
+                        <span asp-validation-for="Quantidade" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="UnidadeMedida" class="form-label"></label>
+                        <input asp-for="UnidadeMedida" class="form-control" placeholder="Kg, Unid..." />
+                        <span asp-validation-for="UnidadeMedida" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="TipoArmazenamento" class="form-label"></label>
+                        <input asp-for="TipoArmazenamento" class="form-control" />
+                        <span asp-validation-for="TipoArmazenamento" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="QuantidadePessoaFisica" class="form-label"></label>
+                        <input asp-for="QuantidadePessoaFisica" class="form-control" />
+                        <span asp-validation-for="QuantidadePessoaFisica" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="QuantidadePessoaJuridica" class="form-label"></label>
+                        <input asp-for="QuantidadePessoaJuridica" class="form-control" />
+                        <span asp-validation-for="QuantidadePessoaJuridica" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 mb-3 form-check ms-3">
+                        <input asp-for="StatusProduto" class="form-check-input" checked />
+                        <label asp-for="StatusProduto" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success btn-lg">Cadastrar Produto</button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Mostra a prévia da imagem depois de selecionar o arquivo
+        document.getElementById('fotoInput').onchange = evt => {
+            const [file] = document.getElementById('fotoInput').files
+            if (file) {
+                document.getElementById('imgPreview').src = URL.createObjectURL(file)
+            }
+        }
+    </script>
+}

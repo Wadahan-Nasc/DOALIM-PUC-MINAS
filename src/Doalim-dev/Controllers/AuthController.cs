@@ -86,6 +86,32 @@ namespace Doalim_dev.Controllers
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync(); // Gera o IdUsuario
 
+            if (ehDoador)
+            {
+                _context.Doadores.Add(new Doador
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    QtdAlimentosDoados = "0"
+                });
+                await _context.SaveChangesAsync();
+            }
+            else if (vm.TipoUsuario == TipoUsuario.BeneficiarioPF || vm.TipoUsuario == TipoUsuario.BeneficiarioPJ)
+            {
+                _context.Beneficiarios.Add(new Beneficiario
+                {
+                    IdUsuario = usuario.IdUsuario
+                });
+                await _context.SaveChangesAsync();
+            }
+            else if (vm.TipoUsuario == TipoUsuario.Admin)
+            {
+                _context.Administradores.Add(new Administrador
+                {
+                    IdUsuario = usuario.IdUsuario
+                });
+                await _context.SaveChangesAsync();
+            }
+
             // RF-002: Registra o aceite do termo para doadores
             if (ehDoador && vm.AceitouTermo)
             {

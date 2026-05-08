@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doalim_dev.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260508030907_AdicionarTabelaDoacao")]
-    partial class AdicionarTabelaDoacao
+    [Migration("20260505012621_UpdateTablesUsuariosAddTableDoacoes")]
+    partial class UpdateTablesUsuariosAddTableDoacoes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,41 +25,96 @@ namespace Doalim_dev.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Administradores");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Beneficiario", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CadastroUnico")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Eong")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuantidadeAlimentosRecebidos")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Beneficiarios");
+                });
+
             modelBuilder.Entity("Doalim_dev.Models.Doacao", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("IdProduto")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BeneficiarioId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProduto"));
 
                     b.Property<string>("Categoria")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DataReserva")
+                    b.Property<DateTime>("DataValidade")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Descricao")
+                    b.Property<string>("FotoProduto")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DoadorId")
+                    b.Property<int>("IdDoador")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantidade")
+                    b.Property<string>("MarcaProduto")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<int>("QuantidadeDisponivel")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<bool>("StatusProduto")
+                        .HasColumnType("bit");
 
-                    b.HasKey("Id");
+                    b.Property<string>("TipoArmazenamento")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.HasKey("IdProduto");
+
+                    b.HasIndex("IdDoador");
 
                     b.ToTable("Doacoes");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
+                {
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QtdAlimentosDoados")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("Doadores");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.TermoAceitacao", b =>
@@ -167,6 +222,50 @@ namespace Doalim_dev.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("Doalim_dev.Models.Administrador", "IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Beneficiario", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("Doalim_dev.Models.Beneficiario", "IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doacao", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Doador", "Doador")
+                        .WithMany("Doacoes")
+                        .HasForeignKey("IdDoador")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doador");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("Doalim_dev.Models.Doador", "IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Doalim_dev.Models.TermoAceitacao", b =>
                 {
                     b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
@@ -176,6 +275,11 @@ namespace Doalim_dev.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
+                {
+                    b.Navigation("Doacoes");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Usuario", b =>

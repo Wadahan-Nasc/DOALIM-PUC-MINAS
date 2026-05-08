@@ -1,18 +1,39 @@
 # Template Padrão da Aplicação
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="3-Projeto de Interface.md"> Projeto de Interface</a>, <a href="4-Metodologia.md"> Metodologia</a>
+## Paleta de Cores
 
-Layout padrão da aplicação que será utilizado em todas as páginas com a definição de identidade visual, aspectos de responsividade e iconografia.
+### Cores primárias
 
-**Não se esqueça de:**
-- Definir padrão de cores: definir as cores principais (primárias) e as cores de apoio (secundárias) apresentando a palheta de cores em formato visual e justificando as escolhas (se tiver dúvidas, pesquise mais sobre a teoria das cores)
-- Definir layout padrão e reutilizável: desenvolver um layout base único, que será reutilizado em todas as páginas da aplicação.
-- Definir logo da solução proposta 
-- Definir padrão visual dos componentes: botões, ícones, caixas de mensagens etc.
+O verde transmite confiança e sustentabilidade, enquanto o laranja e amarelo despertam o apetite e estimulam a ação. Essa mistura cria uma interface vibrante e acolhedora, reforçando o impacto social e humano da marca.
 
-> **Links Úteis**:
->
-> - [CSS Website Layout (W3Schools)](https://www.w3schools.com/css/css_website_layout.asp)
-> - [Website Page Layouts](http://www.cellbiol.com/bioinformatics_web_development/chapter-3-your-first-web-page-learning-html-and-css/website-page-layouts/)
-> - [Perfect Liquid Layout](https://matthewjamestaylor.com/perfect-liquid-layouts)
-> - [How and Why Icons Improve Your Web Design](https://usabilla.com/blog/how-and-why-icons-improve-you-web-design/)
+![Cores Primárias](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/cores_prim%C3%A1rias.png)
+
+### Cores secundárias
+
+Os tons neutros garantem equilíbrio e legibilidade, trazendo profissionalismo e uma sensação de limpeza técnica à aplicação. Eles evitam a fadiga visual, permitindo que os elementos coloridos guiem o usuário de forma intuitiva e segura.
+
+![Cores Secundárias](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/cores_secund%C3%A1rias.png)
+
+## Tipografia
+
+O tipo de fonte escolhido foi o Inter/Open Sans. Estas escolhas são focadas em alta legibilidade, trazendo o equilíbrio necessário com um tom de clareza, modernidade e eficiência técnica. Isso transmite confiança e organização, garantindo que o usuário processe informações e dados sem esforço visual.
+
+## Logo
+
+![Logo](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/logo.png)
+
+A concepção da logo une estrategicamente o coração (empatia), os talheres (nutrição) e uma rede de nós (conexão e tecnologia) para ilustrar o propósito de unir doadores a quem precisa. Essa composição transmite acolhimento, solidariedade e eficiência, causando a impressão de uma plataforma humana e inovadora. Visualmente, a marca consolida a Doalim como um elo seguro, dinâmico e essencial no combate à fome.
+
+## Protótipo
+
+Homepage
+
+![homepage](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/tela_homepage.png)
+
+Cadastro
+
+![cadastro](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/tela_cadastro.png)
+
+Login
+
+![login](https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e2-proj-int-t3-doalim/blob/main/docs/img/tela_login.png)

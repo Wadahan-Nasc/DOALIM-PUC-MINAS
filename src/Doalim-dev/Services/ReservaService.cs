@@ -1,4 +1,4 @@
-﻿using Doalim_dev.DTOs;
+using Doalim_dev.DTOs;
 using Doalim_dev.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,24 +15,22 @@ namespace Doalim_dev.Services
 
         public async Task<ReservaResponseDto> ReservarDoacaoAsync(int doacaoId, int beneficiarioId)
         {
-            // 1. Busca a doação no banco
-            var doacao = await _context.Doacoes
-                .FirstOrDefaultAsync(d => d.Id == doacaoId);
+            var produto = await _context.Produtos
+                .FirstOrDefaultAsync(p => p.IdProduto == doacaoId);
 
-            // 2. Existe?
-            if (doacao == null)
+            if (produto == null)
                 return new ReservaResponseDto(false, "Doação não encontrada.");
 
-            // 3. Ainda está disponível?
-            if (doacao.Status != StatusDoacao.Disponivel)
+            if (!produto.StatusProduto || produto.IdBeneficiario.HasValue || produto.Quantidade <= 0)
                 return new ReservaResponseDto(false, "Esta doação não está mais disponível.");
 
-            // 4. Faz a reserva
-            doacao.Status = StatusDoacao.Reservado;
-            doacao.BeneficiarioId = beneficiarioId;
-            doacao.DataReserva = DateTime.UtcNow;
+            if (produto.IdDoador == beneficiarioId)
+                return new ReservaResponseDto(false, "Você não pode reservar a própria doação.");
 
-            // 5. Salva no banco
+            produto.StatusProduto = false;
+            produto.IdBeneficiario = beneficiarioId;
+            produto.DataReserva = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
             return new ReservaResponseDto(true, "Doação reservada com sucesso!");
@@ -40,22 +38,20 @@ namespace Doalim_dev.Services
 
         public async Task<ReservaResponseDto> CancelarReservaAsync(int doacaoId, int beneficiarioId)
         {
-            // Garante que a reserva pertence a este beneficiário
-            var doacao = await _context.Doacoes
-                .FirstOrDefaultAsync(d =>
-                    d.Id == doacaoId &&
-                    d.BeneficiarioId == beneficiarioId);
+            var produto = await _context.Produtos
+                .FirstOrDefaultAsync(p =>
+                    p.IdProduto == doacaoId &&
+                    p.IdBeneficiario == beneficiarioId);
 
-            if (doacao == null)
+            if (produto == null)
                 return new ReservaResponseDto(false, "Reserva não encontrada.");
 
-            if (doacao.Status != StatusDoacao.Reservado)
+            if (produto.StatusProduto)
                 return new ReservaResponseDto(false, "Não é possível cancelar esta reserva.");
 
-            // Volta ao estado disponível
-            doacao.Status = StatusDoacao.Disponivel;
-            doacao.BeneficiarioId = null;
-            doacao.DataReserva = null;
+            produto.StatusProduto = true;
+            produto.IdBeneficiario = null;
+            produto.DataReserva = null;
 
             await _context.SaveChangesAsync();
 

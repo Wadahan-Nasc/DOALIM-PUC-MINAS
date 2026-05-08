@@ -1,0 +1,93 @@
+﻿@model Doalim_dev.Models.Produto
+
+<div class="container mt-4">
+    <h1>Editar Produto</h1>
+    <hr />
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <input type="hidden" asp-for="IdProduto" />
+        <input type="hidden" asp-for="DataCadastro" />
+
+        <div class="row">
+            <div class="col-md-4 text-center border-end">
+                <div class="p-3 bg-light rounded shadow-sm mb-3">
+                    <label class="fw-bold mb-2">Imagem Atual</label><br />
+                    @if (Model.FotoProduto != null)
+                    {
+                        <img id="imgPreview" src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.FotoProduto))" class="img-thumbnail mb-3" style="max-height: 250px; width: 100%; object-fit: contain;" />
+                    }
+                    else
+                    {
+                        <img id="imgPreview" src="~/images/sem-foto.png" class="img-thumbnail mb-3" style="max-height: 250px; width: 100%; object-fit: contain;" />
+                    }
+                    <label class="form-label text-muted small">Trocar imagem:</label>
+                    <input type="file" name="arquivoFoto" id="fotoInput" class="form-control" accept="image/*" />
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="NomeProduto" class="form-label"></label>
+                        <input asp-for="NomeProduto" class="form-control" />
+                        <span asp-validation-for="NomeProduto" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CodigoBarras" class="form-label"></label>
+                        <input asp-for="CodigoBarras" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MarcaProduto" class="form-label"></label>
+                        <input asp-for="MarcaProduto" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoriaProduto" class="form-label"></label>
+                        <input asp-for="CategoriaProduto" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DataValidade" class="form-label"></label>
+                        <input asp-for="DataValidade" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Quantidade" class="form-label"></label>
+                        <input asp-for="Quantidade" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="UnidadeMedida" class="form-label"></label>
+                        <input asp-for="UnidadeMedida" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="TipoArmazenamento" class="form-label"></label>
+                        <input asp-for="TipoArmazenamento" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="QuantidadePessoaFisica" class="form-label"></label>
+                        <input asp-for="QuantidadePessoaFisica" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="QuantidadePessoaJuridica" class="form-label"></label>
+                        <input asp-for="QuantidadePessoaJuridica" class="form-control" />
+                    </div>
+                    <div class="col-md-12 mb-3 form-check ms-3">
+                        <input asp-for="StatusProduto" class="form-check-input" />
+                        <label asp-for="StatusProduto" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg">Salvar Alterações</button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('fotoInput').onchange = evt => {
+            const [file] = document.getElementById('fotoInput').files
+            if (file) {
+                document.getElementById('imgPreview').src = URL.createObjectURL(file)
+            }
+        }
+    </script>
+}
