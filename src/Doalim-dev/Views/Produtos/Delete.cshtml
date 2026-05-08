@@ -13,17 +13,17 @@
     <dl class="row">
         <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NomeProduto)</dt>
         <dd class="col-sm-9">@Html.DisplayFor(model => model.NomeProduto)</dd>
-        
+
         <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CategoriaProduto)</dt>
         <dd class="col-sm-9">@Html.DisplayFor(model => model.CategoriaProduto)</dd>
-        
+
         <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Quantidade)</dt>
         <dd class="col-sm-9">@Html.DisplayFor(model => model.Quantidade)</dd>
-        
+
         <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DataValidade)</dt>
         <dd class="col-sm-9">@Html.DisplayFor(model => model.DataValidade)</dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="IdProduto" />
         <input type="submit" value="Confirmar Exclusão" class="btn btn-danger" />
