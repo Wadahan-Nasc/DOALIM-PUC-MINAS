@@ -126,8 +126,10 @@ else
                 </div>
 
                 <div class="col-md-1 text-end">
-                    <a asp-action="Reservar" asp-route-id="@alimento.IdProduto"
-                       class="btn btn-success btn-sm">Reservar</a>
+                    <form asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success btn-sm">Reservar</button>
+                    </form>
                 </div>
 
             </div>

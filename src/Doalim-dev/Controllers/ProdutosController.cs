@@ -1,4 +1,5 @@
 ﻿using Doalim_dev.Models;
+using Doalim_dev.Services;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,10 +17,12 @@ namespace Doalim_dev.Controllers
     public class ProdutosController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IReservaService _reservaService;
 
-        public ProdutosController(AppDbContext context)
+        public ProdutosController(AppDbContext context, IReservaService reservaService)
         {
             _context = context;
+            _reservaService = reservaService;
         }
 
         // LISTAGEM
@@ -219,6 +222,23 @@ namespace Doalim_dev.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reservar(int id)
+        {
+            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+                return RedirectToAction("Login", "Auth");
+
+            var resultado = await _reservaService.ReservarDoacaoAsync(id, usuarioId);
+
+            TempData[resultado.Sucesso ? "Sucesso" : "Erro"] = resultado.Mensagem;
+
+            return RedirectToAction(nameof(Vitrine));
         }
     }
 }
