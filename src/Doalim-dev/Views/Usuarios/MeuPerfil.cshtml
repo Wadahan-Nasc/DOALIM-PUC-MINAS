@@ -15,7 +15,16 @@
         </div>
     }
 
-    <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post">
+    @if (TempData["Erro"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Erro"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post"
+          enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
         <input type="hidden" asp-for="IdUsuario" />
@@ -27,15 +36,56 @@
         <input type="hidden" asp-for="Arquivocomprovacao" />
 
         <div class="mb-3">
-            <label asp-for="TipoUsuario" class="form-label"></label>
-            <input asp-for="TipoUsuario" class="form-control bg-light" readonly />
-            <span asp-validation-for="TipoUsuario" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
             <label asp-for="Nome" class="form-label"></label>
             <input asp-for="Nome" class="form-control" />
             <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+
+        @* Foto de Perfil *@
+        <div class="mb-3">
+            <label class="form-label">Foto de Perfil</label>
+
+            @if (!string.IsNullOrEmpty(Model.FotoPerfil))
+            {
+                <div class="mb-2">
+                    <img src="@Model.FotoPerfil"
+                         alt="Foto de perfil atual"
+                         class="rounded-circle"
+                         style="width: 80px; height: 80px; object-fit: cover;" />
+                    <span class="ms-2 text-muted small">Foto atual</span>
+                </div>
+            }
+            else
+            {
+                <div class="mb-2 d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                         style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="bi bi-person text-secondary"></i>
+                    </div>
+                    <span class="text-muted small">Nenhuma foto cadastrada</span>
+                </div>
+            }
+
+            <input type="file"
+                   name="arquivoFotoPerfil"
+                   class="form-control"
+                   accept=".png,.jpg,.jpeg" />
+            <div class="form-text">Formatos aceitos: PNG, JPG ou JPEG. Tamanho máximo: 2MB.</div>
+        </div>
+
+        @*O tipo de usuário será apresentado conforme o valor do enum "TipoUsuario"*@ 
+        <div class="mb-3">
+            <label class="form-label">Tipo de Usuário</label>
+            <input type="text" class="form-control bg-secondary-subtle text-muted" 
+                   readonly style="cursor: not-allowed;"
+                   value="@(Model.TipoUsuario switch {
+                       Doalim_dev.Models.TipoUsuario.DoadorPF       => "Doador PF",
+                       Doalim_dev.Models.TipoUsuario.DoadorPJ       => "Doador PJ",
+                       Doalim_dev.Models.TipoUsuario.BeneficiarioPF => "Beneficiário PF",
+                       Doalim_dev.Models.TipoUsuario.BeneficiarioPJ => "Beneficiário PJ",
+                       Doalim_dev.Models.TipoUsuario.Admin          => "Administrador",
+                       _                                            => "Não informado"
+                   })" />
         </div>
 
         <div class="mb-3">
@@ -56,23 +106,80 @@
             <span asp-validation-for="Endereco" class="text-danger"></span>
         </div>
 
+
+        @*Se o usuário tiver um CPF cadastrado, não é necessário que apareça o campo CNPJ e vice-versa*@
+        @if (!string.IsNullOrEmpty(Model.Cpf))
+        {
+            <div class="mb-3">
+                <label asp-for="Cpf" class="form-label"></label>
+                <input asp-for="Cpf" class="form-control bg-secondary-subtle text-muted"
+                       readonly style="cursor: not-allowed;" />
+                <span asp-validation-for="Cpf" class="text-danger"></span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Cnpj))
+        {
+            <div class="mb-3">
+                <label asp-for="Cnpj" class="form-label"></label>
+                <input asp-for="Cnpj" class="form-control bg-secondary-subtle text-muted"
+                       readonly style="cursor: not-allowed;" />
+                <span asp-validation-for="Cnpj" class="text-danger"></span>
+            </div>
+        }
+
+        @* Campo de upload do documento de comprovação *@
         <div class="mb-3">
-            <label asp-for="Cpf" class="form-label"></label>
-            <input asp-for="Cpf" class="form-control bg-light" readonly />
-            <span asp-validation-for="Cpf" class="text-danger"></span>
+            <label class="form-label">Arquivo de Comprovação</label>
+
+            @if (!string.IsNullOrEmpty(Model.Arquivocomprovacao))
+            {
+                <div class="mb-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-check text-success" style="font-size: 1.2rem;"></i>
+                    <a href="@Model.Arquivocomprovacao" target="_blank" class="text-decoration-none">
+                        Ver arquivo atual
+                    </a>
+                </div>
+            }
+
+            <input type="file"
+                   name="arquivoComprovacao"
+                   class="form-control"
+                   accept=".png,.jpg,.jpeg,.pdf" />
+            <div class="form-text">Formatos aceitos: PNG, JPG, JPEG ou PDF. Tamanho máximo: 5MB.</div>
         </div>
 
-        <div class="mb-3">
-            <label asp-for="Cnpj" class="form-label"></label>
-            <input asp-for="Cnpj" class="form-control bg-light" readonly />
-            <span asp-validation-for="Cnpj" class="text-danger"></span>
-        </div>
+        @* Aviso para Beneficiários levando em consideração o campo "StatusVerificacao" *@
+        @if (Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPF ||
+             Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPJ)
+        {
+            <div class="alert alert-warning d-flex align-items-start gap-2 mt-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                <div>
+                    <strong>Atenção!</strong> Para reservar doações, é necessário que seu
+                    arquivo de comprovação seja enviado e aprovado pela administração.
 
-        <div class="mb-3">
-            <label asp-for="FotoPerfil" class="form-label"></label>
-            <input asp-for="FotoPerfil" class="form-control" placeholder="URL da foto" />
-            <span asp-validation-for="FotoPerfil" class="text-danger"></span>
-        </div>
+                    @if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Pendente)
+                    {
+                        <span class="d-block mt-1 text-warning-emphasis">
+                            <i class="bi bi-clock"></i> Seu arquivo está <strong>aguardando aprovação</strong>.
+                        </span>
+                    }
+                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Aprovado)
+                    {
+                        <span class="d-block mt-1 text-success">
+                            <i class="bi bi-check-circle"></i> Seu cadastro está <strong>aprovado</strong>!
+                        </span>
+                    }
+                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Rejeitado)
+                    {
+                        <span class="d-block mt-1 text-danger">
+                            <i class="bi bi-x-circle"></i> Seu arquivo foi <strong>rejeitado</strong>. Envie um novo documento.
+                        </span>
+                    }
+                </div>
+            </div>
+        }
 
         <div class="d-flex gap-2 mt-4">
             <button type="submit" class="btn btn-success">Salvar alterações</button>

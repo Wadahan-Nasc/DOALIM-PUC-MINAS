@@ -1,4 +1,21 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.EntityFrameworkCore
+@inject Doalim_dev.Models.AppDbContext _context
+
+@{
+    var emailLogado = User.Identity?.IsAuthenticated == true
+        ? (User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity.Name)
+        : null;
+
+    var fotoPerfil = emailLogado != null
+        ? await _context.Usuarios
+            .Where(u => u.Email == emailLogado)
+            .Select(u => u.FotoPerfil)
+            .FirstOrDefaultAsync()
+        : null;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -60,7 +77,17 @@
                                 <a class="nav-link text-dark"
                                        asp-controller="Usuarios" asp-action="MeuPerfil"
                                        title="Meu Perfil">
-                                    <i class="bi bi-person-circle" style="font-size: 1.4rem;"></i>
+                                    @if (!string.IsNullOrEmpty(fotoPerfil))
+                                    {
+                                        <img src="@fotoPerfil"
+                                             alt="Foto de perfil"
+                                             class="rounded-circle"
+                                             style="width: 30px; height: 30px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-person-circle" style="font-size: 1.4rem;"></i>
+                                    }
                                 </a>
                             </li>
                             <li class="nav-item">
