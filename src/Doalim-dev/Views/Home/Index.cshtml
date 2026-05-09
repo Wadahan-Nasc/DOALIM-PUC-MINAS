@@ -28,3 +28,49 @@
         </p>
     }
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+<div class="row g-3 justify-content-center pb-4">
+    <div class="col-md-4">
+        <a asp-controller="Produtos" asp-action="Vitrine" class="home-card text-decoration-none">
+            <span class="home-card-icon"><i class="bi bi-shop"></i></span>
+            <span class="home-card-title">Vitrine</span>
+            <span class="home-card-text">Encontre alimentos disponíveis para doação.</span>
+        </a>
+    </div>
+
+    @if (User.Identity.IsAuthenticated && (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ")))
+    {
+        <div class="col-md-4">
+            <a asp-controller="Produtos" asp-action="MinhasReservas" class="home-card text-decoration-none">
+                <span class="home-card-icon"><i class="bi bi-cart-check"></i></span>
+                <span class="home-card-title">Minhas reservas</span>
+                <span class="home-card-text">Acompanhe os alimentos que você reservou.</span>
+            </a>
+        </div>
+    }
+
+    @if (User.Identity.IsAuthenticated && (User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ")))
+    {
+        <div class="col-md-4">
+            <a asp-controller="Produtos" asp-action="Create" class="home-card text-decoration-none">
+                <span class="home-card-icon"><i class="bi bi-plus-circle"></i></span>
+                <span class="home-card-title">Cadastrar produto</span>
+                <span class="home-card-text">Adicione alimentos para disponibilizar na vitrine.</span>
+            </a>
+        </div>
+    }
+
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    {
+        <div class="col-md-4">
+            <a asp-controller="Usuarios" asp-action="Index" class="home-card text-decoration-none">
+                <span class="home-card-icon"><i class="bi bi-people"></i></span>
+                <span class="home-card-title">Usuários</span>
+                <span class="home-card-text">Gerencie os usuários cadastrados no sistema.</span>
+            </a>
+        </div>
+    }
+</div>
+}

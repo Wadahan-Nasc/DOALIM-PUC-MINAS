@@ -7,7 +7,7 @@
 <h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
 
 @*Formulário de Filtros *@
-<form method="get" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
+<form method="get" asp-controller="Produtos" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
     <div class="row g-3 align-items-end">
 
         @* Busca por nome *@
@@ -46,7 +46,7 @@
         @* Botões *@
         <div class="col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            <a asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
+            <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
         </div>
 
     </div>
@@ -126,8 +126,10 @@ else
                 </div>
 
                 <div class="col-md-1 text-end">
-                    <a asp-action="Reservar" asp-route-id="@alimento.IdProduto"
-                       class="btn btn-success btn-sm">Reservar</a>
+                    <form asp-controller="Produtos" asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success btn-sm">Reservar</button>
+                    </form>
                 </div>
 
             </div>
