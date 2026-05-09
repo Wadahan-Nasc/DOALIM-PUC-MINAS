@@ -14,6 +14,11 @@ Para cada caso de teste definido no Plano de Testes de Software, realize o regis
 |	Requisito Associado 	| RF-00Y - A aplicação deve permitir que um usuário previamente cadastrado faça login |
 |Registro de evidência | www.teste.com.br/drive/ct-02 |
 
+| **Caso de Teste** 	| **CT10 – Visualizar Vitrine** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-005 - A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficiário possa realizar filtros. |
+|Registro de evidência | ![CT10-Vitrine](https://github.com/user-attachments/assets/1a4d159c-a9e1-4250-ba00-cadd380feddf) |
+
 ## Relatório de testes de software
 
 Apresente e discuta detalhadamente os resultados obtidos nos testes realizados, destacando tanto os pontos fortes quanto as fragilidades identificadas na solução. Explique como os aspectos positivos contribuem para o desempenho e a usabilidade do sistema, e como os pontos fracos impactam sua eficácia.
