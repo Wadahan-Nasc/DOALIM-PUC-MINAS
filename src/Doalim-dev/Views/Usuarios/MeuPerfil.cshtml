@@ -27,6 +27,12 @@
         <input type="hidden" asp-for="Arquivocomprovacao" />
 
         <div class="mb-3">
+            <label asp-for="TipoUsuario" class="form-label"></label>
+            <input asp-for="TipoUsuario" class="form-control bg-light" readonly />
+            <span asp-validation-for="TipoUsuario" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
             <label asp-for="Nome" class="form-label"></label>
             <input asp-for="Nome" class="form-control" />
             <span asp-validation-for="Nome" class="text-danger"></span>
