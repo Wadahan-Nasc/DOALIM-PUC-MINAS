@@ -28,12 +28,28 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Usuarios" asp-action="Index">Usuários</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Doacoes" asp-action="Vitrine">Vitrine</a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Usuarios" asp-action="Index">Usuários</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
+                            @if (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark"
+                                           asp-controller="Produtos" asp-action="MinhasReservas"
+                                           title="Minhas Reservas">
+                                        <i class="bi bi-cart-check" style="font-size: 1.4rem;"></i>
+                                    </a>
+                                </li>
+                            }
                             <li class="nav-item d-flex align-items-center">
                                 <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
                             </li>

@@ -61,7 +61,7 @@ namespace Doalim_dev.Controllers
                 Produtos = produtosViewModel
             };
 
-            return View(viewModel);
+            return View("~/Views/Produtos/Vitrine.cshtml", viewModel);
         }
     }
 }

@@ -1,0 +1,64 @@
+@model IEnumerable<Doalim_dev.Models.Produto>
+
+@{
+    ViewData["Title"] = "Minhas Reservas";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="mb-1">Minhas reservas</h2>
+        <p class="text-muted mb-0">Alimentos reservados por você aparecem aqui.</p>
+    </div>
+    <a asp-controller="Doacoes" asp-action="Vitrine" class="btn btn-outline-success">
+        <i class="bi bi-shop me-1"></i> Ver vitrine
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Você ainda não possui reservas.
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    @if (item.FotoProduto != null && item.FotoProduto.Length > 0)
+                    {
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(item.FotoProduto)"
+                             class="card-img-top"
+                             alt="@item.NomeProduto"
+                             style="height: 180px; object-fit: cover;" />
+                    }
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h5 class="card-title mb-0">@item.NomeProduto</h5>
+                            <span class="badge bg-success">Reservado</span>
+                        </div>
+                        <p class="card-text text-muted mb-2">@item.MarcaProduto</p>
+                        <dl class="row small mb-0">
+                            <dt class="col-5">Categoria</dt>
+                            <dd class="col-7">@item.CategoriaProduto</dd>
+
+                            <dt class="col-5">Quantidade</dt>
+                            <dd class="col-7">@item.Quantidade @item.UnidadeMedida</dd>
+
+                            <dt class="col-5">Validade</dt>
+                            <dd class="col-7">@item.DataValidade.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-5">Doador</dt>
+                            <dd class="col-7">@(item.Doador?.Usuario?.Nome ?? "Não informado")</dd>
+
+                            <dt class="col-5">Reserva</dt>
+                            <dd class="col-7">@(item.DataReserva?.ToString("dd/MM/yyyy HH:mm") ?? "Sem data")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

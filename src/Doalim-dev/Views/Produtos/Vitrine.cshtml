@@ -126,7 +126,7 @@ else
                 </div>
 
                 <div class="col-md-1 text-end">
-                    <form asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
+                    <form asp-controller="Produtos" asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-success btn-sm">Reservar</button>
                     </form>

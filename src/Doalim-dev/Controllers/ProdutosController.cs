@@ -234,11 +234,50 @@ namespace Doalim_dev.Controllers
             if (!int.TryParse(usuarioIdClaim, out var usuarioId))
                 return RedirectToAction("Login", "Auth");
 
+            if (!UsuarioEhBeneficiario())
+            {
+                TempData["Erro"] = "Apenas usuários beneficiários podem reservar alimentos.";
+                return RedirectToAction(nameof(Vitrine));
+            }
+
             var resultado = await _reservaService.ReservarDoacaoAsync(id, usuarioId);
 
             TempData[resultado.Sucesso ? "Sucesso" : "Erro"] = resultado.Mensagem;
 
+            if (resultado.Sucesso)
+                return RedirectToAction(nameof(MinhasReservas));
+
             return RedirectToAction(nameof(Vitrine));
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MinhasReservas()
+        {
+            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+                return RedirectToAction("Login", "Auth");
+
+            if (!UsuarioEhBeneficiario())
+            {
+                TempData["Erro"] = "Apenas usuários beneficiários têm reservas.";
+                return RedirectToAction(nameof(Vitrine));
+            }
+
+            var reservas = await _context.Produtos
+                .Include(p => p.Doador)
+                    .ThenInclude(d => d.Usuario)
+                .Where(p => p.IdBeneficiario == usuarioId)
+                .OrderByDescending(p => p.DataReserva)
+                .ToListAsync();
+
+            return View(reservas);
+        }
+
+        private bool UsuarioEhBeneficiario()
+        {
+            return User.IsInRole(TipoUsuario.BeneficiarioPF.ToString())
+                || User.IsInRole(TipoUsuario.BeneficiarioPJ.ToString());
         }
     }
 }
