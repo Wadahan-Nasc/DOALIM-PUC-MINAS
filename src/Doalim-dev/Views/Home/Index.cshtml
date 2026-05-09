@@ -29,9 +29,11 @@
     }
 </div>
 
+@if (User.Identity.IsAuthenticated)
+{
 <div class="row g-3 justify-content-center pb-4">
     <div class="col-md-4">
-        <a asp-controller="Doacoes" asp-action="Vitrine" class="home-card text-decoration-none">
+        <a asp-controller="Produtos" asp-action="Vitrine" class="home-card text-decoration-none">
             <span class="home-card-icon"><i class="bi bi-shop"></i></span>
             <span class="home-card-title">Vitrine</span>
             <span class="home-card-text">Encontre alimentos disponíveis para doação.</span>
@@ -71,3 +73,4 @@
         </div>
     }
 </div>
+}

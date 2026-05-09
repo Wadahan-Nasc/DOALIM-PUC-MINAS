@@ -175,6 +175,7 @@ namespace Doalim_dev.Controllers
         }
 
         // VITRINE
+        [Authorize]
         public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
         {
             var query = _context.Produtos
