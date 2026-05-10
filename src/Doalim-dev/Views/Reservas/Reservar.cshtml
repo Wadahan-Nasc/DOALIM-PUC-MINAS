@@ -1,0 +1,72 @@
+﻿@model Doalim_dev.ViewModels.ReservaViewModel
+
+@{
+    ViewData["Title"] = "Reservar Produto";
+    var base64 = Model.FotoProduto != null
+        ? Convert.ToBase64String(Model.FotoProduto)
+        : null;
+}
+
+<div class="container" style="max-width: 600px;">
+
+    <h2 class="mb-4">🛒 Confirmar Reserva</h2>
+
+    {{-- Card do produto --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex gap-3 align-items-center">
+
+            @if (base64 != null)
+            {
+                <img src="data:image/jpeg;base64,@base64"
+                     class="rounded"
+                     style="width:80px; height:80px; object-fit:cover;" />
+            }
+            else
+            {
+                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                     style="width:80px; height:80px; font-size:2rem;">
+                    🍱
+                </div>
+            }
+
+            <div>
+                <h5 class="mb-1">@Model.NomeProduto</h5>
+                <p class="mb-0 text-muted small">@Model.MarcaProduto — @Model.Categoria</p>
+                <p class="mb-0 small">
+                    📦 Disponível: <strong>@Model.QuantidadeDisponivel @Model.UnidadeMedida</strong> |
+                    📅 Validade: <strong>@Model.DataValidade.ToString("dd/MM/yyyy")</strong>
+                </p>
+                <p class="mb-0 small text-info">
+                    Limite PF: <strong>@Model.QuantidadePessoaFisica</strong> |
+                    Limite PJ: <strong>@Model.QuantidadePessoaJuridica</strong>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- Formulário --}}
+    <form asp-action="Confirmar" asp-controller="Reservas" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="IdProduto" />
+
+        <div class="mb-3">
+            <label asp-for="QuantidadeReservada" class="form-label fw-semibold"></label>
+            <input asp-for="QuantidadeReservada"
+                   type="number"
+                   min="1"
+                   max="@Model.QuantidadeDisponivel"
+                   class="form-control" />
+            <span asp-validation-for="QuantidadeReservada" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success w-100">✅ Confirmar Reserva</button>
+            <a asp-action="Vitrine" asp-controller="Produtos"
+               class="btn btn-outline-secondary w-100">Cancelar</a>
+        </div>
+
+    </form>
+
+</div>

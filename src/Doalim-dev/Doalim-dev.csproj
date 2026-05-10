@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Doacoes\**" />
+    <Content Remove="Views\Doacoes\**" />
+    <EmbeddedResource Remove="Views\Doacoes\**" />
+    <None Remove="Views\Doacoes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.15" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0">
@@ -30,7 +37,6 @@
   <ItemGroup>
     <Folder Include="Services\" />
     <Folder Include="Views\Auth\" />
-    <Folder Include="Views\Doacoes\" />
   </ItemGroup>
 
 </Project>
