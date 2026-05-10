@@ -19,9 +19,14 @@ namespace Doalim_dev.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.TotalUsuarios = await _context.Usuarios.CountAsync();
-            ViewBag.DocumentosPendentes = await _context.Usuarios.CountAsync(u => u.StatusVerificacao != StatusVerificacao.Aprovado);
-            ViewBag.ProdutosDisponiveis = await _context.Produtos.CountAsync(p => p.StatusProduto);
-            ViewBag.TotalAdministradores = await _context.Usuarios.CountAsync(u => u.TipoUsuario == TipoUsuario.Admin);
+            ViewBag.ProdutosDisponiveis = await _context.Produtos
+                .CountAsync(p => p.StatusProduto && p.DataValidade > DateTime.UtcNow && p.Quantidade > 0);
+            ViewBag.AlimentosDisponiveis = await _context.Produtos
+                .Where(p => p.StatusProduto && p.DataValidade > DateTime.UtcNow && p.Quantidade > 0)
+                .SumAsync(p => (int?)p.Quantidade) ?? 0;
+            ViewBag.DoacoesReservadas = await _context.Produtos.CountAsync(p => p.IdBeneficiario != null);
+            ViewBag.TotalDoadores = await _context.Usuarios.CountAsync(u =>
+                u.TipoUsuario == TipoUsuario.DoadorPF || u.TipoUsuario == TipoUsuario.DoadorPJ);
 
             return View();
         }

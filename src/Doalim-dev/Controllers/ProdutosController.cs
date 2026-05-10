@@ -175,9 +175,29 @@ namespace Doalim_dev.Controllers
         }
 
         // VITRINE
-        [Authorize]
         public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
         {
+            var usuarioLogado = User.Identity?.IsAuthenticated == true;
+            var usuarioBeneficiario = UsuarioEhBeneficiario();
+            var usuarioAprovado = false;
+
+            if (usuarioLogado)
+            {
+                var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    usuarioAprovado = await _context.Usuarios
+                        .AsNoTracking()
+                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                }
+            }
+
+            ViewBag.UsuarioLogado = usuarioLogado;
+            ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
+            ViewBag.UsuarioAprovado = usuarioAprovado;
+            ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+
             var query = _context.Produtos
                 .Include(a => a.Doador)
                     .ThenInclude(d => d.Usuario) // Inclui os dados do usuário do doador
@@ -234,6 +254,23 @@ namespace Doalim_dev.Controllers
 
             if (!int.TryParse(usuarioIdClaim, out var usuarioId))
                 return RedirectToAction("Login", "Auth");
+
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+
+            if (usuario == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["Erro"] = "Sua sessão estava vinculada a um usuário que não existe mais. Faça login novamente.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (usuario.StatusVerificacao != StatusVerificacao.Aprovado)
+            {
+                TempData["Erro"] = "Sua conta precisa ser aprovada pelo administrador antes de reservar alimentos.";
+                return RedirectToAction(nameof(Vitrine));
+            }
 
             if (!UsuarioEhBeneficiario())
             {

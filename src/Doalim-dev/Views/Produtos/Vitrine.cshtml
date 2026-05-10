@@ -2,6 +2,10 @@
 
 @{
     ViewData["Title"] = "Alimentos Disponíveis";
+    var usuarioLogado = ViewBag.UsuarioLogado == true;
+    var usuarioBeneficiario = ViewBag.UsuarioBeneficiario == true;
+    var usuarioAprovado = ViewBag.UsuarioAprovado == true;
+    var podeReservar = ViewBag.PodeReservar == true;
 }
 
 <h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
@@ -126,10 +130,30 @@ else
                 </div>
 
                 <div class="col-md-1 text-end">
-                    <form asp-controller="Produtos" asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-success btn-sm">Reservar</button>
-                    </form>
+                    @if (podeReservar)
+                    {
+                        <form asp-controller="Produtos" asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-sm">Reservar</button>
+                        </form>
+                    }
+                    else if (!usuarioLogado)
+                    {
+                        <a asp-controller="Auth"
+                           asp-action="Login"
+                           asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")"
+                           class="btn btn-outline-success btn-sm">
+                            Entrar para reservar
+                        </a>
+                    }
+                    else if (!usuarioAprovado)
+                    {
+                        <button type="button" class="btn btn-outline-warning btn-sm" disabled>Aguardando aprovação</button>
+                    }
+                    else if (!usuarioBeneficiario)
+                    {
+                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Somente beneficiários</button>
+                    }
                 </div>
 
             </div>
