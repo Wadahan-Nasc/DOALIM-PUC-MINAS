@@ -129,7 +129,7 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Registro de
 | Usuário 4 | 85 | 8 | Sim | Esqueceu de preencher a justificativa ao rejeitar o documento na primeira tentativa. | A mensagem de erro ajudou a entender o que faltava preencher. |
 | Usuário 5 | 110 | 10 | Sim | Teve dúvida se a alteração havia sido salva corretamente. | Seria interessante exibir uma mensagem de confirmação mais visível após salvar. |
 
-**Cenário 5**: CTU-03 – Cadastro de Produto para Doação 
+**Cenário 5**: CTU-03 – Cadastro de Produto para Doação (*CTU-13 – Doando produtos excedentes de casa* - procedimento de dois cenários diferentes, cenário de cadastro de usuário e cadastro de produto que foram realizados)
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
