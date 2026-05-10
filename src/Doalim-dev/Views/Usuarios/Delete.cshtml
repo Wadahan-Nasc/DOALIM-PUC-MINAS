@@ -1,75 +1,65 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Remover usuário";
 }
 
-<h1>Remover usuário</h1>
+<section class="admin-dashboard">
+    <div class="admin-page-header">
+        <div>
+            <span class="admin-eyebrow">Remoção de cadastro</span>
+            <h1>Remover usuário</h1>
+            <p>Confira os dados antes de apagar este cadastro do sistema.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-success">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
+    </div>
 
-<h3>Deseja remover o usuário?</h3>
-<div>
-    <h4>Usuário</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cnpj)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cnpj)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cpf)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cpf)
-        </dd>       
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefone)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Endereco)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Endereco)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FotoPerfil)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FotoPerfil)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Arquivocomprovacao)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Arquivocomprovacao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoUsuario)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoUsuario)
-        </dd>        
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdUsuario" />
-        <input type="submit" value="Apagar" class="btn btn-danger" /> |
-        <a asp-action="Index" class="btn btn-info">Voltar</a>
-    </form>
-</div>
+    <div class="admin-profile">
+        <div class="admin-profile-card">
+            <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
+            <h2>@Model.Nome</h2>
+            <span class="admin-pill">@Model.TipoUsuario</span>
+            <span class="admin-status status-danger">Ação permanente</span>
+        </div>
+
+        <div class="admin-detail-section">
+            <h2>Dados que serão removidos</h2>
+            <dl>
+                <dt>E-mail</dt>
+                <dd>@Model.Email</dd>
+                <dt>Telefone</dt>
+                <dd>@Model.Telefone</dd>
+                <dt>Documento</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Cpf) ? Model.Cnpj : Model.Cpf)</dd>
+                <dt>Status</dt>
+                <dd>@(Model.Ativo ? "Ativo" : "Suspenso")</dd>
+            </dl>
+
+            <form asp-action="Delete" class="admin-detail-actions">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="IdUsuario" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i>
+                    Apagar usuário
+                </button>
+                <a asp-action="Index" class="btn btn-outline-success">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</section>
+
+@functions {
+    private static string Iniciais(string nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+            return "US";
+
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var primeira = partes[0][0].ToString();
+        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
+        return (primeira + segunda).ToUpperInvariant();
+    }
+}
