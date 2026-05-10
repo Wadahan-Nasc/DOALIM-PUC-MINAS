@@ -65,7 +65,7 @@
     @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
     {
         <div class="col-md-4">
-            <a asp-controller="Usuarios" asp-action="Index" class="home-card text-decoration-none">
+                <a asp-controller="Usuarios" a asp-controller="Produtos" asp-action="Index" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-people"></i></span>
                 <span class="home-card-title">Usuários</span>
                 <span class="home-card-text">Gerencie os usuários cadastrados no sistema.</span>
