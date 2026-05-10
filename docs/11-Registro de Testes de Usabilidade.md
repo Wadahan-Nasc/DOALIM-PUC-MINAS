@@ -118,3 +118,13 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Registro de
 | Usuário 3 | 260 | 22 | Sim | Tentou anexar documento no local incorreto e não encontrou confirmação de envio | Relatou dificuldade para entender os ícones e pediu letras maiores e instruções mais claras. |
 | Usuário 4 | 64 | 8 | Sim | Nenhum erro relevante | Processo rápido e objetivo, sem dificuldades durante o teste. |
 | Usuário 5 | 78 | 10 | Sim | Pequena demora para localizar a área de upload do documento | Interface agradável e funcional, mas sugeriu deixar a área de envio de arquivos mais destacada visualmente. |
+
+**Cenário 4**: CTU-08 – Moderação de Usuários e Documentos
+
+| **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
+| Usuário 1 | 95 | 9 | Sim |Nenhum erro crítico. Demorou um pouco para localizar o botão de baixar documento. | O painel é simples, mas o botão de download poderia estar mais destacado. |
+| Usuário 2 | 70 | 7 | Sim | Nenhum erro. | O processo é objetivo e fácil de entender. A atualização de status ficou clara. |
+| Usuário 3 | 130 | 12 | Sim | Clicou inicialmente no perfil errado e teve dificuldade para encontrar a opção de rejeição. | O processo é objetivo e fácil de entender. A atualização de status ficou clara. |
+| Usuário 4 | 85 | 8 | Sim | Esqueceu de preencher a justificativa ao rejeitar o documento na primeira tentativa. | A mensagem de erro ajudou a entender o que faltava preencher. |
+| Usuário 5 | 110 | 10 | Sim | Teve dúvida se a alteração havia sido salva corretamente. | Seria interessante exibir uma mensagem de confirmação mais visível após salvar. |
