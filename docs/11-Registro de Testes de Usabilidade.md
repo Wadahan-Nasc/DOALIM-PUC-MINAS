@@ -109,3 +109,12 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Registro de
 | Usuário 5 | 88 | 11 | Sim | Filtro retornou vazio na 1ª tentativa | Boa experiência. Sugiro sugestão automática nos filtros. |
 [relatorio_usabilidadeCTU05e14.docx](https://github.com/user-attachments/files/27572029/relatorio_usabilidade.docx)
 
+**Cenário 3**: CTU-02 – Edição de perfil e envio de documentos: Verifica a usabilidade na edição de dados e anexo de arquivos de comprovação.
+
+| **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
+| Usuário 1 | 185 | 16 | Sim | Dificuldade para localizar botão de salvar e anexar documento | Achou o processo um pouco confuso no início, mas conseguiu concluir após explorar a tela. |
+| Usuário 2 | 72 | 9 | Sim | Nenhum erro relevante | Considerou a funcionalidade simples e intuitiva. |
+| Usuário 3 | 260 | 22 | Sim | Tentou anexar documento no local incorreto e não encontrou confirmação de envio | Relatou dificuldade para entender os ícones e pediu letras maiores e instruções mais claras. |
+| Usuário 4 | 64 | 8 | Sim | Nenhum erro relevante | Processo rápido e objetivo, sem dificuldades durante o teste. |
+| Usuário 5 | 78 | 10 | Sim | Pequena demora para localizar a área de upload do documento | Interface agradável e funcional, mas sugeriu deixar a área de envio de arquivos mais destacada visualmente. |
