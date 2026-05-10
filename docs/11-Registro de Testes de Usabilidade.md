@@ -128,3 +128,13 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Registro de
 | Usuário 3 | 130 | 12 | Sim | Clicou inicialmente no perfil errado e teve dificuldade para encontrar a opção de rejeição. | O processo é objetivo e fácil de entender. A atualização de status ficou clara. |
 | Usuário 4 | 85 | 8 | Sim | Esqueceu de preencher a justificativa ao rejeitar o documento na primeira tentativa. | A mensagem de erro ajudou a entender o que faltava preencher. |
 | Usuário 5 | 110 | 10 | Sim | Teve dúvida se a alteração havia sido salva corretamente. | Seria interessante exibir uma mensagem de confirmação mais visível após salvar. |
+
+**Cenário 5**: CTU-03 – Cadastro de Produto para Doação 
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   | 100 | 30 | Sim | Selecionou de forma errada a data de vencimento do produto (utilizando o calendário que aparece ao selecionar o campo da data) | Informou que o calendário que é mostrado é muito pequeno |                     |      
+| Usuário 2   | 145 | 35 | Sim | Errou ao selecionar o arquivo da imagem correto e escreveu alguns dados do produto de errada (erro de ortográfia), que foi notado apenas na conferência antes de salvar o cadastro do produto | Ter uma outra aba para cadastrar categoria, marca, entre outros, para que em vez de digitar e ter variações, possa apenas selecionar a opção padrão |                     |      
+| Usuário 3   | 60 | 22 | Sim | Nenhum erro foi cometido | N/A |                     |  
+| Usuário 4   | 55 | 18 | Sim | Nenhum erro foi cometido | N/A |                     | 
+| Usuário 5   | 83 | 27 | Sim | Errou ao selecionar o arquivo da imagem correto | Informou necessidade de cadastrar o lote do produto |                     | 
