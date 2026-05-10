@@ -43,7 +43,7 @@
     @if (User.Identity.IsAuthenticated && (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ")))
     {
         <div class="col-md-4">
-            <a asp-controller="Produtos" asp-action="MinhasReservas" class="home-card text-decoration-none">
+            <a asp-controller="Reservas" asp-action="MinhasReservas" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-cart-check"></i></span>
                 <span class="home-card-title">Minhas reservas</span>
                 <span class="home-card-text">Acompanhe os alimentos que você reservou.</span>
