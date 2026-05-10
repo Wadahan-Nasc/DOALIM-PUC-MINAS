@@ -42,7 +42,7 @@ namespace Doalim_dev.Data
                         Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000",
                         Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim",
                         TipoUsuario = TipoUsuario.Admin,
-                        StatusVerificacao = StatusVerificacao.NaoAplicavel,
+                        StatusVerificacao = StatusVerificacao.Pendente,
                         Ativo = true,
                         DataCadastro = DateTime.UtcNow
                     };
@@ -56,7 +56,8 @@ namespace Doalim_dev.Data
                 {
                     usuario.TipoUsuario = TipoUsuario.Admin;
                     usuario.Ativo = true;
-                    usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
+                    if (usuario.StatusVerificacao == StatusVerificacao.NaoAplicavel)
+                        usuario.StatusVerificacao = StatusVerificacao.Pendente;
 
                     if (string.IsNullOrWhiteSpace(usuario.Telefone))
                         usuario.Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000";

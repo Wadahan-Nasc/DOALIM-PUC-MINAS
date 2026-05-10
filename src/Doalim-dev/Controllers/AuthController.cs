@@ -81,10 +81,8 @@ namespace Doalim_dev.Controllers
                 Endereco           = vm.Endereco,
                 Ativo              = true,
                 DataCadastro       = DateTime.UtcNow,
-                // PJ comeÃ§a com verificaÃ§Ã£o pendente; PF nÃ£o precisa
-                StatusVerificacao  = ehPJ
-                    ? StatusVerificacao.Pendente
-                    : StatusVerificacao.NaoAplicavel
+                // Todo usuário começa pendente até o administrador validar a documentação.
+                StatusVerificacao  = StatusVerificacao.Pendente
             };
 
             _context.Usuarios.Add(usuario);

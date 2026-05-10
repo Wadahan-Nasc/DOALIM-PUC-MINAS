@@ -4,7 +4,7 @@
     ViewData["Title"] = "Detalhes do usuário";
     var foto = FotoUrl(Model.FotoPerfil);
     var documento = FotoUrl(Model.Arquivocomprovacao);
-    var ehPessoaJuridica = Model.TipoUsuario == TipoUsuario.DoadorPJ || Model.TipoUsuario == TipoUsuario.BeneficiarioPJ;
+    var documentoAprovado = Model.StatusVerificacao == StatusVerificacao.Aprovado;
 }
 
 @functions {
@@ -37,7 +37,7 @@
             StatusVerificacao.Pendente => "status-warning",
             StatusVerificacao.Aprovado => "status-success",
             StatusVerificacao.Rejeitado => "status-danger",
-            _ => "status-neutral"
+            _ => "status-warning"
         };
     }
 }
@@ -113,18 +113,14 @@
                                 Abrir documento
                             </a>
                         }
-                        else if (ehPessoaJuridica)
-                        {
-                            <span class="admin-status status-warning">Aguardando envio</span>
-                        }
                         else
                         {
-                            <span class="admin-status status-neutral">Não se aplica</span>
+                            <span class="admin-status status-warning">Aguardando envio</span>
                         }
                     </dd>
                 </dl>
 
-                @if (ehPessoaJuridica)
+                @if (!documentoAprovado)
                 {
                     <div class="admin-detail-actions">
                         <form asp-action="AtualizarStatusVerificacao" method="post">

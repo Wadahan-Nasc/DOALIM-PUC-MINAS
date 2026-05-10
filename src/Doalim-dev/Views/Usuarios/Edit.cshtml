@@ -119,7 +119,6 @@
         const tipoUsuario = document.getElementById('TipoUsuario');
         const camposCpf = document.querySelectorAll('[data-field="cpf"]');
         const camposCnpj = document.querySelectorAll('[data-field="cnpj"]');
-        const camposDocumento = document.querySelectorAll('[data-field="documento"], [data-field="status-doc"]');
 
         function atualizarCamposAdmin() {
             const valor = tipoUsuario.value;
@@ -128,7 +127,6 @@
 
             camposCpf.forEach(campo => campo.style.display = ehPf ? '' : 'none');
             camposCnpj.forEach(campo => campo.style.display = ehPj ? '' : 'none');
-            camposDocumento.forEach(campo => campo.style.display = ehPj ? '' : 'none');
         }
 
         tipoUsuario.addEventListener('change', atualizarCamposAdmin);

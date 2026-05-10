@@ -98,7 +98,7 @@
             <div class="admin-side-panel">
                 <i class="bi bi-file-earmark-check"></i>
                 <strong>Comprovação</strong>
-                <p>Pessoas jurídicas entram como pendentes até a documentação ser aprovada no painel.</p>
+                <p>Todos os usuários entram como pendentes até a documentação ser aprovada no painel.</p>
             </div>
             <button type="submit" class="btn btn-success w-100">
                 <i class="bi bi-check2-circle"></i>
@@ -115,7 +115,6 @@
         const tipoUsuario = document.getElementById('TipoUsuario');
         const camposCpf = document.querySelectorAll('[data-field="cpf"]');
         const camposCnpj = document.querySelectorAll('[data-field="cnpj"]');
-        const camposDocumento = document.querySelectorAll('[data-field="documento"]');
 
         function atualizarCamposAdmin() {
             const valor = tipoUsuario.value;
@@ -124,7 +123,6 @@
 
             camposCpf.forEach(campo => campo.style.display = ehPf ? '' : 'none');
             camposCnpj.forEach(campo => campo.style.display = ehPj ? '' : 'none');
-            camposDocumento.forEach(campo => campo.style.display = ehPj ? '' : 'none');
         }
 
         tipoUsuario.addEventListener('change', atualizarCamposAdmin);

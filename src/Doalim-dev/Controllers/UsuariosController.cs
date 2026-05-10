@@ -25,7 +25,7 @@ namespace Doalim_dev.Controllers
         public async Task<IActionResult> Index()
         {
             var usuarios = await _context.Usuarios
-                .OrderByDescending(u => u.StatusVerificacao == StatusVerificacao.Pendente)
+                .OrderBy(u => u.StatusVerificacao == StatusVerificacao.Aprovado)
                 .ThenBy(u => u.Nome)
                 .ToListAsync();
 
@@ -142,9 +142,7 @@ namespace Doalim_dev.Controllers
                     usuarioAtual.Arquivocomprovacao = usuario.Arquivocomprovacao;
                     usuarioAtual.TipoUsuario = usuario.TipoUsuario;
                     usuarioAtual.Ativo = usuario.Ativo;
-                    usuarioAtual.StatusVerificacao = usuario.TipoUsuario == TipoUsuario.Admin
-                        ? StatusVerificacao.NaoAplicavel
-                        : usuario.StatusVerificacao;
+                    usuarioAtual.StatusVerificacao = usuario.StatusVerificacao;
 
                     if (!string.IsNullOrWhiteSpace(usuario.SenhaHash))
                         usuarioAtual.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
@@ -228,9 +226,7 @@ namespace Doalim_dev.Controllers
 
         private static StatusVerificacao StatusInicialPorTipo(TipoUsuario tipoUsuario)
         {
-            return tipoUsuario == TipoUsuario.DoadorPJ || tipoUsuario == TipoUsuario.BeneficiarioPJ
-                ? StatusVerificacao.Pendente
-                : StatusVerificacao.NaoAplicavel;
+            return StatusVerificacao.Pendente;
         }
 
         private async Task CriarPerfilComplementarAsync(Usuario usuario)
