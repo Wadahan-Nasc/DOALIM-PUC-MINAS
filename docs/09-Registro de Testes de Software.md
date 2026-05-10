@@ -3,22 +3,22 @@
 | **Caso de Teste** 	| **CT01 – Cadastrar perfil** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. RF-002 - A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador. |
-|Registro de evidência | https://github.com/user-attachments/assets/7bf9c74c-d81b-42ea-a8d3-6cc6506baf93 |
+|Registro de evidência | https://github.com/user-attachments/assets/35e0b4c6-73a3-4498-86c7-97cf567e9dee |
 
 | **Caso de Teste** 	| **CT02 – Efetuar Login** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência | https://github.com/user-attachments/assets/bd9b70fd-4514-4a4e-b06b-32f60547e424 |
+|Registro de evidência | https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869 |
 
 | **Caso de Teste** 	| **CT03 – Efetuar Logout** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência | https://github.com/user-attachments/assets/bd9b70fd-4514-4a4e-b06b-32f60547e424 |
+|Registro de evidência | https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869 |
 
 | **Caso de Teste** 	| **CT04 – Recuperar Senha** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência |https://github.com/user-attachments/assets/7305a481-5789-4219-8c1f-0ce63ea18aec |
+|Registro de evidência |https://github.com/user-attachments/assets/9ed9e6e5-18e8-4744-bcfc-6c5854633f13 |
 
 | **Caso de Teste** 	| **CT05 – Edição de Perfil** 	|
 |:---:	|:---:	|
