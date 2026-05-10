@@ -229,6 +229,12 @@ namespace Doalim_dev.Controllers
             return View(viewModel);
         }
 
+        [Authorize]
+        public IActionResult MinhasReservas()
+        {
+            return RedirectToAction("MinhasReservas", "Reservas");
+        }
+
         private bool UsuarioEhBeneficiario()
         {
             return User.IsInRole(TipoUsuario.BeneficiarioPF.ToString())
