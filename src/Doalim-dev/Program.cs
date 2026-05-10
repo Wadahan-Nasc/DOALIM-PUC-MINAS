@@ -1,3 +1,4 @@
+using Doalim_dev.Data;
 using Doalim_dev.Models;
 using Doalim_dev.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -27,6 +28,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 
 var app = builder.Build();
+
+await AdminSeeder.SeedAsync(app);
 
 // Configuração do pipeline de requisição HTTP.
 if (!app.Environment.IsDevelopment())

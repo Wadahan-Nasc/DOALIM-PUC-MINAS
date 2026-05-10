@@ -175,9 +175,29 @@ namespace Doalim_dev.Controllers
         }
 
         // VITRINE
-        [Authorize]
         public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
         {
+            var usuarioLogado = User.Identity?.IsAuthenticated == true;
+            var usuarioBeneficiario = UsuarioEhBeneficiario();
+            var usuarioAprovado = false;
+
+            if (usuarioLogado)
+            {
+                var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    usuarioAprovado = await _context.Usuarios
+                        .AsNoTracking()
+                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                }
+            }
+
+            ViewBag.UsuarioLogado = usuarioLogado;
+            ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
+            ViewBag.UsuarioAprovado = usuarioAprovado;
+            ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+
             var query = _context.Produtos
                 .Include(a => a.Doador)
                     .ThenInclude(d => d.Usuario) // Inclui os dados do usuário do doador
@@ -208,9 +228,7 @@ namespace Doalim_dev.Controllers
                     Categoria = a.CategoriaProduto ?? "",
                     MarcaProduto = a.MarcaProduto ?? "",
                     TipoArmazenamento = a.TipoArmazenamento ?? "",
-                    FotoProduto = a.FotoProduto == null || a.FotoProduto.Length == 0
-                        ? ""
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(a.FotoProduto)}",
+                    FotoProduto = ObterFotoProdutoDataUrl(a.FotoProduto),
                     QuantidadeDisponivel = a.Quantidade,
                     NomeDoador = a.Doador.Usuario.Nome
                 })
@@ -234,6 +252,23 @@ namespace Doalim_dev.Controllers
 
             if (!int.TryParse(usuarioIdClaim, out var usuarioId))
                 return RedirectToAction("Login", "Auth");
+
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+
+            if (usuario == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["Erro"] = "Sua sessão estava vinculada a um usuário que não existe mais. Faça login novamente.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (usuario.StatusVerificacao != StatusVerificacao.Aprovado)
+            {
+                TempData["Erro"] = "Sua conta precisa ser aprovada pelo administrador antes de reservar alimentos.";
+                return RedirectToAction(nameof(Vitrine));
+            }
 
             if (!UsuarioEhBeneficiario())
             {
@@ -279,6 +314,31 @@ namespace Doalim_dev.Controllers
         {
             return User.IsInRole(TipoUsuario.BeneficiarioPF.ToString())
                 || User.IsInRole(TipoUsuario.BeneficiarioPJ.ToString());
+        }
+
+        private static string ObterFotoProdutoDataUrl(byte[]? fotoProduto)
+        {
+            if (fotoProduto == null || fotoProduto.Length == 0)
+                return string.Empty;
+
+            var mimeType = "image/jpeg";
+
+            if (fotoProduto.Length >= 8
+                && fotoProduto[0] == 0x89
+                && fotoProduto[1] == 0x50
+                && fotoProduto[2] == 0x4E
+                && fotoProduto[3] == 0x47)
+            {
+                mimeType = "image/png";
+            }
+            else if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x3C
+                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
+            {
+                mimeType = "image/svg+xml";
+            }
+
+            return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
         }
     }
 }

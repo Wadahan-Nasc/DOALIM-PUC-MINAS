@@ -1,75 +1,131 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Create";
+    var criandoAdmin = Model.TipoUsuario == TipoUsuario.Admin;
+    ViewData["Title"] = criandoAdmin ? "Novo administrador" : "Novo usuário";
 }
 
-<h1>Cadastro</h1>
-
-<h4>Cadastrar usuário</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Cpf" class="control-label"></label>
-                <input asp-for="Cpf" class="form-control" />
-                <span asp-validation-for="Cpf" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Cnpj" class="control-label"></label>
-                <input asp-for="Cnpj" class="form-control" />
-                <span asp-validation-for="Cnpj" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefone" class="control-label"></label>
-                <input asp-for="Telefone" class="form-control" />
-                <span asp-validation-for="Telefone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Endereco" class="control-label"></label>
-                <input asp-for="Endereco" class="form-control" />
-                <span asp-validation-for="Endereco" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FotoPerfil" class="control-label"></label>
-                <input asp-for="FotoPerfil" class="form-control" />
-                <span asp-validation-for="FotoPerfil" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Arquivocomprovacao" class="control-label"></label>
-                <input asp-for="Arquivocomprovacao" class="form-control" />
-                <span asp-validation-for="Arquivocomprovacao" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoUsuario" class="control-label"></label>
-                <select asp-for="TipoUsuario" class="form-control" asp-items="Html.GetEnumSelectList<TipoUsuario>()"></select>
-                <span asp-validation-for="TipoUsuario" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SenhaHash" class="control-label"></label>
-                <input asp-for="SenhaHash" class="form-control" />
-                <span asp-validation-for="SenhaHash" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <a asp-action="Index" class="btn btn-info">Voltar</a> 
-                <input type="submit" value="Criar" class="btn btn-success" />
-            </div>
-        </form>
+<section class="admin-dashboard">
+    <div class="admin-page-header">
+        <div>
+            <span class="admin-eyebrow">Cadastro administrativo</span>
+            <h1>@ViewData["Title"]</h1>
+            <p>Crie contas de usuários comuns ou libere acesso para outro administrador.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-success">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
     </div>
-</div>
+
+    <form asp-action="Create" class="admin-form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <input type="hidden" asp-for="Ativo" value="true" />
+
+        <div class="admin-form-main">
+            <div class="admin-form-section">
+                <h2>Dados de acesso</h2>
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="Nome" class="form-label"></label>
+                        <input asp-for="Nome" class="form-control" placeholder="Nome completo" />
+                        <span asp-validation-for="Nome" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="TipoUsuario" class="form-label"></label>
+                        <select asp-for="TipoUsuario" class="form-select" asp-items="Html.GetEnumSelectList<TipoUsuario>()"></select>
+                        <span asp-validation-for="TipoUsuario" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="email@dominio.com" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="SenhaHash" class="form-label">Senha de acesso</label>
+                        <input asp-for="SenhaHash" class="form-control" type="password" placeholder="Senha temporária" autocomplete="new-password" />
+                        <span asp-validation-for="SenhaHash" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Telefone" class="form-label"></label>
+                        <input asp-for="Telefone" class="form-control" placeholder="(31) 99999-0000" />
+                        <span asp-validation-for="Telefone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Endereco" class="form-label"></label>
+                        <input asp-for="Endereco" class="form-control" placeholder="Rua, número, bairro, cidade" />
+                        <span asp-validation-for="Endereco" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-form-section">
+                <h2>Identificação e documentação</h2>
+
+                <div class="row g-3">
+                    <div class="col-md-6" data-field="cpf">
+                        <label asp-for="Cpf" class="form-label"></label>
+                        <input asp-for="Cpf" class="form-control" placeholder="000.000.000-00" />
+                        <span asp-validation-for="Cpf" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6" data-field="cnpj">
+                        <label asp-for="Cnpj" class="form-label"></label>
+                        <input asp-for="Cnpj" class="form-control" placeholder="00.000.000/0001-00" />
+                        <span asp-validation-for="Cnpj" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FotoPerfil" class="form-label"></label>
+                        <input asp-for="FotoPerfil" class="form-control" placeholder="URL da foto do perfil" />
+                        <span asp-validation-for="FotoPerfil" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6" data-field="documento">
+                        <label asp-for="Arquivocomprovacao" class="form-label">Arquivo de comprovação</label>
+                        <input asp-for="Arquivocomprovacao" class="form-control" placeholder="URL ou caminho do documento" />
+                        <span asp-validation-for="Arquivocomprovacao" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="admin-form-side">
+            <div class="admin-side-panel">
+                <i class="bi bi-shield-check"></i>
+                <strong>Acesso administrativo</strong>
+                <p>Ao selecionar <b>Admin</b>, o sistema cria também o vínculo na tabela de administradores.</p>
+            </div>
+            <div class="admin-side-panel">
+                <i class="bi bi-file-earmark-check"></i>
+                <strong>Comprovação</strong>
+                <p>Todos os usuários entram como pendentes até a documentação ser aprovada no painel.</p>
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-check2-circle"></i>
+                Salvar cadastro
+            </button>
+        </aside>
+    </form>
+</section>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        const tipoUsuario = document.getElementById('TipoUsuario');
+        const camposCpf = document.querySelectorAll('[data-field="cpf"]');
+        const camposCnpj = document.querySelectorAll('[data-field="cnpj"]');
+
+        function atualizarCamposAdmin() {
+            const valor = tipoUsuario.value;
+            const ehPf = valor === '0' || valor === '2';
+            const ehPj = valor === '1' || valor === '3';
+
+            camposCpf.forEach(campo => campo.style.display = ehPf ? '' : 'none');
+            camposCnpj.forEach(campo => campo.style.display = ehPj ? '' : 'none');
+        }
+
+        tipoUsuario.addEventListener('change', atualizarCamposAdmin);
+        atualizarCamposAdmin();
+    </script>
 }

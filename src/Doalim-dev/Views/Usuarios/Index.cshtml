@@ -1,65 +1,344 @@
-﻿@model IEnumerable<Doalim_dev.Models.Usuario>
+@model IEnumerable<Doalim_dev.Models.Usuario>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Administração de usuários";
+
+    var usuarios = Model.ToList();
+    var naoAprovados = usuarios
+        .Where(u => !DocumentoAprovado(u))
+        .OrderByDescending(u => u.StatusVerificacao == StatusVerificacao.Pendente)
+        .ThenBy(u => u.Nome)
+        .ToList();
+    var aprovados = usuarios
+        .Where(DocumentoAprovado)
+        .OrderBy(u => u.Nome)
+        .ToList();
+    var aguardandoEnvio = usuarios.Count(u => string.IsNullOrWhiteSpace(u.Arquivocomprovacao));
+    var administradores = usuarios.Count(u => u.TipoUsuario == TipoUsuario.Admin);
+    var ativos = usuarios.Count(u => u.Ativo);
+    var busca = ViewBag.Busca as string;
+    var grupos = new[]
+    {
+        new
+        {
+            Titulo = "Usuários não aprovados",
+            Descricao = $"{aguardandoEnvio} aguardando envio de arquivo.",
+            Lista = naoAprovados,
+            Classe = "status-warning",
+            Contador = $"{naoAprovados.Count} pendente(s)",
+            MostrarAcoesValidacao = true
+        },
+        new
+        {
+            Titulo = "Usuários aprovados",
+            Descricao = "Cadastros com documentação validada.",
+            Lista = aprovados,
+            Classe = "status-success",
+            Contador = $"{aprovados.Count} aprovado(s)",
+            MostrarAcoesValidacao = false
+        }
+    };
 }
 
-<h1>Lista de Usuários</h1>
+@functions {
+    private static bool DocumentoAprovado(Usuario usuario)
+    {
+        return usuario.StatusVerificacao == StatusVerificacao.Aprovado;
+    }
 
-<p>
-    <a asp-action="Create">Cadastrar usuário</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nome)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cnpj)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cpf)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefone)
-            </th>             
-            <th>
-                @Html.DisplayNameFor(model => model.TipoUsuario)
-            </th>            
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cnpj)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cpf)
-            </td>           
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefone)
-            </td>       
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoUsuario)
-            </td>            
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-warning">Editar</a> |
-                <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-primary">Visualizar</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger">Apagar</a>
-            </td>
-        </tr>
+    private static bool PrecisaDocumento(Usuario usuario)
+    {
+        return !DocumentoAprovado(usuario);
+    }
+
+    private static string Iniciais(string nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+            return "US";
+
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var primeira = partes[0][0].ToString();
+        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
+        return (primeira + segunda).ToUpperInvariant();
+    }
+
+    private string ArquivoUrl(string arquivo)
+    {
+        if (string.IsNullOrWhiteSpace(arquivo))
+            return string.Empty;
+
+        if (arquivo.StartsWith("http", StringComparison.OrdinalIgnoreCase) || arquivo.StartsWith("/"))
+            return arquivo;
+
+        return Url.Content($"~/{arquivo.TrimStart('~', '/')}");
+    }
+
+    private static string ClasseStatus(StatusVerificacao status)
+    {
+        return status switch
+        {
+            StatusVerificacao.Pendente => "status-warning",
+            StatusVerificacao.Aprovado => "status-success",
+            StatusVerificacao.Rejeitado => "status-danger",
+            _ => "status-warning"
+        };
+    }
+
+    private static string TextoDocumento(Usuario usuario)
+    {
+        if (string.IsNullOrWhiteSpace(usuario.Arquivocomprovacao))
+            return "Aguardando envio";
+
+        return usuario.StatusVerificacao switch
+        {
+            StatusVerificacao.Aprovado => "Aprovado",
+            StatusVerificacao.Rejeitado => "Rejeitado",
+            _ => "Aguardando aprovação"
+        };
+    }
+
+    private static string PerfilCategoria(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "Administrador",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "Doador",
+            _ => "Beneficiário"
+        };
+    }
+
+    private static string PerfilClasse(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "account-admin",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "account-donor",
+            _ => "account-beneficiary"
+        };
+    }
+
+    private static string PerfilIcone(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "bi-shield-check",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "bi-basket2",
+            _ => "bi-people"
+        };
+    }
 }
-    </tbody>
-</table>
+
+<section class="admin-dashboard">
+    <div class="admin-page-header">
+        <div>
+            <span class="admin-eyebrow">Painel administrativo</span>
+            <h1>Usuários</h1>
+            <p>Gerencie cadastros, administradores e validações de documentação.</p>
+        </div>
+        <div class="admin-header-actions">
+            <a asp-action="Create" asp-route-tipoUsuario="@TipoUsuario.Admin" class="btn btn-success">
+                <i class="bi bi-shield-plus"></i>
+                Novo administrador
+            </a>
+            <a asp-action="Create" class="btn btn-outline-success">
+                <i class="bi bi-person-plus"></i>
+                Novo usuário
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-metrics">
+        <div class="admin-metric">
+            <span>Total de usuários</span>
+            <strong>@usuarios.Count</strong>
+        </div>
+        <div class="admin-metric">
+            <span>Ativos</span>
+            <strong>@ativos</strong>
+        </div>
+        <div class="admin-metric metric-alert">
+            <span>Não aprovados</span>
+            <strong>@naoAprovados.Count</strong>
+        </div>
+        <div class="admin-metric">
+            <span>Aprovados</span>
+            <strong>@aprovados.Count</strong>
+        </div>
+    </div>
+
+    <form asp-action="Index" method="get" class="admin-search">
+        <div>
+            <label for="busca" class="form-label">Pesquisar usuário</label>
+            <div class="admin-search-box">
+                <i class="bi bi-search"></i>
+                <input id="busca" name="busca" value="@busca" class="form-control" placeholder="Buscar por nome, CPF ou CNPJ" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-search"></i>
+            Pesquisar
+        </button>
+        @if (!string.IsNullOrWhiteSpace(busca))
+        {
+            <a asp-action="Index" class="btn btn-outline-success">
+                <i class="bi bi-x-lg"></i>
+                Limpar
+            </a>
+        }
+    </form>
+
+    @if (naoAprovados.Any())
+    {
+        <div class="admin-attention">
+            <div>
+                <h2>Documentação pendente</h2>
+                <p>Todos os usuários precisam enviar e ter a documentação aprovada pelo administrador.</p>
+            </div>
+            <div class="admin-attention-list">
+                @foreach (var usuario in naoAprovados.Take(4))
+                {
+                    <a asp-action="Details" asp-route-id="@usuario.IdUsuario" class="admin-attention-item">
+                        <span class="admin-avatar avatar-sm">@Iniciais(usuario.Nome)</span>
+                        <span>
+                            <strong>@usuario.Nome</strong>
+                            <small>@TextoDocumento(usuario)</small>
+                        </span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="admin-user-groups">
+        @foreach (var grupo in grupos)
+        {
+            <section class="admin-user-group">
+                <div class="admin-group-header">
+                    <div>
+                        <h2>@grupo.Titulo</h2>
+                        <p>@grupo.Descricao</p>
+                    </div>
+                    <span class="admin-status @grupo.Classe">@grupo.Contador</span>
+                </div>
+
+                @if (!grupo.Lista.Any())
+                {
+                    <div class="admin-empty-state">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Nenhum usuário nesta categoria.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="admin-table-wrap">
+                        <table class="table admin-users-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Contato</th>
+                                    <th>Perfil</th>
+                                    <th>Documentação</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in grupo.Lista)
+                                {
+                                    var foto = ArquivoUrl(item.FotoPerfil);
+                                    var documentoUrl = ArquivoUrl(item.Arquivocomprovacao);
+
+                                    <tr class="@(PrecisaDocumento(item) ? "row-needs-doc" : string.Empty)">
+                                        <td>
+                                            <div class="admin-user-cell">
+                                                @if (!string.IsNullOrWhiteSpace(foto))
+                                                {
+                                                    <img class="admin-avatar" src="@foto" alt="Foto de @item.Nome" />
+                                                }
+                                                else
+                                                {
+                                                    <span class="admin-avatar">@Iniciais(item.Nome)</span>
+                                                }
+                                                <div>
+                                                    <strong>@item.Nome</strong>
+                                                    <small>@(string.IsNullOrWhiteSpace(item.Cpf) ? item.Cnpj : item.Cpf)</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="mailto:@item.Email" class="admin-link">@item.Email</a>
+                                            <small class="d-block text-muted">@item.Telefone</small>
+                                        </td>
+                                        <td>
+                                            <span class="admin-account @PerfilClasse(item)">
+                                                <i class="bi @PerfilIcone(item)"></i>
+                                                <span>
+                                                    <strong>@PerfilCategoria(item)</strong>
+                                                    <small>@item.TipoUsuario</small>
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="admin-status @ClasseStatus(item.StatusVerificacao)">
+                                                @TextoDocumento(item)
+                                            </span>
+                                            @if (!string.IsNullOrWhiteSpace(documentoUrl))
+                                            {
+                                                <a class="admin-doc-link" href="@documentoUrl" target="_blank" rel="noopener">
+                                                    <i class="bi bi-paperclip"></i>
+                                                    Abrir arquivo
+                                                </a>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.Ativo)
+                                            {
+                                                <span class="admin-status status-success">Ativo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="admin-status status-danger">Suspenso</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="admin-row-actions">
+                                                @if (grupo.MostrarAcoesValidacao)
+                                                {
+                                                    <form asp-action="AtualizarStatusVerificacao" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.IdUsuario" />
+                                                        <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Aprovar documentação">
+                                                            <i class="bi bi-check2"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form asp-action="AtualizarStatusVerificacao" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.IdUsuario" />
+                                                        <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Rejeitar documentação">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-warning" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-danger" title="Apagar">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+</section>

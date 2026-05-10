@@ -1,72 +1,149 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do usuário";
+    var foto = FotoUrl(Model.FotoPerfil);
+    var documento = FotoUrl(Model.Arquivocomprovacao);
+    var documentoAprovado = Model.StatusVerificacao == StatusVerificacao.Aprovado;
 }
 
-<h1>Detalhes</h1>
+@functions {
+    private static string Iniciais(string nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+            return "US";
 
-<div>
-    <h4>Usuário</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cnpj)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cnpj)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cpf)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cpf)
-        </dd>        
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefone)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Endereco)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Endereco)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FotoPerfil)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FotoPerfil)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Arquivocomprovacao)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Arquivocomprovacao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoUsuario)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoUsuario)
-        </dd>        
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdUsuario" class="btn btn-warning">Editar</a> |
-    <a asp-action="Index" class="btn btn-info">Voltar</a>
-</div>
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var primeira = partes[0][0].ToString();
+        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
+        return (primeira + segunda).ToUpperInvariant();
+    }
+
+    private string FotoUrl(string foto)
+    {
+        if (string.IsNullOrWhiteSpace(foto))
+            return string.Empty;
+
+        if (foto.StartsWith("http", StringComparison.OrdinalIgnoreCase) || foto.StartsWith("/"))
+            return foto;
+
+        return Url.Content($"~/{foto.TrimStart('~', '/')}");
+    }
+
+    private static string ClasseStatus(StatusVerificacao status)
+    {
+        return status switch
+        {
+            StatusVerificacao.Pendente => "status-warning",
+            StatusVerificacao.Aprovado => "status-success",
+            StatusVerificacao.Rejeitado => "status-danger",
+            _ => "status-warning"
+        };
+    }
+}
+
+<section class="admin-dashboard">
+    <div class="admin-page-header">
+        <div>
+            <span class="admin-eyebrow">Perfil do usuário</span>
+            <h1>@Model.Nome</h1>
+            <p>@Model.Email</p>
+        </div>
+        <div class="admin-header-actions">
+            <a asp-action="Edit" asp-route-id="@Model.IdUsuario" class="btn btn-warning">
+                <i class="bi bi-pencil"></i>
+                Editar
+            </a>
+            <a asp-action="Index" class="btn btn-outline-success">
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-profile">
+        <div class="admin-profile-card">
+            @if (!string.IsNullOrWhiteSpace(foto))
+            {
+                <img class="admin-profile-photo" src="@foto" alt="Foto de @Model.Nome" />
+            }
+            else
+            {
+                <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
+            }
+            <h2>@Model.Nome</h2>
+            <span class="admin-pill">@Model.TipoUsuario</span>
+            <span class="admin-status @(Model.Ativo ? "status-success" : "status-danger")">
+                @(Model.Ativo ? "Ativo" : "Suspenso")
+            </span>
+        </div>
+
+        <div class="admin-details-grid">
+            <div class="admin-detail-section">
+                <h2>Contato</h2>
+                <dl>
+                    <dt>E-mail</dt>
+                    <dd><a href="mailto:@Model.Email" class="admin-link">@Model.Email</a></dd>
+                    <dt>Telefone</dt>
+                    <dd>@Model.Telefone</dd>
+                    <dt>Endereço</dt>
+                    <dd>@Model.Endereco</dd>
+                </dl>
+            </div>
+
+            <div class="admin-detail-section">
+                <h2>Documentos</h2>
+                <dl>
+                    <dt>CPF</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Cpf) ? "Não informado" : Model.Cpf)</dd>
+                    <dt>CNPJ</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Cnpj) ? "Não informado" : Model.Cnpj)</dd>
+                    <dt>Status de verificação</dt>
+                    <dd>
+                        <span class="admin-status @ClasseStatus(Model.StatusVerificacao)">
+                            @Model.StatusVerificacao
+                        </span>
+                    </dd>
+                    <dt>Comprovação</dt>
+                    <dd>
+                        @if (!string.IsNullOrWhiteSpace(documento))
+                        {
+                            <a href="@documento" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-paperclip"></i>
+                                Abrir documento
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="admin-status status-warning">Aguardando envio</span>
+                        }
+                    </dd>
+                </dl>
+
+                @if (!documentoAprovado)
+                {
+                    <div class="admin-detail-actions">
+                        <form asp-action="AtualizarStatusVerificacao" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.IdUsuario" />
+                            <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check2"></i>
+                                Aprovar
+                            </button>
+                        </form>
+                        <form asp-action="AtualizarStatusVerificacao" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.IdUsuario" />
+                            <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-x-lg"></i>
+                                Rejeitar
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

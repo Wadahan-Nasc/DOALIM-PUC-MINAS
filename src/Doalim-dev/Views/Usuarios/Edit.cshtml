@@ -1,76 +1,135 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar usuário";
 }
 
-<h1>Editar cadastro do usuário:</h1>
-
-<h4>Usuário</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdUsuario" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Cnpj" class="control-label"></label>
-                <input asp-for="Cnpj" class="form-control" />
-                <span asp-validation-for="Cnpj" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Cpf" class="control-label"></label>
-                <input asp-for="Cpf" class="form-control" />
-                <span asp-validation-for="Cpf" class="text-danger"></span>
-            </div>            
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefone" class="control-label"></label>
-                <input asp-for="Telefone" class="form-control" />
-                <span asp-validation-for="Telefone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Endereco" class="control-label"></label>
-                <input asp-for="Endereco" class="form-control" />
-                <span asp-validation-for="Endereco" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FotoPerfil" class="control-label"></label>
-                <input asp-for="FotoPerfil" class="form-control" />
-                <span asp-validation-for="FotoPerfil" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Arquivocomprovacao" class="control-label"></label>
-                <input asp-for="Arquivocomprovacao" class="form-control" />
-                <span asp-validation-for="Arquivocomprovacao" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoUsuario" class="control-label"></label>
-                <select asp-for="TipoUsuario" class="form-control" asp-items="Html.GetEnumSelectList<TipoUsuario>()"></select>
-                <span asp-validation-for="TipoUsuario" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SenhaHash" class="control-label"></label>
-                <input asp-for="SenhaHash" class="form-control" />
-                <span asp-validation-for="SenhaHash" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <a asp-action="Index" class="btn btn-info">Voltar</a>
-                <input type="submit" value="Salvar" class="btn btn-success" />
-            </div>
-        </form>
+<section class="admin-dashboard">
+    <div class="admin-page-header">
+        <div>
+            <span class="admin-eyebrow">Edição administrativa</span>
+            <h1>Editar usuário</h1>
+            <p>Atualize cadastro, perfil de acesso e validação de documentação.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-success">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
     </div>
-</div>
+
+    <form asp-action="Edit" class="admin-form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <input type="hidden" asp-for="IdUsuario" />
+
+        <div class="admin-form-main">
+            <div class="admin-form-section">
+                <h2>Dados principais</h2>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="Nome" class="form-label"></label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span asp-validation-for="Nome" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="TipoUsuario" class="form-label"></label>
+                        <select asp-for="TipoUsuario" class="form-select" asp-items="Html.GetEnumSelectList<TipoUsuario>()"></select>
+                        <span asp-validation-for="TipoUsuario" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="SenhaHash" class="form-label">Nova senha</label>
+                        <input name="SenhaHash" id="SenhaHash" class="form-control" type="password" value="" placeholder="Deixe em branco para manter" autocomplete="new-password" />
+                        <small class="text-muted">Preencha apenas se quiser trocar a senha.</small>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Telefone" class="form-label"></label>
+                        <input asp-for="Telefone" class="form-control" />
+                        <span asp-validation-for="Telefone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Endereco" class="form-label"></label>
+                        <input asp-for="Endereco" class="form-control" />
+                        <span asp-validation-for="Endereco" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-form-section">
+                <h2>Documentação</h2>
+                <div class="row g-3">
+                    <div class="col-md-6" data-field="cpf">
+                        <label asp-for="Cpf" class="form-label"></label>
+                        <input asp-for="Cpf" class="form-control" />
+                        <span asp-validation-for="Cpf" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6" data-field="cnpj">
+                        <label asp-for="Cnpj" class="form-label"></label>
+                        <input asp-for="Cnpj" class="form-control" />
+                        <span asp-validation-for="Cnpj" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FotoPerfil" class="form-label"></label>
+                        <input asp-for="FotoPerfil" class="form-control" placeholder="URL da foto do perfil" />
+                        <span asp-validation-for="FotoPerfil" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6" data-field="documento">
+                        <label asp-for="Arquivocomprovacao" class="form-label">Arquivo de comprovação</label>
+                        <input asp-for="Arquivocomprovacao" class="form-control" placeholder="URL ou caminho do documento" />
+                        <span asp-validation-for="Arquivocomprovacao" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6" data-field="status-doc">
+                        <label asp-for="StatusVerificacao" class="form-label"></label>
+                        <select asp-for="StatusVerificacao" class="form-select" asp-items="Html.GetEnumSelectList<StatusVerificacao>()"></select>
+                        <span asp-validation-for="StatusVerificacao" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label d-block">Situação da conta</label>
+                        <div class="form-check form-switch admin-switch">
+                            <input asp-for="Ativo" class="form-check-input" />
+                            <label asp-for="Ativo" class="form-check-label">Conta ativa</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="admin-form-side">
+            <div class="admin-side-panel">
+                <i class="bi bi-person-gear"></i>
+                <strong>Perfil de acesso</strong>
+                <p>Se mudar o tipo para <b>Admin</b>, o vínculo administrativo é criado automaticamente.</p>
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-save"></i>
+                Salvar alterações
+            </button>
+        </aside>
+    </form>
+</section>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        const tipoUsuario = document.getElementById('TipoUsuario');
+        const camposCpf = document.querySelectorAll('[data-field="cpf"]');
+        const camposCnpj = document.querySelectorAll('[data-field="cnpj"]');
+
+        function atualizarCamposAdmin() {
+            const valor = tipoUsuario.value;
+            const ehPf = valor === '0' || valor === '2';
+            const ehPj = valor === '1' || valor === '3';
+
+            camposCpf.forEach(campo => campo.style.display = ehPf ? '' : 'none');
+            camposCnpj.forEach(campo => campo.style.display = ehPj ? '' : 'none');
+        }
+
+        tipoUsuario.addEventListener('change', atualizarCamposAdmin);
+        atualizarCamposAdmin();
+    </script>
 }
