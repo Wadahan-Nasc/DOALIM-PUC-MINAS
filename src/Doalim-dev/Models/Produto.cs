@@ -57,10 +57,6 @@ namespace Doalim_dev.Models
         [Display(Name = "Data de Cadastro")]
         public DateTime DataCadastro { get; set; } = DateTime.Now;
 
-        public int? IdBeneficiario { get; set; }
-
-        public DateTime? DataReserva { get; set; }
-
         [Required]
         public int IdDoador { get; set; }
 
