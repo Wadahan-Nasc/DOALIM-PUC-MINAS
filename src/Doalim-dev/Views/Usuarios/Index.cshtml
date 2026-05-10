@@ -16,6 +16,7 @@
     var aguardandoEnvio = usuarios.Count(u => string.IsNullOrWhiteSpace(u.Arquivocomprovacao));
     var administradores = usuarios.Count(u => u.TipoUsuario == TipoUsuario.Admin);
     var ativos = usuarios.Count(u => u.Ativo);
+    var busca = ViewBag.Busca as string;
     var grupos = new[]
     {
         new
@@ -95,6 +96,36 @@
             _ => "Aguardando aprovação"
         };
     }
+
+    private static string PerfilCategoria(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "Administrador",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "Doador",
+            _ => "Beneficiário"
+        };
+    }
+
+    private static string PerfilClasse(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "account-admin",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "account-donor",
+            _ => "account-beneficiary"
+        };
+    }
+
+    private static string PerfilIcone(Usuario usuario)
+    {
+        return usuario.TipoUsuario switch
+        {
+            TipoUsuario.Admin => "bi-shield-check",
+            TipoUsuario.DoadorPF or TipoUsuario.DoadorPJ => "bi-basket2",
+            _ => "bi-people"
+        };
+    }
 }
 
 <section class="admin-dashboard">
@@ -134,6 +165,27 @@
             <strong>@aprovados.Count</strong>
         </div>
     </div>
+
+    <form asp-action="Index" method="get" class="admin-search">
+        <div>
+            <label for="busca" class="form-label">Pesquisar usuário</label>
+            <div class="admin-search-box">
+                <i class="bi bi-search"></i>
+                <input id="busca" name="busca" value="@busca" class="form-control" placeholder="Buscar por nome, CPF ou CNPJ" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-search"></i>
+            Pesquisar
+        </button>
+        @if (!string.IsNullOrWhiteSpace(busca))
+        {
+            <a asp-action="Index" class="btn btn-outline-success">
+                <i class="bi bi-x-lg"></i>
+                Limpar
+            </a>
+        }
+    </form>
 
     @if (naoAprovados.Any())
     {
@@ -218,7 +270,13 @@
                                             <small class="d-block text-muted">@item.Telefone</small>
                                         </td>
                                         <td>
-                                            <span class="admin-pill">@item.TipoUsuario</span>
+                                            <span class="admin-account @PerfilClasse(item)">
+                                                <i class="bi @PerfilIcone(item)"></i>
+                                                <span>
+                                                    <strong>@PerfilCategoria(item)</strong>
+                                                    <small>@item.TipoUsuario</small>
+                                                </span>
+                                            </span>
                                         </td>
                                         <td>
                                             <span class="admin-status @ClasseStatus(item.StatusVerificacao)">

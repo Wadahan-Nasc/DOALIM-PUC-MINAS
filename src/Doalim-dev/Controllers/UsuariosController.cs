@@ -22,12 +22,31 @@ namespace Doalim_dev.Controllers
         }
 
         // GET: Usuarios
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? busca = null)
         {
             var usuarios = await _context.Usuarios
                 .OrderBy(u => u.StatusVerificacao == StatusVerificacao.Aprovado)
                 .ThenBy(u => u.Nome)
                 .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(busca))
+            {
+                var termo = busca.Trim();
+                var termoDocumento = NormalizarDocumento(termo);
+
+                usuarios = usuarios
+                    .Where(u =>
+                        u.Nome.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
+                        (u.Cpf != null && (
+                            u.Cpf.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
+                            DocumentoContem(u.Cpf, termoDocumento))) ||
+                        (u.Cnpj != null && (
+                            u.Cnpj.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
+                            DocumentoContem(u.Cnpj, termoDocumento))))
+                    .ToList();
+            }
+
+            ViewBag.Busca = busca;
 
             return View(usuarios);
         }
@@ -222,6 +241,17 @@ namespace Doalim_dev.Controllers
         private bool UsuarioExists(int id)
         {
             return _context.Usuarios.Any(e => e.IdUsuario == id);
+        }
+
+        private static string NormalizarDocumento(string valor)
+        {
+            return new string(valor.Where(char.IsDigit).ToArray());
+        }
+
+        private static bool DocumentoContem(string documento, string termoDocumento)
+        {
+            return !string.IsNullOrWhiteSpace(termoDocumento)
+                && NormalizarDocumento(documento).Contains(termoDocumento);
         }
 
         private static StatusVerificacao StatusInicialPorTipo(TipoUsuario tipoUsuario)

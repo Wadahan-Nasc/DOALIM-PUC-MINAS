@@ -1,76 +1,112 @@
-﻿@{
+@{
     ViewData["Title"] = "Home";
+
+    var totalUsuarios = ViewBag.TotalUsuarios ?? 0;
+    var documentosPendentes = ViewBag.DocumentosPendentes ?? 0;
+    var produtosDisponiveis = ViewBag.ProdutosDisponiveis ?? 0;
+    var totalAdministradores = ViewBag.TotalAdministradores ?? 0;
 }
 
-<div class="text-center py-5">
-    <img src="~/images/logo.png" alt="Doalim — Conectando alimentos."
-         class="img-fluid mb-4" style="max-width: 280px;"
-         onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';" />
-    
-    <div id="logoFallback" style="display:none;">
-        <h1 class="fw-bold" style="color: var(--doalim-verde-escuro);">Doalim</h1>
-        <p class="lead text-muted">Conectando alimentos.</p>
+<section class="home-shell">
+    <div class="home-hero">
+        <div class="home-hero-copy">
+            <span class="admin-eyebrow">Doalim</span>
+            <h1>Conectando alimentos com quem precisa.</h1>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <p>Bem-vindo(a), <strong>@User.Identity.Name</strong>. Acesse rapidamente as principais ações da plataforma.</p>
+            }
+            else
+            {
+                <p>Cadastre doações, encontre alimentos disponíveis e acompanhe reservas em uma experiência simples e organizada.</p>
+            }
+
+            <div class="home-hero-actions">
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Auth" asp-action="Registro" class="btn btn-success btn-lg">
+                        <i class="bi bi-person-plus"></i>
+                        Criar conta
+                    </a>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Entrar
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-success btn-lg">
+                        <i class="bi bi-shop"></i>
+                        Abrir vitrine
+                    </a>
+                    <a asp-controller="Usuarios" asp-action="MeuPerfil" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-person-circle"></i>
+                        Meu perfil
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="home-hero-panel">
+            <img src="~/images/logo.png" alt="Doalim - Conectando alimentos." />
+            <div class="home-hero-note">
+                <strong>Fluxo de doação</strong>
+                <span>Cadastro, validação, vitrine e reserva em um só lugar.</span>
+            </div>
+        </div>
     </div>
 
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <div class="mt-4 d-flex justify-content-center gap-3">
-            <a asp-controller="Auth" asp-action="Registro"
-               class="btn btn-success btn-lg px-4">Cadastre-se</a>
-            <a asp-controller="Auth" asp-action="Login"
-               class="btn btn-outline-success btn-lg px-4">Login</a>
+    <div class="home-stats">
+        <div class="home-stat">
+            <span>Usuários</span>
+            <strong>@totalUsuarios</strong>
         </div>
-    }
-    else
-    {
-        <p class="mt-3 text-muted">
-            Bem-vindo(a), <strong>@User.Identity.Name</strong>!
-        </p>
-    }
-</div>
+        <div class="home-stat">
+            <span>Documentos pendentes</span>
+            <strong>@documentosPendentes</strong>
+        </div>
+        <div class="home-stat">
+            <span>Produtos disponíveis</span>
+            <strong>@produtosDisponiveis</strong>
+        </div>
+        <div class="home-stat">
+            <span>Administradores</span>
+            <strong>@totalAdministradores</strong>
+        </div>
+    </div>
 
-@if (User.Identity.IsAuthenticated)
-{
-<div class="row g-3 justify-content-center pb-4">
-    <div class="col-md-4">
+    <div class="home-actions-grid">
         <a asp-controller="Produtos" asp-action="Vitrine" class="home-card text-decoration-none">
             <span class="home-card-icon"><i class="bi bi-shop"></i></span>
             <span class="home-card-title">Vitrine</span>
-            <span class="home-card-text">Encontre alimentos disponíveis para doação.</span>
+            <span class="home-card-text">Veja alimentos cadastrados e disponíveis para reserva.</span>
         </a>
-    </div>
 
-    @if (User.Identity.IsAuthenticated && (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ")))
-    {
-        <div class="col-md-4">
+        @if (User.Identity.IsAuthenticated && (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ")))
+        {
             <a asp-controller="Produtos" asp-action="MinhasReservas" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-cart-check"></i></span>
                 <span class="home-card-title">Minhas reservas</span>
                 <span class="home-card-text">Acompanhe os alimentos que você reservou.</span>
             </a>
-        </div>
-    }
+        }
 
-    @if (User.Identity.IsAuthenticated && (User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ")))
-    {
-        <div class="col-md-4">
+        @if (User.Identity.IsAuthenticated && (User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ")))
+        {
             <a asp-controller="Produtos" asp-action="Create" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-plus-circle"></i></span>
                 <span class="home-card-title">Cadastrar produto</span>
-                <span class="home-card-text">Adicione alimentos para disponibilizar na vitrine.</span>
+                <span class="home-card-text">Disponibilize alimentos para beneficiários visualizarem.</span>
             </a>
-        </div>
-    }
+        }
 
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-    {
-        <div class="col-md-4">
-                <a asp-controller="Usuarios" a asp-controller="Produtos" asp-action="Index" class="home-card text-decoration-none">
+        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+        {
+            <a asp-controller="Usuarios" asp-action="Index" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-people"></i></span>
                 <span class="home-card-title">Usuários</span>
-                <span class="home-card-text">Gerencie os usuários cadastrados no sistema.</span>
+                <span class="home-card-text">Pesquise usuários, aprove documentos e gerencie administradores.</span>
             </a>
-        </div>
-    }
-</div>
-}
+        }
+    </div>
+</section>

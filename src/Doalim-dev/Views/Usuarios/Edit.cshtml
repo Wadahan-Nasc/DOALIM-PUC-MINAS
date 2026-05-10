@@ -43,8 +43,8 @@
                     </div>
                     <div class="col-md-5">
                         <label asp-for="SenhaHash" class="form-label">Nova senha</label>
-                        <input asp-for="SenhaHash" class="form-control" type="password" value="" placeholder="Deixe em branco para manter" autocomplete="new-password" />
-                        <span asp-validation-for="SenhaHash" class="text-danger small"></span>
+                        <input name="SenhaHash" id="SenhaHash" class="form-control" type="password" value="" placeholder="Deixe em branco para manter" autocomplete="new-password" />
+                        <small class="text-muted">Preencha apenas se quiser trocar a senha.</small>
                     </div>
                     <div class="col-md-5">
                         <label asp-for="Telefone" class="form-label"></label>
