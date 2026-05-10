@@ -23,12 +23,12 @@
 | **Caso de Teste** 	| **CT05 – Edição de Perfil** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3 |
 
 | **Caso de Teste** 	| **CT06 – Envio de documentos para verificação** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	|RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3 |
 
 | **Caso de Teste** 	| **CT07 – Visualização de histórico - Beneficiário** 	|
 |:---:	|:---:	|
