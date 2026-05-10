@@ -38,12 +38,12 @@
 | **Caso de Teste** 	| **CT08 – Visualização de histórico - Doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://github.com/user-attachments/assets/0538bcf1-190d-40d6-84e5-9d85a45edefb |
 
 | **Caso de Teste** 	| **CT09 – Cadastro de Produto** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. RF-012 A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://github.com/user-attachments/assets/cde0fe8a-a0d7-4bad-a74c-5d1ffb3c77dd |
 
 | **Caso de Teste** 	| **CT10 – Visualizar Vitrine** 	|
 |:---:	|:---:	|
