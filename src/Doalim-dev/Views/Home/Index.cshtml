@@ -47,7 +47,7 @@
                 }
                 else if (isBeneficiario)
                 {
-                    <a asp-controller="Produtos" asp-action="MinhasReservas" class="btn btn-outline-success btn-lg">
+                    <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-outline-success btn-lg">
                         <i class="bi bi-cart-check"></i>
                         Minhas reservas
                     </a>
@@ -129,7 +129,7 @@
 
         @if (isBeneficiario)
         {
-            <a asp-controller="Produtos" asp-action="MinhasReservas" class="home-card text-decoration-none">
+            <a asp-controller="Reservas" asp-action="MinhasReservas" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-cart-check"></i></span>
                 <span class="home-card-title">Minhas reservas</span>
                 <span class="home-card-text">Acompanhe os alimentos reservados e organize suas retiradas.</span>

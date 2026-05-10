@@ -1,4 +1,4 @@
-﻿@model Doalim_dev.ViewModels.VitrineCompletaViewModel
+@model Doalim_dev.ViewModels.VitrineCompletaViewModel
 
 @{
     ViewData["Title"] = "Alimentos Disponíveis";
@@ -10,33 +10,28 @@
 
 <h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
 
-@*Formulário de Filtros *@
 <form method="get" asp-controller="Produtos" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
     <div class="row g-3 align-items-end">
-
-        @* Busca por nome *@
         <div class="col-md-4">
-            <label class="form-label fw-semibold"> Buscar por nome</label>
+            <label class="form-label fw-semibold">Buscar por nome</label>
             <input type="text"
                    name="NomeBusca"
                    value="@Model.Filtros.NomeBusca"
                    class="form-control"
-                   placeholder="Ex: Arroz, feijão, macarrão..."/>
+                   placeholder="Ex: Arroz, feijão, macarrão..." />
         </div>
 
-        @* Quantidade Mínima *@
         <div class="col-md-3">
             <label class="form-label fw-semibold">Quantidade Mínima</label>
             <input type="number"
                    name="QuantidadeMinima"
                    value="@Model.Filtros.QuantidadeMinima"
                    class="form-control"
-                   placeholder="Ex: 10"/>
+                   placeholder="Ex: 10" />
         </div>
 
-        @* Ordenação por Validade *@
         <div class="col-md-3">
-            <label class="form-label fw-semibold">Ordernar por validade</label>
+            <label class="form-label fw-semibold">Ordenar por validade</label>
             <select name="OrdemValidade" class="form-select">
                 <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">
                     Mais próxima de vencer
@@ -47,16 +42,13 @@
             </select>
         </div>
 
-        @* Botões *@
         <div class="col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-primary w-100">Filtrar</button>
             <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
         </div>
-
     </div>
 </form>
 
-@* Lista de Produtos *@
 @if (!Model.Produtos.Any())
 {
     <div class="alert alert-info">Nenhum alimento encontrado para os filtros aplicados.</div>
@@ -64,10 +56,8 @@
 else
 {
     <div class="container">
-
-        @* Cabeçalho *@
         <div class="row fw-bold border-bottom pb-2 mb-2 text-muted d-none d-md-flex">
-            <div class="col-md-1"></div>              @* foto *@
+            <div class="col-md-1"></div>
             <div class="col-md-2">Alimento</div>
             <div class="col-md-1">Marca</div>
             <div class="col-md-2">Categoria</div>
@@ -75,15 +65,12 @@ else
             <div class="col-md-1 text-center">Qtd.</div>
             <div class="col-md-1 text-center">Validade</div>
             <div class="col-md-1">Doador</div>
-            <div class="col-md-1"></div>              @* botão *@
+            <div class="col-md-1"></div>
         </div>
 
-        @* Linhas *@
         @foreach (var alimento in Model.Produtos)
         {
             <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
-
-                @* Foto miniatura *@
                 <div class="col-md-1 text-center">
                     @if (!string.IsNullOrEmpty(alimento.FotoProduto))
                     {
@@ -132,10 +119,12 @@ else
                 <div class="col-md-1 text-end">
                     @if (podeReservar)
                     {
-                        <form asp-controller="Produtos" asp-action="Reservar" asp-route-id="@alimento.IdProduto" method="post">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-success btn-sm">Reservar</button>
-                        </form>
+                        <a asp-controller="Reservas"
+                           asp-action="Reservar"
+                           asp-route-id="@alimento.IdProduto"
+                           class="btn btn-success btn-sm">
+                            Reservar
+                        </a>
                     }
                     else if (!usuarioLogado)
                     {
@@ -155,7 +144,6 @@ else
                         <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Somente beneficiários</button>
                     }
                 </div>
-
             </div>
         }
     </div>

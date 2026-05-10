@@ -1,0 +1,88 @@
+@model IEnumerable<Doalim_dev.ViewModels.MinhasReservasViewModel>
+
+@{
+    ViewData["Title"] = "Minhas Reservas";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="mb-1">Minhas Reservas</h2>
+        <p class="text-muted mb-0">Alimentos reservados por você aparecem aqui.</p>
+    </div>
+    <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success">
+        <i class="bi bi-shop me-1"></i> Ver vitrine
+    </a>
+</div>
+
+@if (TempData["Sucesso"] != null)
+{
+    <div class="alert alert-success">@TempData["Sucesso"]</div>
+}
+
+@if (TempData["Erro"] != null)
+{
+    <div class="alert alert-danger">@TempData["Erro"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Você ainda não possui reservas.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(item.FotoProduto))
+                    {
+                        <img src="@item.FotoProduto"
+                             class="card-img-top"
+                             alt="@item.NomeProduto"
+                             style="height:180px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center"
+                             style="height:180px; font-size:3rem;">
+                            🍱
+                        </div>
+                    }
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h5 class="card-title mb-0">@item.NomeProduto</h5>
+                            <span class="badge @(item.StatusReserva == "Pendente" ? "bg-warning text-dark" :
+                                                                                                                 item.StatusReserva == "Confirmada" ? "bg-success" :
+                                                                                                                 item.StatusReserva == "Retirada" ? "bg-primary" : "bg-secondary")">
+                                @item.StatusReserva
+                            </span>
+                        </div>
+
+                        <p class="card-text text-muted mb-2">@item.MarcaProduto</p>
+
+                        <dl class="row small mb-0">
+                            <dt class="col-5">Categoria</dt>
+                            <dd class="col-7">@item.Categoria</dd>
+
+                            <dt class="col-5">Quantidade</dt>
+                            <dd class="col-7">@item.QuantidadeReservada @item.UnidadeMedida</dd>
+
+                            <dt class="col-5">Validade</dt>
+                            <dd class="col-7">@item.DataValidade.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-5">Doador</dt>
+                            <dd class="col-7">@item.NomeDoador</dd>
+
+                            <dt class="col-5">Reservado em</dt>
+                            <dd class="col-7">@item.DataReserva.ToString("dd/MM/yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}

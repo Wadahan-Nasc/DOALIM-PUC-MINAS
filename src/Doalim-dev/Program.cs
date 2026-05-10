@@ -25,7 +25,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IReservaService, ReservaService>();
 
 var app = builder.Build();
 

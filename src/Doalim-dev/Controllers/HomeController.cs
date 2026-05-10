@@ -24,7 +24,7 @@ namespace Doalim_dev.Controllers
             ViewBag.AlimentosDisponiveis = await _context.Produtos
                 .Where(p => p.StatusProduto && p.DataValidade > DateTime.UtcNow && p.Quantidade > 0)
                 .SumAsync(p => (int?)p.Quantidade) ?? 0;
-            ViewBag.DoacoesReservadas = await _context.Produtos.CountAsync(p => p.IdBeneficiario != null);
+            ViewBag.DoacoesReservadas = await _context.Reservas.CountAsync();
             ViewBag.TotalDoadores = await _context.Usuarios.CountAsync(u =>
                 u.TipoUsuario == TipoUsuario.DoadorPF || u.TipoUsuario == TipoUsuario.DoadorPJ);
 

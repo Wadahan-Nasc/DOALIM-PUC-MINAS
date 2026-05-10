@@ -11,7 +11,7 @@ namespace Doalim_dev.Models
         public DbSet<Doador> Doadores { get; set; }
         public DbSet<Beneficiario> Beneficiarios { get; set; }
         public DbSet<Administrador> Administradores { get; set; }
-
+        public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Produto> Produtos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +57,20 @@ namespace Doalim_dev.Models
                 .WithMany(dc => dc.Produtos)
                 .HasForeignKey(d => d.IdDoador)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento N:N entre Produto e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Produto)
+                .WithMany()
+                .HasForeignKey(r => r.IdProduto)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento 1:N Beneficiário e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Beneficiario)
+                .WithMany()
+                .HasForeignKey(r => r.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
