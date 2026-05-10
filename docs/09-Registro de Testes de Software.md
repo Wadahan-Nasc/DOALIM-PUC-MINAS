@@ -68,11 +68,7 @@
 | **Caso de Teste** 	| **CT14 – Moderação de Usuários** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-008 - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. |
-|Registro de evidência | 
-
-https://github.com/user-attachments/assets/91decdb8-eb38-4c19-a351-698598bfaf83
-
- |
+|Registro de evidência | https://github.com/user-attachments/assets/91decdb8-eb38-4c19-a351-698598bfaf83 |
 
 | **Caso de Teste** 	| **CT15 – Moderação de Métricas** 	|
 |:---:	|:---:	|
