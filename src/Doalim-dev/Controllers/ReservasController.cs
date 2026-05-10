@@ -20,26 +20,30 @@ namespace Doalim_dev.Controllers
         // GET: /Reservas/Reservar/5
         public async Task<IActionResult> Reservar(int id)
         {
-            var produto = await _context.Produtos.FindAsync(id);
+            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+                return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeReservarAsync(usuarioId))
+            {
+                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
+                return RedirectToAction("Vitrine", "Produtos");
+            }
+
+            var produto = await _context.Produtos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.IdProduto == id);
 
             if (produto == null || !produto.StatusProduto)
                 return NotFound();
 
-            var viewModel = new ReservaViewModel
+            if (produto.IdDoador == usuarioId)
             {
-                IdProduto = produto.IdProduto,
-                NomeProduto = produto.NomeProduto,
-                MarcaProduto = produto.MarcaProduto,
-                Categoria = produto.CategoriaProduto,
-                UnidadeMedida = produto.UnidadeMedida,
-                QuantidadeDisponivel = produto.Quantidade,
-                QuantidadePessoaFisica = produto.QuantidadePessoaFisica,
-                QuantidadePessoaJuridica = produto.QuantidadePessoaJuridica,
-                DataValidade = produto.DataValidade,
-                FotoProduto = produto.FotoProduto
-            };
+                TempData["Erro"] = "Você não pode reservar a própria doação.";
+                return RedirectToAction("Vitrine", "Produtos");
+            }
 
-            return View(viewModel);
+            return View(CriarReservaViewModel(produto));
         }
 
         // POST: /Reservas/Confirmar
@@ -52,31 +56,32 @@ namespace Doalim_dev.Controllers
             if (!int.TryParse(usuarioIdClaim, out var usuarioId))
                 return RedirectToAction("Login", "Auth");
 
-            // 2. Verifica se é um Beneficiario
-            var beneficiario = await _context.Beneficiarios.FindAsync(usuarioId);
-            if (beneficiario == null)
+            if (!await UsuarioPodeReservarAsync(usuarioId))
             {
-                TempData["Erro"] = "Apenas beneficiários podem realizar reservas.";
+                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
             if (!ModelState.IsValid)
-                return View("Reservar", viewModel);
+                return await RetornarViewReservaAsync(viewModel);
 
-            // 3. Busca e valida o produto
             var produto = await _context.Produtos.FindAsync(viewModel.IdProduto);
             if (produto == null || !produto.StatusProduto)
                 return NotFound();
 
-            // 4. Valida quantidade solicitada
+            if (produto.IdDoador == usuarioId)
+            {
+                TempData["Erro"] = "Você não pode reservar a própria doação.";
+                return RedirectToAction("Vitrine", "Produtos");
+            }
+
             if (viewModel.QuantidadeReservada > produto.Quantidade)
             {
                 ModelState.AddModelError("QuantidadeReservada",
                     $"Quantidade indisponível. Máximo permitido: {produto.Quantidade}.");
-                return View("Reservar", viewModel);
+                return await RetornarViewReservaAsync(viewModel);
             }
 
-            // 5. Cria a reserva
             var reserva = new Reserva
             {
                 IdProduto = viewModel.IdProduto,
@@ -86,7 +91,6 @@ namespace Doalim_dev.Controllers
                 DataReserva = DateTime.UtcNow
             };
 
-            // 6. Desconta a quantidade do produto
             produto.Quantidade -= viewModel.QuantidadeReservada;
             if (produto.Quantidade == 0)
                 produto.StatusProduto = false;
@@ -130,6 +134,49 @@ namespace Doalim_dev.Controllers
                 .ToListAsync();
 
             return View(reservas);
+        }
+
+        private async Task<bool> UsuarioPodeReservarAsync(int usuarioId)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+
+            if (usuario == null || usuario.StatusVerificacao != StatusVerificacao.Aprovado)
+                return false;
+
+            return await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuarioId);
+        }
+
+        private async Task<IActionResult> RetornarViewReservaAsync(ReservaViewModel viewModel)
+        {
+            var produto = await _context.Produtos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.IdProduto == viewModel.IdProduto);
+
+            if (produto == null)
+                return NotFound();
+
+            var preenchido = CriarReservaViewModel(produto);
+            preenchido.QuantidadeReservada = viewModel.QuantidadeReservada;
+            return View("Reservar", preenchido);
+        }
+
+        private static ReservaViewModel CriarReservaViewModel(Produto produto)
+        {
+            return new ReservaViewModel
+            {
+                IdProduto = produto.IdProduto,
+                NomeProduto = produto.NomeProduto,
+                MarcaProduto = produto.MarcaProduto,
+                Categoria = produto.CategoriaProduto,
+                UnidadeMedida = produto.UnidadeMedida,
+                QuantidadeDisponivel = produto.Quantidade,
+                QuantidadePessoaFisica = produto.QuantidadePessoaFisica,
+                QuantidadePessoaJuridica = produto.QuantidadePessoaJuridica,
+                DataValidade = produto.DataValidade,
+                FotoProduto = produto.FotoProduto
+            };
         }
     }
 }

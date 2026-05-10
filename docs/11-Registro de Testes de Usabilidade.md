@@ -85,3 +85,27 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Registro de
 
 > **Links Úteis**:
 > - [Ferramentas de Testes de Usabilidade](https://www.usability.gov/how-to-and-tools/resources/templates.html)
+
+
+
+**Cenário 1**: CTU-05 – Solicitar Reserva de Doação
+
+| **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
+| Usuário 1 | 142 | 11 | Sim | Clicou em "Ver Detalhes" antes de encontrar o botão "Solicitar Reserva" | Achei confuso no começo, mas depois consegui. O botão poderia ser mais visível. |
+| Usuário 2 | 38 | 6 | Sim | Nenhum | Fluxo simples e rápido. O modal de quantidade ficou claro. |
+| Usuário 3 | 198 | 15 | Sim | Tentou usar o campo de busca para encontrar o item | Precisei de ajuda para entender onde estava o produto. |
+| Usuário 4 | 45 | 7 | Sim | Nenhum | Processo bem direto. A confirmação de status ficou clara. |
+| Usuário 5 | 52 | 8 | Sim | Inseriu quantidade incorreta no modal | Quase tudo intuitivo. Sugiro validação de quantidade mínima. |
+
+**Cenário 2**: CTU-14 – ONG Buscando Mantimentos
+
+| **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
+| Usuário 1 | — | — | N/A | — | Fora do perfil deste cenário |
+| Usuário 2 | — | — | N/A | — | Fora do perfil deste cenário |
+| Usuário 3 | 310 | 20 | Sim | Não encontrou o filtro de localização | Difícil achar os filtros. Seriam melhor destacados na página. |
+| Usuário 4 | 75 | 9 | Sim | Nenhum | Filtros funcionaram bem. Encontrei o comerciante rapidamente. |
+| Usuário 5 | 88 | 11 | Sim | Filtro retornou vazio na 1ª tentativa | Boa experiência. Sugiro sugestão automática nos filtros. |
+[relatorio_usabilidadeCTU05e14.docx](https://github.com/user-attachments/files/27572029/relatorio_usabilidade.docx)
+

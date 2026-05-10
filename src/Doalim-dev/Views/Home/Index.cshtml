@@ -1,76 +1,155 @@
-﻿@{
+@{
     ViewData["Title"] = "Home";
+
+    var totalUsuarios = ViewBag.TotalUsuarios ?? 0;
+    var alimentosDisponiveis = ViewBag.AlimentosDisponiveis ?? 0;
+    var produtosDisponiveis = ViewBag.ProdutosDisponiveis ?? 0;
+    var doacoesReservadas = ViewBag.DoacoesReservadas ?? 0;
+    var totalDoadores = ViewBag.TotalDoadores ?? 0;
+    var isLogged = User.Identity?.IsAuthenticated == true;
+    var isDoador = User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ");
+    var isBeneficiario = User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ");
+    var isAdmin = User.IsInRole("Admin");
 }
 
-<div class="text-center py-5">
-    <img src="~/images/logo.png" alt="Doalim — Conectando alimentos."
-         class="img-fluid mb-4" style="max-width: 280px;"
-         onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';" />
-    
-    <div id="logoFallback" style="display:none;">
-        <h1 class="fw-bold" style="color: var(--doalim-verde-escuro);">Doalim</h1>
-        <p class="lead text-muted">Conectando alimentos.</p>
+<section class="home-shell">
+    <div class="home-hero home-hero-marketing">
+        <div class="home-hero-copy">
+            <span class="admin-eyebrow">Doalim</span>
+            <h1>Alimentos bons chegando a quem precisa.</h1>
+            <p>
+                Veja doações disponíveis, cadastre alimentos e acompanhe reservas em uma plataforma feita para aproximar doadores e beneficiários.
+            </p>
+
+            <div class="home-hero-actions">
+                <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-success btn-lg">
+                    <i class="bi bi-shop"></i>
+                    Ver vitrine
+                </a>
+
+                @if (!isLogged)
+                {
+                    <a asp-controller="Auth" asp-action="Registro" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-person-plus"></i>
+                        Criar conta
+                    </a>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-warning btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Entrar
+                    </a>
+                }
+                else if (isDoador)
+                {
+                    <a asp-controller="Produtos" asp-action="Create" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-plus-circle"></i>
+                        Cadastrar alimento
+                    </a>
+                }
+                else if (isBeneficiario)
+                {
+                    <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-cart-check"></i>
+                        Minhas reservas
+                    </a>
+                }
+                else if (isAdmin)
+                {
+                    <a asp-controller="Usuarios" asp-action="Index" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-people"></i>
+                        Gerenciar usuários
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="home-hero-panel home-visual-panel" aria-label="Doalim">
+            <div class="home-logo-frame">
+                <img src="~/images/logo.png" alt="Doalim - Conectando alimentos." />
+            </div>
+            <div class="home-impact-list">
+                <div>
+                    <i class="bi bi-basket2"></i>
+                    <span>@alimentosDisponiveis alimento(s) disponíveis para reserva</span>
+                </div>
+                <div>
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>@doacoesReservadas doação(ões) já reservada(s)</span>
+                </div>
+                <div>
+                    <i class="bi bi-people"></i>
+                    <span>@totalUsuarios pessoa(s) conectada(s)</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <div class="mt-4 d-flex justify-content-center gap-3">
-            <a asp-controller="Auth" asp-action="Registro"
-               class="btn btn-success btn-lg px-4">Cadastre-se</a>
-            <a asp-controller="Auth" asp-action="Login"
-               class="btn btn-outline-success btn-lg px-4">Login</a>
+    <div class="home-stats home-impact-stats">
+        <div class="home-stat">
+            <span>Alimentos para reservar</span>
+            <strong>@alimentosDisponiveis</strong>
         </div>
-    }
-    else
-    {
-        <p class="mt-3 text-muted">
-            Bem-vindo(a), <strong>@User.Identity.Name</strong>!
-        </p>
-    }
-</div>
+        <div class="home-stat">
+            <span>Produtos na vitrine</span>
+            <strong>@produtosDisponiveis</strong>
+        </div>
+        <div class="home-stat">
+            <span>Doadores cadastrados</span>
+            <strong>@totalDoadores</strong>
+        </div>
+        <div class="home-stat">
+            <span>Reservas realizadas</span>
+            <strong>@doacoesReservadas</strong>
+        </div>
+    </div>
 
-@if (User.Identity.IsAuthenticated)
-{
-<div class="row g-3 justify-content-center pb-4">
-    <div class="col-md-4">
-        <a asp-controller="Produtos" asp-action="Vitrine" class="home-card text-decoration-none">
-            <span class="home-card-icon"><i class="bi bi-shop"></i></span>
-            <span class="home-card-title">Vitrine</span>
-            <span class="home-card-text">Encontre alimentos disponíveis para doação.</span>
+    <div class="home-highlight">
+        <div>
+            <span class="admin-eyebrow">Vitrine aberta</span>
+            <h2>Qualquer pessoa pode olhar os alimentos disponíveis.</h2>
+            <p>Para reservar, o usuário precisa criar uma conta, enviar a documentação e aguardar aprovação administrativa.</p>
+        </div>
+        <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-success">
+            <i class="bi bi-arrow-right-circle"></i>
+            Explorar agora
         </a>
     </div>
 
-    @if (User.Identity.IsAuthenticated && (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ")))
-    {
-        <div class="col-md-4">
+    <div class="home-actions-grid">
+        <a asp-controller="Produtos" asp-action="Vitrine" class="home-card text-decoration-none">
+            <span class="home-card-icon"><i class="bi bi-shop"></i></span>
+            <span class="home-card-title">Vitrine</span>
+            <span class="home-card-text">Alimentos disponíveis para consulta pública e reserva por beneficiários aprovados.</span>
+        </a>
+
+        <a asp-controller="@(isDoador ? "Produtos" : "Auth")" asp-action="@(isDoador ? "Create" : "Registro")" class="home-card text-decoration-none">
+            <span class="home-card-icon"><i class="bi bi-bag-heart"></i></span>
+            <span class="home-card-title">Quero doar</span>
+            <span class="home-card-text">Cadastre alimentos e ajude a transformar excedentes em apoio real.</span>
+        </a>
+
+        @if (isBeneficiario)
+        {
             <a asp-controller="Reservas" asp-action="MinhasReservas" class="home-card text-decoration-none">
                 <span class="home-card-icon"><i class="bi bi-cart-check"></i></span>
                 <span class="home-card-title">Minhas reservas</span>
-                <span class="home-card-text">Acompanhe os alimentos que você reservou.</span>
+                <span class="home-card-text">Acompanhe os alimentos reservados e organize suas retiradas.</span>
             </a>
-        </div>
-    }
-
-    @if (User.Identity.IsAuthenticated && (User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ")))
-    {
-        <div class="col-md-4">
-            <a asp-controller="Produtos" asp-action="Create" class="home-card text-decoration-none">
-                <span class="home-card-icon"><i class="bi bi-plus-circle"></i></span>
-                <span class="home-card-title">Cadastrar produto</span>
-                <span class="home-card-text">Adicione alimentos para disponibilizar na vitrine.</span>
-            </a>
-        </div>
-    }
-
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-    {
-        <div class="col-md-4">
+        }
+        else if (isAdmin)
+        {
             <a asp-controller="Usuarios" asp-action="Index" class="home-card text-decoration-none">
-                <span class="home-card-icon"><i class="bi bi-people"></i></span>
-                <span class="home-card-title">Usuários</span>
-                <span class="home-card-text">Gerencie os usuários cadastrados no sistema.</span>
+                <span class="home-card-icon"><i class="bi bi-shield-check"></i></span>
+                <span class="home-card-title">Painel administrativo</span>
+                <span class="home-card-text">Aprove cadastros, acompanhe usuários e mantenha a plataforma confiável.</span>
             </a>
-        </div>
-    }
-</div>
-}
+        }
+        else
+        {
+            <a asp-controller="Auth" asp-action="Registro" class="home-card text-decoration-none">
+                <span class="home-card-icon"><i class="bi bi-person-check"></i></span>
+                <span class="home-card-title">Quero reservar</span>
+                <span class="home-card-text">Crie sua conta, envie a documentação e aguarde a aprovação para reservar.</span>
+            </a>
+        }
+    </div>
+</section>

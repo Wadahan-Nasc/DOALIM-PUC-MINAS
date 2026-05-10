@@ -1,4 +1,4 @@
-﻿using Doalim_dev.Models;
+using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -6,38 +6,36 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.IO;
 
 namespace Doalim_dev.Controllers
 {
     public class ProdutosController : Controller
     {
         private readonly AppDbContext _context;
+
         public ProdutosController(AppDbContext context)
         {
             _context = context;
         }
 
-        // LISTAGEM
         public async Task<IActionResult> Index()
         {
             return View(await _context.Produtos.ToListAsync());
         }
 
-        // DETALHES
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
+
             var produto = await _context.Produtos.FirstOrDefaultAsync(m => m.IdProduto == id);
             if (produto == null) return NotFound();
+
             return View(produto);
         }
 
-        // CRIAR (GET)
         [Authorize]
         public IActionResult Create() => View();
 
-        // CRIAR (POST)
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -80,11 +78,9 @@ namespace Doalim_dev.Controllers
 
             if (arquivoFoto != null && arquivoFoto.Length > 0)
             {
-                using (var ms = new MemoryStream())
-                {
-                    await arquivoFoto.CopyToAsync(ms);
-                    produto.FotoProduto = ms.ToArray();
-                }
+                using var ms = new MemoryStream();
+                await arquivoFoto.CopyToAsync(ms);
+                produto.FotoProduto = ms.ToArray();
             }
 
             if (ModelState.IsValid)
@@ -93,19 +89,20 @@ namespace Doalim_dev.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(produto);
         }
 
-        // EDITAR (GET)
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
+
             var produto = await _context.Produtos.FindAsync(id);
             if (produto == null) return NotFound();
+
             return View(produto);
         }
 
-        // EDITAR (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Produto produto, IFormFile arquivoFoto)
@@ -118,11 +115,9 @@ namespace Doalim_dev.Controllers
                 {
                     if (arquivoFoto != null && arquivoFoto.Length > 0)
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            await arquivoFoto.CopyToAsync(ms);
-                            produto.FotoProduto = ms.ToArray();
-                        }
+                        using var ms = new MemoryStream();
+                        await arquivoFoto.CopyToAsync(ms);
+                        produto.FotoProduto = ms.ToArray();
                     }
                     else
                     {
@@ -138,21 +133,23 @@ namespace Doalim_dev.Controllers
                     if (!_context.Produtos.Any(e => e.IdProduto == id)) return NotFound();
                     throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(produto);
         }
 
-        // DELETAR (GET)
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
+
             var produto = await _context.Produtos.FirstOrDefaultAsync(m => m.IdProduto == id);
             if (produto == null) return NotFound();
+
             return View(produto);
         }
 
-        // DELETAR (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -163,13 +160,33 @@ namespace Doalim_dev.Controllers
                 _context.Produtos.Remove(produto);
                 await _context.SaveChangesAsync();
             }
+
             return RedirectToAction(nameof(Index));
         }
 
-        // VITRINE
-        [Authorize]
         public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
         {
+            var usuarioLogado = User.Identity?.IsAuthenticated == true;
+            var usuarioBeneficiario = UsuarioEhBeneficiario();
+            var usuarioAprovado = false;
+
+            if (usuarioLogado)
+            {
+                var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    usuarioAprovado = await _context.Usuarios
+                        .AsNoTracking()
+                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                }
+            }
+
+            ViewBag.UsuarioLogado = usuarioLogado;
+            ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
+            ViewBag.UsuarioAprovado = usuarioAprovado;
+            ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+
             var query = _context.Produtos
                 .Include(a => a.Doador)
                     .ThenInclude(d => d.Usuario)
@@ -197,9 +214,7 @@ namespace Doalim_dev.Controllers
                     Categoria = a.CategoriaProduto ?? "",
                     MarcaProduto = a.MarcaProduto ?? "",
                     TipoArmazenamento = a.TipoArmazenamento ?? "",
-                    FotoProduto = a.FotoProduto == null || a.FotoProduto.Length == 0
-                        ? ""
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(a.FotoProduto)}",
+                    FotoProduto = ObterFotoProdutoDataUrl(a.FotoProduto),
                     QuantidadeDisponivel = a.Quantidade,
                     NomeDoador = a.Doador.Usuario.Nome
                 })
@@ -212,6 +227,37 @@ namespace Doalim_dev.Controllers
             };
 
             return View(viewModel);
+        }
+
+        private bool UsuarioEhBeneficiario()
+        {
+            return User.IsInRole(TipoUsuario.BeneficiarioPF.ToString())
+                || User.IsInRole(TipoUsuario.BeneficiarioPJ.ToString());
+        }
+
+        private static string ObterFotoProdutoDataUrl(byte[]? fotoProduto)
+        {
+            if (fotoProduto == null || fotoProduto.Length == 0)
+                return string.Empty;
+
+            var mimeType = "image/jpeg";
+
+            if (fotoProduto.Length >= 8
+                && fotoProduto[0] == 0x89
+                && fotoProduto[1] == 0x50
+                && fotoProduto[2] == 0x4E
+                && fotoProduto[3] == 0x47)
+            {
+                mimeType = "image/png";
+            }
+            else if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x3C
+                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
+            {
+                mimeType = "image/svg+xml";
+            }
+
+            return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
         }
     }
 }
