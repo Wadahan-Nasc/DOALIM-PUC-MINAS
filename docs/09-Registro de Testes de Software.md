@@ -31,3 +31,11 @@ Por fim, apresente e/ou proponha as melhorias a partir dos testes realizados, de
 
 > **Links Úteis**:
 > - [Ferramentas de Test para Java Script](https://geekflare.com/javascript-unit-testing/)
+
+
+
+
+| **Caso de Teste** 	| **CT07 e CT11 – Solicitação e Reserva** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-006 - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento |
+|Registro de evidência | [![CT07e11](https://img.youtube.com/vi/opH8s5UxpqU.jpg)](https://youtu.be/opH8s5UxpqU) |
