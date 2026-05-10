@@ -302,13 +302,14 @@ namespace Doalim_dev.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MeuPerfil(Usuario model)
+        public async Task<IActionResult> MeuPerfil(Usuario model, IFormFile? arquivoComprovacao, IFormFile? arquivoFotoPerfil)
         {
             if (!User.Identity!.IsAuthenticated)
                 return RedirectToAction("Login", "Auth");
 
             ModelState.Remove("SenhaHash");
             ModelState.Remove("Arquivocomprovacao");
+            ModelState.Remove("FotoPerfil");
             ModelState.Remove("TermosAceitados");
 
             if (!ModelState.IsValid) return View(model);
@@ -321,12 +322,77 @@ namespace Doalim_dev.Controllers
 
             if (usuario == null) return NotFound();
 
+            // Upload da foto de perfil
+            if (arquivoFotoPerfil != null && arquivoFotoPerfil.Length > 0)
+            {
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
+                var extensao = Path.GetExtension(arquivoFotoPerfil.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de foto inválido. Use PNG, JPG ou JPEG.";
+                    return View(model);
+                }
+
+                const long tamanhoMaximo = 2 * 1024 * 1024; // 2MB
+                if (arquivoFotoPerfil.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "A foto excede o tamanho máximo permitido de 2MB.";
+                    return View(model);
+                }
+
+                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "fotos-perfil");
+                Directory.CreateDirectory(pastaUpload);
+
+                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
+                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
+
+                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                {
+                    await arquivoFotoPerfil.CopyToAsync(stream);
+                }
+
+                usuario.FotoPerfil = $"/uploads/fotos-perfil/{nomeArquivo}";
+            }
+
+            // Upload do arquivo de comprovação
+            if (arquivoComprovacao != null && arquivoComprovacao.Length > 0)
+            {
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
+                var extensao = Path.GetExtension(arquivoComprovacao.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de arquivo inválido. Use PNG, JPG, JPEG ou PDF.";
+                    return View(model);
+                }
+
+                const long tamanhoMaximo = 5 * 1024 * 1024; // 5MB
+                if (arquivoComprovacao.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "O arquivo excede o tamanho máximo permitido de 5MB.";
+                    return View(model);
+                }
+
+                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "comprovacoes");
+                Directory.CreateDirectory(pastaUpload);
+
+                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
+                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
+
+                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                {
+                    await arquivoComprovacao.CopyToAsync(stream);
+                }
+
+                usuario.Arquivocomprovacao = $"/uploads/comprovacoes/{nomeArquivo}";
+            }
+
             usuario.Nome = model.Nome;
             usuario.Email = model.Email;
             usuario.Telefone = model.Telefone;
             usuario.Endereco = model.Endereco;
-            usuario.FotoPerfil = model.FotoPerfil;
-            // Cpf e Cnpj não são atualizados — campos somente leitura
+            // FotoPerfil, Cpf e Cnpj são tratados separadamente acima
 
             _context.Update(usuario);
             await _context.SaveChangesAsync();
