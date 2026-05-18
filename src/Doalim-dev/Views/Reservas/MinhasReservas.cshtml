@@ -71,7 +71,7 @@ else
                             <dd class="col-7">@item.QuantidadeReservada @item.UnidadeMedida</dd>
 
                             <dt class="col-5">Validade</dt>
-                            <dd class="col-7">@item.DataValidade.ToString("dd/MM/yyyy")</dd>
+                            <dd class="col-7">@item.DataValidade?.ToString("dd/MM/yyyy")</dd>
 
                             <dt class="col-5">Doador</dt>
                             <dd class="col-7">@item.NomeDoador</dd>

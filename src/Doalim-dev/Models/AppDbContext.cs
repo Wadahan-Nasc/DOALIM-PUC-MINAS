@@ -13,6 +13,7 @@ namespace Doalim_dev.Models
         public DbSet<Administrador> Administradores { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Produto> Produtos { get; set; }
+        public DbSet<Lote> Lotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +72,13 @@ namespace Doalim_dev.Models
                 .WithMany()
                 .HasForeignKey(r => r.IdBeneficiario)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento 1:N entre Produto e Lote
+            modelBuilder.Entity<Lote>()
+                .HasOne(l => l.Produto)
+                .WithMany(p => p.Lotes)
+                .HasForeignKey(l => l.IdProduto)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

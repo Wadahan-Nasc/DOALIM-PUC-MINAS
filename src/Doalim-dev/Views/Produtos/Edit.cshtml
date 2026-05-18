@@ -1,93 +1,360 @@
 ﻿@model Doalim_dev.Models.Produto
 
-<div class="container mt-4">
-    <h1>Editar Produto</h1>
+<style>
+    .btn-doalim {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+    }
+
+        .btn-doalim:hover {
+            background-color: #43A047;
+            color: white;
+        }
+
+    .border-doalim {
+        border-top: 5px solid #4CAF50 !important;
+    }
+
+    .card-doalim {
+        border-radius: 12px;
+    }
+
+    .bg-doalim-orange {
+        background-color: #FF9800;
+        color: white;
+    }
+
+    .border-warning-doalim {
+        border-left: 5px solid #FF9800 !important;
+    }
+
+    .bg-alerta-lote {
+        background-color: #fff4f4 !important;
+        border-color: #ffcdd2 !important;
+    }
+
+    .bg-lote-inativo {
+        background-color: #f1f3f5 !important;
+        opacity: 0.85;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-success fw-bold mb-0">Gerenciar Alimento</h2>
+            <small class="text-muted">Editando informações gerais, estoque e controle de lotes.</small>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill fw-bold">Voltar para o Painel de Produtos</a>
+    </div>
     <hr />
-    <form asp-action="Edit" enctype="multipart/form-data">
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
         <input type="hidden" asp-for="IdProduto" />
+        <input type="hidden" asp-for="IdDoador" />
         <input type="hidden" asp-for="DataCadastro" />
 
-        <div class="row">
-            <div class="col-md-4 text-center border-end">
-                <div class="p-3 bg-light rounded shadow-sm mb-3">
-                    <label class="fw-bold mb-2">Imagem Atual</label><br />
-                    @if (Model.FotoProduto != null)
-                    {
-                        <img id="imgPreview" src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.FotoProduto))" class="img-thumbnail mb-3" style="max-height: 250px; width: 100%; object-fit: contain;" />
-                    }
-                    else
-                    {
-                        <img id="imgPreview" src="~/images/sem-foto.png" class="img-thumbnail mb-3" style="max-height: 250px; width: 100%; object-fit: contain;" />
-                    }
-                    <label class="form-label text-muted small">Trocar imagem:</label>
-                    <input type="file" name="arquivoFoto" id="fotoInput" class="form-control" accept="image/*" />
+        <div id="alertaProdutoInativo" class="alert alert-danger border-danger shadow @(Model.StatusProduto ? "d-none" : "") mb-4" role="alert">
+            <h4 class="fw-bold mb-1 text-danger">⚠️ Produto Inativo!</h4>
+            <span class="text-dark">Este produto está inativo no momento. <strong>Ele não aparece na contagem do estoque e não está visível na vitrine para doação.</strong> Ative ele para restaurá-lo.</span>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-6 order-2 order-lg-1">
+                <div class="card card-doalim shadow-sm border-0 border-doalim h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-success mb-4 border-bottom pb-2">Informações Básicas</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="NomeProduto" class="form-label fw-semibold"></label>
+                                <input asp-for="NomeProduto" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CodigoBarras" class="form-label fw-semibold"></label>
+                                <input asp-for="CodigoBarras" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MarcaProduto" class="form-label fw-semibold"></label>
+                                <input asp-for="MarcaProduto" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoriaProduto" class="form-label fw-semibold"></label>
+                                <input asp-for="CategoriaProduto" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TipoArmazenamento" class="form-label fw-semibold"></label>
+                                <input asp-for="TipoArmazenamento" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="QuantidadePessoaFisica" class="form-label fw-semibold"></label>
+                                <input asp-for="QuantidadePessoaFisica" type="number" min="0" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="QuantidadePessoaJuridica" class="form-label fw-semibold"></label>
+                                <input asp-for="QuantidadePessoaJuridica" type="number" min="0" class="form-control bg-white" />
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="UnidadeMedida" class="form-label fw-semibold"></label>
+                                <input asp-for="UnidadeMedida" class="form-control bg-white" />
+                            </div>
+
+                            <div class="col-md-12 mt-2 p-3 bg-light rounded border border-2">
+                                <div class="form-check form-switch fs-5">
+                                    <input asp-for="StatusProduto" class="form-check-input border-success" id="switchStatusProduto" />
+                                    <label asp-for="StatusProduto" class="form-check-label fs-6 mt-1 ms-2 fw-bold text-dark">Status do Produto</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-8">
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                        <label asp-for="NomeProduto" class="form-label"></label>
-                        <input asp-for="NomeProduto" class="form-control" />
-                        <span asp-validation-for="NomeProduto" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CodigoBarras" class="form-label"></label>
-                        <input asp-for="CodigoBarras" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="MarcaProduto" class="form-label"></label>
-                        <input asp-for="MarcaProduto" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CategoriaProduto" class="form-label"></label>
-                        <input asp-for="CategoriaProduto" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="DataValidade" class="form-label"></label>
-                        <input asp-for="DataValidade" type="date" class="form-control" />
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="Quantidade" class="form-label"></label>
-                        <input asp-for="Quantidade" class="form-control" />
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="UnidadeMedida" class="form-label"></label>
-                        <input asp-for="UnidadeMedida" class="form-control" />
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="TipoArmazenamento" class="form-label"></label>
-                        <input asp-for="TipoArmazenamento" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="QuantidadePessoaFisica" class="form-label"></label>
-                        <input asp-for="QuantidadePessoaFisica" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="QuantidadePessoaJuridica" class="form-label"></label>
-                        <input asp-for="QuantidadePessoaJuridica" class="form-control" />
-                    </div>
-                    <div class="col-md-12 mb-3 form-check ms-3">
-                        <input asp-for="StatusProduto" class="form-check-input" />
-                        <label asp-for="StatusProduto" class="form-check-label"></label>
+            <div class="col-lg-6 order-1 order-lg-2 d-flex flex-column gap-4">
+
+                <div class="card card-doalim shadow-sm border-0 border-doalim flex-grow-1">
+                    <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                        <h5 class="fw-bold text-success mb-4 border-bottom pb-2 w-100 text-start">Imagem do Prdouto</h5>
+                        <div class="w-100 text-center mb-3 p-3 bg-light rounded d-flex align-items-center justify-content-center" style="border: 2px dashed #4CAF50; min-height: 320px;">
+                            @if (Model.FotoProduto != null && Model.FotoProduto.Length > 0)
+                            {
+                                <img id="imgPreview" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.FotoProduto)" class="img-fluid rounded shadow-sm" style="max-height: 340px; width: 100%; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <img id="imgPreview" src="~/images/sem-foto.png" class="img-fluid rounded shadow-sm" style="max-height: 340px; width: 100%; object-fit: contain;" />
+                            }
+                        </div>
+                        <div class="w-100 d-grid mt-auto">
+                            <label for="fotoInput" class="btn btn-doalim btn-lg fw-bold py-2 shadow-sm rounded-pill">
+                                Alterar Imagem do Produto
+                            </label>
+                            <input type="file" name="arquivoFoto" id="fotoInput" class="d-none" accept="image/*" />
+                        </div>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg">Salvar Alterações</button>
-                    <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+
+                <div class="card card-doalim shadow-sm border-0 border-warning-doalim bg-light">
+                    <div class="card-body d-flex justify-content-between align-items-center p-4">
+                        <div>
+                            <h5 class="text-warning-emphasis fw-bold mb-1">⚠️ Atenção</h5>
+                            <small class="text-muted">A exclusão removerá permanentemente este produto e todos os lotes a ele vinculados.</small>
+                        </div>
+                        <button type="button" class="btn btn-danger fw-bold px-4 shadow-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#modalExcluirProduto">
+                            Excluir Registro
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </form>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card card-doalim shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center p-4">
+                        <h5 class="mb-0 fw-bold text-success">Lotes Vinculados</h5>
+                        <button type="button" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3" id="btnAddLote">
+                            + Adicionar Novo Lote
+                        </button>
+                    </div>
+
+                    <div class="card-body bg-light rounded-bottom p-4" id="lotesContainer">
+
+                        <div id="containerExclusoes"></div>
+
+                        @if (Model.Lotes != null && Model.Lotes.Any())
+                        {
+                            @foreach (var lote in Model.Lotes)
+                            {
+                                var diasParaVencer = (lote.DataValidade.Date - DateTime.Today).Days;
+                                var temAlerta = diasParaVencer <= 1;
+                                var textoAlerta = diasParaVencer < 0 ? "❌ Vencido" : (diasParaVencer == 0 ? "⚠️ Vence HOJE" : (diasParaVencer == 1 ? "⚠️ Vence AMANHÃ" : ""));
+
+                                var classeFundoLote = "border-secondary-subtle";
+                                if (!lote.StatusLote)
+                                {
+                                    classeFundoLote = "bg-lote-inativo border-dark";
+                                }
+                                else if (temAlerta)
+                                {
+                                    classeFundoLote = "bg-alerta-lote";
+                                }
+
+                                var corInputData = (temAlerta && lote.StatusLote) ? "text-danger fw-bold" : "";
+                                var corTextoSelect = lote.StatusLote ? "text-success" : "text-danger";
+
+                                <div class="row lote-item align-items-end mb-3 pb-3 border-bottom @classeFundoLote p-2 rounded">
+
+                                    <input type="hidden" name="IdLote" value="@lote.IdLote" />
+
+                                    <div class="col-md-3 mb-2 mb-md-0">
+                                        <label class="form-label fw-semibold small">Número do Lote</label>
+                                        <input type="text" name="NumeroLote" value="@lote.NumeroLote" class="form-control bg-white" required />
+                                    </div>
+                                    <div class="col-md-3 mb-2 mb-md-0">
+                                        <label class="form-label fw-semibold small d-flex justify-content-between">
+                                            Validade @if(temAlerta && lote.StatusLote) {
+                                            <span class="text-danger fw-bold ms-2">@textoAlerta</span>
+                                        }
+                                    </label>
+                                    <input type="date" name="DataValidade" value="@lote.DataValidade.ToString("yyyy-MM-dd")" class="form-control bg-white @corInputData" required />
+                                </div>
+                                <div class="col-md-2 mb-2 mb-md-0">
+                                    <label class="form-label fw-semibold small">Quantidade</label>
+                                    <input type="number" name="Quantidade" value="@lote.Quantidade" min="1" class="form-control bg-white" required />
+                                </div>
+
+                                <div class="col-md-2 mb-2 mb-md-0">
+                                    <label class="form-label fw-semibold small">Status Lote</label>
+                                    <select name="StatusLote" class="form-select bg-white fw-bold @corTextoSelect" onchange="mudarCorStatusLote(this)">
+                                        <!option value="true" @(lote.StatusLote ? "selected" : "")>✅ Ativo</!option>
+                                        <!option value="false" @(!lote.StatusLote ? "selected" : "")>❌ Inativo</!option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 text-md-end">
+                                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill" onclick="marcarLoteParaRemocao(this, @lote.IdLote)">
+                                        Remover
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4 mb-5">
+        <div class="col-12 text-end">
+            <button type="submit" class="btn btn-doalim btn-lg px-5 fw-bold shadow rounded-pill">
+                Salvar Alterações
+            </button>
+        </div>
+    </div>
+</form>
+</div>
+
+<div class="modal fade" id="modalExcluirProduto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-doalim-orange text-white py-3">
+                <h5 class="modal-title fw-bold">⚠️ Atenção: Confimarção da Exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <p class="text-dark fw-medium fs-5 mb-3 text-center">Você está prestes a excluir o produto: <br /><strong class="text-danger fs-4">@Model.NomeProduto</strong></p>
+                <div class="alert alert-warning p-3 mb-4" style="font-size: 14px;">
+                    <strong class="d-block mb-1">Ação Irreversível!</strong>
+                    Ao confirmar, este registro e todos os lotes serão excluídos sem possibilidade de recuperação.
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input border-danger" type="checkbox" id="checkConhecimento" onchange="verificarConsentimentos()">
+                    <label class="form-check-label text-dark fw-semibold small" for="checkConhecimento">Declaro ter total conhecimento de que esta ação apagará o produto.</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input border-danger" type="checkbox" id="checkConfirmacao" onchange="verificarConsentimentos()">
+                    <label class="form-check-label text-dark fw-semibold small" for="checkConfirmacao">Confirmo que desejo prosseguir com a exclusão deste registro.</label>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light border-top d-flex justify-content-between py-3">
+                <button type="button" class="btn btn-secondary fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+
+                <form asp-action="Delete" asp-route-id="@Model.IdProduto" method="post">
+                    <button type="submit" id="btnDestruirProduto" class="btn btn-danger fw-bold px-4 rounded-pill" disabled>Sim, Apagar Agora</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        document.getElementById('fotoInput').onchange = evt => {
-            const [file] = document.getElementById('fotoInput').files
-            if (file) {
-                document.getElementById('imgPreview').src = URL.createObjectURL(file)
+        document.getElementById('fotoInput').addEventListener('change', function(evt) {
+            const [file] = evt.target.files;
+            if (file) document.getElementById('imgPreview').src = URL.createObjectURL(file);
+        });
+
+        const switchProduto = document.getElementById('switchStatusProduto');
+        const alertaProduto = document.getElementById('alertaProdutoInativo');
+        switchProduto.addEventListener('change', function() {
+            if (!this.checked) alertaProduto.classList.remove('d-none');
+            else alertaProduto.classList.add('d-none');
+        });
+
+        function mudarCorStatusLote(selectElement) {
+            if(selectElement.value === "true") {
+                selectElement.classList.add('text-success');
+                selectElement.classList.remove('text-danger');
+            } else {
+                selectElement.classList.add('text-danger');
+                selectElement.classList.remove('text-success');
             }
+        }
+
+        function marcarLoteParaRemocao(botao, idLote) {
+            if (confirm("Deseja remover este lote específico? Ele será apagado ao salvar.")) {
+
+                const container = document.getElementById('containerExclusoes');
+                container.insertAdjacentHTML('beforeend', `<input type="hidden" name="LotesExcluidos" value="${idLote}" />`);
+
+
+                const linhaLote = botao.closest('.lote-item');
+
+                linhaLote.style.display = 'none';
+
+                linhaLote.querySelectorAll('input, select').forEach(i => i.disabled = true);
+            }
+        }
+
+        document.getElementById('btnAddLote').addEventListener('click', function() {
+            const container = document.getElementById('lotesContainer');
+
+            const loteHtml = `
+                <div class="row lote-item align-items-end mb-3 pb-3 border-bottom border-secondary-subtle p-2 rounded">
+                    <input type="hidden" name="IdLote" value="0" />
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <label class="form-label fw-semibold small">Número do Lote</label>
+                        <input type="text" name="NumeroLote" class="form-control bg-white border-success-subtle" required />
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <label class="form-label fw-semibold small">Validade</label>
+                        <input type="date" name="DataValidade" class="form-control bg-white border-success-subtle" required />
+                    </div>
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <label class="form-label fw-semibold small">Quantidade</label>
+                        <input type="number" name="Quantidade" min="1" class="form-control bg-white border-success-subtle" required />
+                    </div>
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <label class="form-label fw-semibold small">Status Lote</label>
+                        <select name="StatusLote" class="form-select bg-white border-success-subtle fw-bold text-success" onchange="mudarCorStatusLote(this)">
+                            <option value="true" selected>✅ Ativo</option>
+                            <option value="false">❌ Inativo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-md-end">
+                        <button type="button" class="btn btn-outline-danger w-100 rounded-pill" onclick="removerLoteNovo(this)">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', loteHtml);
+        });
+
+        function removerLoteNovo(botao) { botao.closest('.lote-item').remove(); }
+
+        function verificarConsentimentos() {
+            const c1 = document.getElementById('checkConhecimento').checked;
+            const c2 = document.getElementById('checkConfirmacao').checked;
+
+            document.getElementById('btnDestruirProduto').disabled = !(c1 && c2);
         }
     </script>
 }

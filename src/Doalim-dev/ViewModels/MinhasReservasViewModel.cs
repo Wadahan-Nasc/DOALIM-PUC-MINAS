@@ -12,7 +12,7 @@
         public string MarcaProduto { get; set; }
         public string Categoria { get; set; }
         public string UnidadeMedida { get; set; }
-        public DateTime DataValidade { get; set; }
+        public DateTime? DataValidade { get; set; }
         public string? FotoProduto { get; set; } // Base64 convertido no controller
 
         // Dados do doador

@@ -18,15 +18,27 @@ namespace Doalim_dev.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var agora = DateTime.UtcNow;
+
             ViewBag.TotalUsuarios = await _context.Usuarios.CountAsync();
+
+            // Produtos que possuem pelo menos um lote ativo (validade futura e qtd > 0)
             ViewBag.ProdutosDisponiveis = await _context.Produtos
-                .CountAsync(p => p.StatusProduto && p.DataValidade > DateTime.UtcNow && p.Quantidade > 0);
+                .CountAsync(p => p.StatusProduto
+                    && p.Lotes.Any(l => l.DataValidade > agora && l.Quantidade > 0));
+
+            // Soma de todas as quantidades dos lotes ativos
             ViewBag.AlimentosDisponiveis = await _context.Produtos
-                .Where(p => p.StatusProduto && p.DataValidade > DateTime.UtcNow && p.Quantidade > 0)
-                .SumAsync(p => (int?)p.Quantidade) ?? 0;
+                .Where(p => p.StatusProduto)
+                .SelectMany(p => p.Lotes)
+                .Where(l => l.DataValidade > agora && l.Quantidade > 0)
+                .SumAsync(l => (int?)l.Quantidade) ?? 0;
+
             ViewBag.DoacoesReservadas = await _context.Reservas.CountAsync();
-            ViewBag.TotalDoadores = await _context.Usuarios.CountAsync(u =>
-                u.TipoUsuario == TipoUsuario.DoadorPF || u.TipoUsuario == TipoUsuario.DoadorPJ);
+
+            ViewBag.TotalDoadores = await _context.Usuarios
+                .CountAsync(u => u.TipoUsuario == TipoUsuario.DoadorPF
+                              || u.TipoUsuario == TipoUsuario.DoadorPJ);
 
             return View();
         }

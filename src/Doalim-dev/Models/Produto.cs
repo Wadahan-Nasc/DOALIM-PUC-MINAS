@@ -26,21 +26,12 @@ namespace Doalim_dev.Models
         [Display(Name = "Categoria")]
         public string CategoriaProduto { get; set; }
 
-        [Required(ErrorMessage = "A quantidade é obrigatória.")]
-        [Display(Name = "Quantidade disponível")]
-        public int Quantidade { get; set; }
-
         [Display(Name = "Tipo de Armazenamento")]
         public string TipoArmazenamento { get; set; }
 
         [Required(ErrorMessage = "A unidade de medida é obrigatória.")]
         [Display(Name = "Unidade de Medida")]
         public string UnidadeMedida { get; set; }
-
-        [Required(ErrorMessage = "A data de validade é obrigatória.")]
-        [DataType(DataType.Date)]
-        [Display(Name = "Data de Validade")]
-        public DateTime DataValidade { get; set; }
 
         [Display(Name = "Foto do Produto")]
         public byte[]? FotoProduto { get; set; }
@@ -59,8 +50,10 @@ namespace Doalim_dev.Models
 
         [Required]
         public int IdDoador { get; set; }
-
+        
         [ForeignKey(nameof(IdDoador))]
         public Doador Doador { get; set; }
+
+        public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
     }
 }

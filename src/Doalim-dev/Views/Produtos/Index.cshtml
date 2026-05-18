@@ -1,44 +1,212 @@
 ﻿@model IEnumerable<Doalim_dev.Models.Produto>
 
-<div class="container mt-4">
-    <h1>Lista de Produtos</h1>
-    <p><a asp-action="Create" class="btn btn-primary">Cadastrar Novo</a></p>
-    <table class="table table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Foto</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Qtd</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @if (item.FotoProduto != null)
+<style>
+    .btn-doalim {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+    }
+
+        .btn-doalim:hover {
+            background-color: #43A047;
+            color: white;
+        }
+
+    .text-doalim-green {
+        color: #2E7D32;
+    }
+
+    .bg-doalim-light {
+        background-color: #f8fdf8;
+    }
+
+    .card-doalim {
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .produto-inativo td {
+        background-color: #f8f9fa !important;
+        opacity: 0.6;
+        transition: 0.3s;
+    }
+
+    .produto-inativo:hover td {
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    @if (TempData["ErroSeguranca"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-danger shadow-sm mb-4" role="alert">
+            <h5 class="fw-bold mb-1">❌ Operação Bloqueada</h5>
+            <span>@TempData["ErroSeguranca"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-doalim-green fw-bold mb-1">Painel de Produtos</h2>
+            <p class="text-muted mb-0">Gerencie o estoque, lotes e alertas de validade dos alimentos.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-doalim btn-lg fw-bold shadow-sm px-4">
+            + Cadastrar Produto
+        </a>
+    </div>
+
+    <div class="card card-doalim shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="mb-0 text-secondary fw-bold">🔎 Busca Avançada</h5>
+        </div>
+        <div class="card-body bg-doalim-light rounded-bottom">
+            <form asp-action="Index" method="get">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Descrição do Produto</label>
+                        <input type="text" name="busca" value="@ViewBag.Busca" class="form-control bg-white border-success-subtle" placeholder="Ex: Arroz, Feijão..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Categoria</label>
+                        <input type="text" name="categoria" value="@ViewBag.Categoria" class="form-control bg-white border-success-subtle" placeholder="Ex: Grãos..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Marca</label>
+                        <input type="text" name="marca" value="@ViewBag.Marca" class="form-control bg-white border-success-subtle" placeholder="Ex: Camil..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Status do Produto</label>
+                        <select name="statusFiltro" class="form-select bg-white border-success-subtle fw-bold text-dark">
+                            <!option value="ativos" @(ViewBag.StatusFiltro == "ativos" ? "selected" : "")>✅ Apenas Ativos (Padrão)</!option>
+                            <!option value="inativos" @(ViewBag.StatusFiltro == "inativos" ? "selected" : "")>❌ Apenas Inativos</!option>
+                            <!option value="todos" @(ViewBag.StatusFiltro == "todos" ? "selected" : "")>Todos os Produtos</!option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Número do Lote</label>
+                        <input type="text" name="numeroLote" value="@ViewBag.NumeroLote" class="form-control bg-white border-success-subtle" placeholder="Ex: LT-100" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Período Inicial (Vencimento)</label>
+                        <input type="date" name="dataInicio" value="@ViewBag.DataInicio" class="form-control bg-white border-success-subtle" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small text-muted">Período Final (Vencimento)</label>
+                        <input type="date" name="dataFim" value="@ViewBag.DataFim" class="form-control bg-white border-success-subtle" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center pt-4">
+                        <div class="form-check form-switch fs-6">
+                            <input class="form-check-input border-danger" type="checkbox" id="apenasAlertas" name="apenasAlertas" value="true" checked="@(ViewBag.ApenasAlertas == true ? "checked" : null)">
+                            <label class="form-check-label fw-bold text-danger" for="apenasAlertas">⚠️ Alerta de Vencimento</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-end mt-2 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 me-2">Limpar Filtros</a>
+                        <button type="submit" class="btn btn-doalim fw-bold px-5">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card card-doalim shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #4CAF50; color: white;">
+                    <tr>
+                        <th scope="col" style="width: 80px;" class="ps-4">Foto</th>
+                        <th scope="col">Nome do Produto</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col">Categoria</th>
+                        <th scope="col">Marca</th>
+                        <th scope="col" class="text-center">U.M.</th>
+                        <th scope="col" class="text-center" title="Soma apenas lotes ativos">Qtd. Disponível</th>
+                        <th scope="col" class="text-center pe-4" style="width: 140px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <p class="fs-5 mb-1">Nenhum produto encontrado.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
                         {
-                            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(item.FotoProduto))" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />
+                            var qtdTotalAtiva = 0;
+                            if (item.StatusProduto && item.Lotes != null)
+                            {
+                                qtdTotalAtiva = item.Lotes.Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today).Sum(l => l.Quantidade);
+                            }
+
+                            var possuiAlertaCritico = item.Lotes != null && item.Lotes.Any(l => l.StatusLote && (l.DataValidade.Date - DateTime.Today).Days <= 1);
+
+                            var classeLinha = item.StatusProduto ? "" : "produto-inativo";
+
+                            <tr class="@classeLinha">
+
+                                <td class="ps-4">
+                                    @if (item.FotoProduto != null && item.FotoProduto.Length > 0)
+                                    {
+                                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(item.FotoProduto)" class="img-fluid rounded border shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="Foto" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-white rounded border d-flex align-items-center justify-content-center text-muted fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 10px;">
+                                            Sem Foto Cadastrada
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    <span class="fw-bold text-dark fs-6 d-block">@item.NomeProduto</span>
+                                    @if (item.StatusProduto && possuiAlertaCritico)
+                                    {
+                                        <span class="badge bg-danger mt-1 text-white" title="Lote Ativo vencendo em 1 dia ou menos!">⚠️ Lote em Atenção</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    @if (item.StatusProduto)
+                                    {
+                                        <span class="badge bg-success shadow-sm">✅ Ativo</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-secondary shadow-sm">❌ Inativo</span>
+                                    }
+                                </td>
+
+                                <td><span class="badge bg-light text-success border border-success-subtle px-2">@item.CategoriaProduto</span></td>
+                                <td class="text-muted">@item.MarcaProduto</td>
+                                <td class="text-center fw-semibold">@item.UnidadeMedida</td>
+
+                                <td class="text-center">
+                                    <span class="fs-6 fw-bold @(qtdTotalAtiva == 0 ? "text-danger" : "text-doalim-green")">
+                                        @qtdTotalAtiva
+                                    </span>
+                                </td>
+
+                                <td class="text-center pe-4">
+                                    <a asp-action="Edit" asp-route-id="@item.IdProduto" class="btn btn-sm @(item.StatusProduto ? "btn-doalim" : "btn-secondary") fw-bold rounded-pill shadow-sm w-100">
+                                        ⚙️ Gerenciar
+                                    </a>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <small class="text-muted">Sem foto</small>
-                        }
-                    </td>
-                    <td>@item.NomeProduto</td>
-                    <td>@item.CategoriaProduto</td>
-                    <td>@item.Quantidade @item.UnidadeMedida</td>
-                    <td>@(item.StatusProduto ? "Ativo" : "Inativo")</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.IdProduto" class="btn btn-sm btn-warning">Editar</a>
-                        <a asp-action="Details" asp-route-id="@item.IdProduto" class="btn btn-sm btn-info">Detalhes</a>
-                        <a asp-action="Delete" asp-route-id="@item.IdProduto" class="btn btn-sm btn-danger">Excluir</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
