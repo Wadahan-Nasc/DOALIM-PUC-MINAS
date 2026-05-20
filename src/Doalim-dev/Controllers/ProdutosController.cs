@@ -233,8 +233,6 @@ namespace Doalim_dev.Controllers
 
             var hoje = DateTime.Today;
             var query = _context.Produtos
-                .Include(p => p.Doador)
-                    .ThenInclude(d => d.Usuario)
                 .Include(p => p.Lotes)
                 .Where(p => p.StatusProduto
                     && p.Lotes.Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0));
@@ -243,10 +241,17 @@ namespace Doalim_dev.Controllers
                 query = query.Where(p => p.NomeProduto.Contains(filtros.NomeBusca));
 
             var produtos = await query.ToListAsync();
+            var idsDoadores = produtos.Select(p => p.IdDoador).Distinct().ToList();
+            var nomesDoadores = await _context.Usuarios
+                .Where(u => idsDoadores.Contains(u.IdUsuario))
+                .Select(u => new { u.IdUsuario, u.Nome })
+                .ToDictionaryAsync(u => u.IdUsuario, u => u.Nome);
 
             var produtosViewModel = produtos
                 .Select(p =>
                 {
+                    nomesDoadores.TryGetValue(p.IdDoador, out var nomeDoador);
+
                     var lotesAtivos = p.Lotes
                         .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                         .OrderBy(l => l.DataValidade)
@@ -262,7 +267,7 @@ namespace Doalim_dev.Controllers
                         TipoArmazenamento = p.TipoArmazenamento ?? "",
                         FotoProduto = ObterFotoProdutoDataUrl(p.FotoProduto),
                         QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
-                        NomeDoador = p.Doador?.Usuario?.Nome ?? "Doador"
+                        NomeDoador = nomeDoador ?? "Doador"
                     };
                 })
                 .Where(p => !filtros.QuantidadeMinima.HasValue || p.QuantidadeDisponivel >= filtros.QuantidadeMinima.Value);
