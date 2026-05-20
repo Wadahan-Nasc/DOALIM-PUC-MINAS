@@ -1,4 +1,5 @@
 using Doalim_dev.Models;
+using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -206,6 +207,79 @@ namespace Doalim_dev.Controllers
         public IActionResult Details(int? id) => RedirectToAction(nameof(Edit), new { id = id });
         public IActionResult Delete(int? id) => RedirectToAction(nameof(Edit), new { id = id });
 
+        [AllowAnonymous]
+        public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
+        {
+            var usuarioLogado = User.Identity?.IsAuthenticated == true;
+            var usuarioBeneficiario = UsuarioEhBeneficiario();
+            var usuarioAprovado = false;
+
+            if (usuarioLogado)
+            {
+                var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    usuarioAprovado = await _context.Usuarios
+                        .AsNoTracking()
+                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                }
+            }
+
+            ViewBag.UsuarioLogado = usuarioLogado;
+            ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
+            ViewBag.UsuarioAprovado = usuarioAprovado;
+            ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+
+            var hoje = DateTime.Today;
+            var query = _context.Produtos
+                .Include(p => p.Doador)
+                    .ThenInclude(d => d.Usuario)
+                .Include(p => p.Lotes)
+                .Where(p => p.StatusProduto
+                    && p.Lotes.Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0));
+
+            if (!string.IsNullOrWhiteSpace(filtros.NomeBusca))
+                query = query.Where(p => p.NomeProduto.Contains(filtros.NomeBusca));
+
+            var produtos = await query.ToListAsync();
+
+            var produtosViewModel = produtos
+                .Select(p =>
+                {
+                    var lotesAtivos = p.Lotes
+                        .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
+                        .OrderBy(l => l.DataValidade)
+                        .ToList();
+
+                    return new VitrineDoacoesViewModel
+                    {
+                        IdProduto = p.IdProduto,
+                        Nome = p.NomeProduto,
+                        DataValidade = lotesAtivos.First().DataValidade,
+                        Categoria = p.CategoriaProduto ?? "",
+                        MarcaProduto = p.MarcaProduto ?? "",
+                        TipoArmazenamento = p.TipoArmazenamento ?? "",
+                        FotoProduto = ObterFotoProdutoDataUrl(p.FotoProduto),
+                        QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
+                        NomeDoador = p.Doador?.Usuario?.Nome ?? "Doador"
+                    };
+                })
+                .Where(p => !filtros.QuantidadeMinima.HasValue || p.QuantidadeDisponivel >= filtros.QuantidadeMinima.Value);
+
+            produtosViewModel = filtros.OrdemValidade == "desc"
+                ? produtosViewModel.OrderByDescending(p => p.DataValidade)
+                : produtosViewModel.OrderBy(p => p.DataValidade);
+
+            var viewModel = new VitrineCompletaViewModel
+            {
+                Filtros = filtros,
+                Produtos = produtosViewModel.ToList()
+            };
+
+            return View(viewModel);
+        }
+
         // GET
         public async Task<IActionResult> Edit(int? id)
         {
@@ -253,6 +327,24 @@ namespace Doalim_dev.Controllers
                 if (codigoJaExiste) ModelState.AddModelError("CodigoBarras", "Você já possui OUTRO produto usando este mesmo Código.");
             }
 
+            var idsLotesRecebidos = (IdLote ?? Array.Empty<int>())
+                .Concat(LotesExcluidos ?? Array.Empty<int>())
+                .Where(loteId => loteId > 0)
+                .Distinct()
+                .ToList();
+
+            if (idsLotesRecebidos.Any())
+            {
+                var lotesDoProduto = await _context.Lotes
+                    .CountAsync(l => idsLotesRecebidos.Contains(l.IdLote) && l.IdProduto == id);
+
+                if (lotesDoProduto != idsLotesRecebidos.Count)
+                {
+                    TempData["ErroSeguranca"] = "Tentativa de alterar lote de outro produto identificada. Operação cancelada.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -276,7 +368,7 @@ namespace Doalim_dev.Controllers
                     {
                         foreach (var loteId in LotesExcluidos)
                         {
-                            var lRemover = await _context.Lotes.FindAsync(loteId);
+                            var lRemover = await _context.Lotes.FirstOrDefaultAsync(l => l.IdLote == loteId && l.IdProduto == produto.IdProduto);
                             if (lRemover != null) _context.Lotes.Remove(lRemover);
                         }
                     }
@@ -297,7 +389,7 @@ namespace Doalim_dev.Controllers
 
                             if (IdLote != null && i < IdLote.Length && IdLote[i] > 0)
                             {
-                                var loteExist = await _context.Lotes.FindAsync(IdLote[i]);
+                                var loteExist = await _context.Lotes.FirstOrDefaultAsync(l => l.IdLote == IdLote[i] && l.IdProduto == produto.IdProduto);
                                 if (loteExist != null)
                                 {
                                     loteExist.NumeroLote = NumeroLote[i];
@@ -362,5 +454,36 @@ namespace Doalim_dev.Controllers
         }
 
         private bool ProdutoExists(int id) => _context.Produtos.Any(e => e.IdProduto == id);
+
+        private bool UsuarioEhBeneficiario()
+        {
+            return User.IsInRole(TipoUsuario.BeneficiarioPF.ToString())
+                || User.IsInRole(TipoUsuario.BeneficiarioPJ.ToString());
+        }
+
+        private static string ObterFotoProdutoDataUrl(byte[]? fotoProduto)
+        {
+            if (fotoProduto == null || fotoProduto.Length == 0)
+                return string.Empty;
+
+            var mimeType = "image/jpeg";
+
+            if (fotoProduto.Length >= 8
+                && fotoProduto[0] == 0x89
+                && fotoProduto[1] == 0x50
+                && fotoProduto[2] == 0x4E
+                && fotoProduto[3] == 0x47)
+            {
+                mimeType = "image/png";
+            }
+            else if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x3C
+                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
+            {
+                mimeType = "image/svg+xml";
+            }
+
+            return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
     }
 }

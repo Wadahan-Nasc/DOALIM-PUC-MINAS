@@ -11,14 +11,6 @@ namespace Doalim_dev.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "DataValidade",
-                table: "Produtos");
-
-            migrationBuilder.DropColumn(
-                name: "Quantidade",
-                table: "Produtos");
-
             migrationBuilder.CreateTable(
                 name: "Lotes",
                 columns: table => new
@@ -45,6 +37,21 @@ namespace Doalim_dev.Migrations
                 name: "IX_Lotes_IdProduto",
                 table: "Lotes",
                 column: "IdProduto");
+
+            migrationBuilder.Sql("""
+                INSERT INTO Lotes (NumeroLote, DataValidade, Quantidade, IdProduto)
+                SELECT CONCAT('LEGADO-', IdProduto), DataValidade, Quantidade, IdProduto
+                FROM Produtos
+                WHERE Quantidade > 0
+                """);
+
+            migrationBuilder.DropColumn(
+                name: "DataValidade",
+                table: "Produtos");
+
+            migrationBuilder.DropColumn(
+                name: "Quantidade",
+                table: "Produtos");
         }
 
         /// <inheritdoc />

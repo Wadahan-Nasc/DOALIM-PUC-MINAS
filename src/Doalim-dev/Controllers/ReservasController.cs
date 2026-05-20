@@ -78,9 +78,9 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
-            var agora = DateTime.UtcNow;
+            var hoje = DateTime.Today;
             var quantidadeDisponivel = produto.Lotes
-                .Where(l => l.DataValidade > agora)
+                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje)
                 .Sum(l => l.Quantidade);
 
             if (viewModel.QuantidadeReservada > quantidadeDisponivel)
@@ -134,7 +134,7 @@ namespace Doalim_dev.Controllers
                     UnidadeMedida = r.Produto.UnidadeMedida,
                     // Exibe a data de validade mais próxima entre os lotes ainda ativos
                     DataValidade = r.Produto.Lotes
-                        .Where(l => l.DataValidade > DateTime.UtcNow)
+                        .Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today && l.Quantidade > 0)
                         .OrderBy(l => l.DataValidade)
                         .Select(l => (DateTime?)l.DataValidade)
                         .FirstOrDefault(),
@@ -179,10 +179,10 @@ namespace Doalim_dev.Controllers
 
         private ReservaViewModel CriarReservaViewModel(Produto produto)
         {
-            var agora = DateTime.UtcNow;
+            var hoje = DateTime.Today;
 
             var lotesAtivos = produto.Lotes
-                .Where(l => l.DataValidade > agora)
+                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
                 .ToList();
 
@@ -208,9 +208,9 @@ namespace Doalim_dev.Controllers
         /// </summary>
         private void DeduzirQuantidadeLotes(Produto produto, int quantidade)
         {
-            var agora = DateTime.UtcNow;
+            var hoje = DateTime.Today;
             var lotes = produto.Lotes
-                .Where(l => l.DataValidade > agora && l.Quantidade > 0)
+                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
                 .ToList();
 
@@ -222,6 +222,8 @@ namespace Doalim_dev.Controllers
                 if (lote.Quantidade <= quantidade)
                 {
                     quantidade -= lote.Quantidade;
+                    lote.Quantidade = 0;
+                    lote.StatusLote = false;
                     _context.Lotes.Remove(lote);
                 }
                 else
@@ -233,7 +235,7 @@ namespace Doalim_dev.Controllers
 
             // Se não restarem lotes ativos, desativa o produto
             var aindaTemLotes = produto.Lotes
-                .Any(l => l.DataValidade > agora && l.Quantidade > 0);
+                .Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0);
 
             if (!aindaTemLotes)
                 produto.StatusProduto = false;

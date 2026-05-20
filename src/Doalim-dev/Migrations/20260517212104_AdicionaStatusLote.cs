@@ -15,7 +15,7 @@ namespace Doalim_dev.Migrations
                 table: "Lotes",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />
