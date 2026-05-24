@@ -19,20 +19,17 @@ namespace Doalim_dev.ViewModels
         public string MarcaProduto { get; set; }
         public string Categoria { get; set; }
         public string UnidadeMedida { get; set; }
-        public int QuantidadeDisponivel { get; set; }
         public int QuantidadePessoaFisica { get; set; }
         public int QuantidadePessoaJuridica { get; set; }
-        // Data de validade do lote mais distante de vencer entre os lotes ativos
-        public DateTime DataValidadeProduto { get; set; }
         public byte[]? FotoProduto { get; set; }
 
-        //Lista de lotes disponíveis para reserva — preenchida pelo controller
-        public List<LoteDisponivelViewModel> LotesDisponiveis { get; set; } = new ();
+        // Dados do lote mais urgente - selecionado automaticamente
+        public int IdLoteMaisUrgente { get; set; }
+        public string NumeroLote { get; set; }
+        public DateTime DataValidadeLote { get; set; }
+        public int QuantidadeDisponivelNoLote { get; set; }
 
         // Input do usuário
-
-        [Required(ErrorMessage ="Selecione um lote.")]
-        public int IdLoteSelecionado { get; set; }
 
         [Required(ErrorMessage = "Informe a quantidade desejada.")]
         [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero.")]
