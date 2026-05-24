@@ -242,7 +242,9 @@ namespace Doalim_dev.Controllers
             };
         }
 
-        /*// <summary>
+        /* APAGAR DEPOIS DE TESTAR - MANTIDO PARA REFERÊNCIA DE LÓGICA DE DEDUÇÃO DE QUANTIDADE DOS LOTES
+        
+        /// <summary>
         /// Deduz a quantidade reservada dos lotes ativos do produto,
         /// começando pelos mais próximos do vencimento (FIFO).
         /// Remove lotes que ficam zerados e atualiza StatusProduto se necessário.

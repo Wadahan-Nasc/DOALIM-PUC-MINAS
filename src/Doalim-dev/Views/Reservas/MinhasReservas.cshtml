@@ -55,8 +55,9 @@ else
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                             <h5 class="card-title mb-0">@item.NomeProduto</h5>
                             <span class="badge @(item.StatusReserva == "Pendente" ? "bg-warning text-dark" :
-                                                                                                                 item.StatusReserva == "Confirmada" ? "bg-success" :
-                                                                                                                 item.StatusReserva == "Retirada" ? "bg-primary" : "bg-secondary")">
+                                    item.StatusReserva == "Confirmada" ? "bg-success" :
+                                    item.StatusReserva == "Retirada" ? "bg-primary" : "bg-secondary")">
+
                                 @item.StatusReserva
                             </span>
                         </div>
@@ -68,10 +69,16 @@ else
                             <dd class="col-7">@item.Categoria</dd>
 
                             <dt class="col-5">Quantidade</dt>
-                            <dd class="col-7">@item.QuantidadeReservada @item.UnidadeMedida</dd>
+                            <dd class="col-7">@item.QuantidadeReservada</dd>
 
-                            <dt class="col-5">Validade</dt>
-                            <dd class="col-7">@item.DataValidade?.ToString("dd/MM/yyyy")</dd>
+                            <dt class="col-5">Unidade</dt>
+                            <dd class="col-7">@item.UnidadeMedida</dd>
+
+                            <dt class="col-5">Lote</dt>
+                            <dd class="col-7">@item.NumeroLote</dd>
+
+                            <dt class="col-5">Validade do lote</dt>
+                            <dd class="col-7">@item.DataValidadeLote.ToString("dd/MM/yyyy")</dd>
 
                             <dt class="col-5">Doador</dt>
                             <dd class="col-7">@item.NomeDoador</dd>
