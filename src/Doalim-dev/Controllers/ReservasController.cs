@@ -44,7 +44,14 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
-            return View(CriarReservaViewModel(produto));
+            var viewModel = CriarReservaViewModel(produto);
+            if (viewModel == null)
+            {
+                TempData["Erro"] = "Não há lotes disponíveis para este produto.";
+                return RedirectToAction("Vitrine", "Produtos");
+            }
+
+            return View(viewModel);
         }
 
         // POST: /Reservas/Confirmar
@@ -65,41 +72,68 @@ namespace Doalim_dev.Controllers
             if (!ModelState.IsValid)
                 return await RetornarViewReservaAsync(viewModel);
 
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .FirstOrDefaultAsync(p => p.IdProduto == viewModel.IdProduto);
+            // Busca o lote mais urgente (com menor data de validade) - FIFO definido pelo sistema
+            var lote = await _context.Lotes
+                .Include(l => l.Produto)
+                .Where(l => l.IdProduto == viewModel.IdProduto
+                            && l.StatusLote
+                            && l.DataValidade.Date >= DateTime.Today
+                            && l.Quantidade > 0)
+                .OrderBy(l => l.DataValidade)
+                .FirstOrDefaultAsync();
 
-            if (produto == null || !produto.StatusProduto)
-                return NotFound();
+            if (lote == null)
+            {
+                TempData["Erro"] = "Não há lotes disponíveis para este produto.";
+                return RedirectToAction("Vitrine", "Produtos");
+            }
 
-            if (produto.IdDoador == usuarioId)
+            if (lote.Produto.IdDoador == usuarioId)
             {
                 TempData["Erro"] = "Você não pode reservar a própria doação.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
-            var hoje = DateTime.Today;
-            var quantidadeDisponivel = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje)
-                .Sum(l => l.Quantidade);
-
-            if (viewModel.QuantidadeReservada > quantidadeDisponivel)
+            // Validade qtd contra lote mais urgente
+            if (viewModel.QuantidadeReservada > lote.Quantidade)
             {
                 ModelState.AddModelError("QuantidadeReservada",
-                    $"Quantidade indisponível. Máximo permitido: {quantidadeDisponivel}.");
+                    $"Quantidade indisponível neste lote. Máximo permitido: {lote.Quantidade}.");
                 return await RetornarViewReservaAsync(viewModel);
             }
 
+            // Cria a reserva vinculada ao lote mais urgente
             var reserva = new Reserva
             {
-                IdProduto = viewModel.IdProduto,
+                IdLote = lote.IdLote,
                 IdBeneficiario = usuarioId,
                 QuantidadeReservada = viewModel.QuantidadeReservada,
                 Status = StatusReserva.Pendente,
                 DataReserva = DateTime.UtcNow
             };
 
-            DeduzirQuantidadeLotes(produto, viewModel.QuantidadeReservada);
+            // Deduz a quantidade do lote
+            lote.Quantidade -= viewModel.QuantidadeReservada;
+
+            // Desativa o lote zerado
+            if (lote.Quantidade == 0)
+            {
+                lote.StatusLote = false;
+            }
+
+            // Busca se ainda há lotes ativos
+            var aindaTemLotes = await _context.Lotes
+                .AnyAsync(l => l.IdProduto == viewModel.IdProduto
+                               && l.StatusLote
+                               && l.DataValidade.Date >= DateTime.Today
+                               && l.Quantidade > 0
+                               && l.IdLote != lote.IdLote);
+
+            // Se não houver mais lotes ativos, desativa o produto
+            if (aindaTemLotes && lote.Quantidade == 0)
+            {
+                lote.StatusLote = false;
+            }
 
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
@@ -116,10 +150,10 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction("Login", "Auth");
 
             var reservas = await _context.Reservas
-                .Include(r => r.Produto)
-                    .ThenInclude(p => p.Doador)
-                        .ThenInclude(d => d.Usuario)
-                .Include(r => r.Produto.Lotes)   // necessário para obter a menor validade
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                        .ThenInclude(p => p.Doador)
+                            .ThenInclude(d => d.Usuario)
                 .Where(r => r.IdBeneficiario == usuarioId)
                 .OrderByDescending(r => r.DataReserva)
                 .Select(r => new MinhasReservasViewModel
@@ -128,20 +162,16 @@ namespace Doalim_dev.Controllers
                     DataReserva = r.DataReserva,
                     StatusReserva = r.Status.ToString(),
                     QuantidadeReservada = r.QuantidadeReservada,
-                    NomeProduto = r.Produto.NomeProduto,
-                    MarcaProduto = r.Produto.MarcaProduto,
-                    Categoria = r.Produto.CategoriaProduto,
-                    UnidadeMedida = r.Produto.UnidadeMedida,
-                    // Exibe a data de validade mais próxima entre os lotes ainda ativos
-                    DataValidade = r.Produto.Lotes
-                        .Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today && l.Quantidade > 0)
-                        .OrderBy(l => l.DataValidade)
-                        .Select(l => (DateTime?)l.DataValidade)
-                        .FirstOrDefault(),
-                    FotoProduto = r.Produto.FotoProduto == null
+                    NumeroLote = r.Lote.NumeroLote,
+                    DataValidadeLote = r.Lote.DataValidade,
+                    NomeProduto = r.Lote.Produto.NomeProduto,
+                    MarcaProduto = r.Lote.Produto.MarcaProduto,
+                    Categoria = r.Lote.Produto.CategoriaProduto,
+                    UnidadeMedida = r.Lote.Produto.UnidadeMedida,
+                    FotoProduto = r.Lote.Produto.FotoProduto == null
                         ? null
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Produto.FotoProduto)}",
-                    NomeDoador = r.Produto.Doador.Usuario.Nome
+                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                    NomeDoador = r.Lote.Produto.Doador.Usuario.Nome
                 })
                 .ToListAsync();
 
@@ -173,18 +203,27 @@ namespace Doalim_dev.Controllers
                 return NotFound();
 
             var preenchido = CriarReservaViewModel(produto);
+
+            if (preenchido == null)
+                return NotFound();
+
             preenchido.QuantidadeReservada = viewModel.QuantidadeReservada;
             return View("Reservar", preenchido);
         }
 
-        private ReservaViewModel CriarReservaViewModel(Produto produto)
+        private ReservaViewModel? CriarReservaViewModel(Produto produto)
         {
             var hoje = DateTime.Today;
 
-            var lotesAtivos = produto.Lotes
+            // Seleciona o lote mais urgente (com menor data de validade) que esteja ativo e com quantidade disponível - FIFO
+            var loteMaisUrgente = produto.Lotes
                 .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
-                .ToList();
+                .FirstOrDefault();
+
+            // Se não houver lotes disponíveis, retorna null para indicar que a reserva não pode ser feita
+            if (loteMaisUrgente == null)
+                return null;
 
             return new ReservaViewModel
             {
@@ -193,15 +232,17 @@ namespace Doalim_dev.Controllers
                 MarcaProduto = produto.MarcaProduto,
                 Categoria = produto.CategoriaProduto,
                 UnidadeMedida = produto.UnidadeMedida,
-                QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
                 QuantidadePessoaFisica = produto.QuantidadePessoaFisica,
                 QuantidadePessoaJuridica = produto.QuantidadePessoaJuridica,
-                DataValidade = lotesAtivos.FirstOrDefault()?.DataValidade ?? DateTime.MinValue,
+                IdLoteMaisUrgente = loteMaisUrgente.IdLote,
+                NumeroLote = loteMaisUrgente.NumeroLote,
+                DataValidadeLote = loteMaisUrgente.DataValidade,
+                QuantidadeDisponivelNoLote = loteMaisUrgente.Quantidade,
                 FotoProduto = produto.FotoProduto
             };
         }
 
-        /// <summary>
+        /*// <summary>
         /// Deduz a quantidade reservada dos lotes ativos do produto,
         /// começando pelos mais próximos do vencimento (FIFO).
         /// Remove lotes que ficam zerados e atualiza StatusProduto se necessário.
@@ -240,5 +281,6 @@ namespace Doalim_dev.Controllers
             if (!aindaTemLotes)
                 produto.StatusProduto = false;
         }
+        */
     }
 }
