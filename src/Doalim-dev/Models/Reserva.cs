@@ -26,12 +26,13 @@ namespace Doalim_dev.Models
         [Required]
         public int QuantidadeReservada { get; set; }
 
-        // FK para o Produto reservado
+        // FK para o Lote reservado
+        // Produto fica implicito atarvés do Lote.IdProduto
         [Required]
-        public int IdProduto { get; set; }
+        public int IdLote { get; set; }
 
-        [ForeignKey(nameof(IdProduto))]
-        public Produto Produto { get; set; } = null!;
+        [ForeignKey(nameof(IdLote))]
+        public Lote Lote { get; set; } = null!;
 
         // FK para o Beneficiario que fez a reserva
         [Required]

@@ -59,11 +59,18 @@ namespace Doalim_dev.Models
                 .HasForeignKey(d => d.IdDoador)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relacionamento N:N entre Produto e Reserva
+            // Relacionamento 1:N entre Produto e Lote
+            modelBuilder.Entity<Lote>()
+                .HasOne(l => l.Produto)
+                .WithMany(p => p.Lotes)
+                .HasForeignKey(l => l.IdProduto)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento N:N entre Reserva e Lote
             modelBuilder.Entity<Reserva>()
-                .HasOne(r => r.Produto)
+                .HasOne(r => r.Lote)
                 .WithMany()
-                .HasForeignKey(r => r.IdProduto)
+                .HasForeignKey(r => r.IdLote)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relacionamento 1:N Beneficiário e Reserva
@@ -72,13 +79,6 @@ namespace Doalim_dev.Models
                 .WithMany()
                 .HasForeignKey(r => r.IdBeneficiario)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Relacionamento 1:N entre Produto e Lote
-            modelBuilder.Entity<Lote>()
-                .HasOne(l => l.Produto)
-                .WithMany(p => p.Lotes)
-                .HasForeignKey(l => l.IdProduto)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
