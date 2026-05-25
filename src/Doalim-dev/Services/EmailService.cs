@@ -1,5 +1,5 @@
-using System.Net;
-using System.Net.Mail;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace Doalim_dev.Services
 {
@@ -16,39 +16,38 @@ namespace Doalim_dev.Services
 
         public async Task EnviarEmailAsync(string para, string assunto, string corpo)
         {
-            // Em desenvolvimento, apenas loga o e-mail no console
-            // Substitua pela configuração SMTP real antes de publicar
-            var ambiente = _config["Ambiente"] ?? "Development";
+            var apiKey = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"] ?? "noreply@doalim.com";
+            var fromName = _config["SendGrid:FromName"] ?? "Doalim";
 
-            if (ambiente == "Development")
+            // Se não tiver chave configurada, apenas loga (ambiente de dev sem chave)
+            if (string.IsNullOrWhiteSpace(apiKey))
             {
-                _logger.LogInformation("=== E-MAIL (DEV - não enviado) ===");
+                _logger.LogInformation("=== E-MAIL (SendGrid não configurado) ===");
                 _logger.LogInformation("Para: {Para}", para);
                 _logger.LogInformation("Assunto: {Assunto}", assunto);
                 _logger.LogInformation("Corpo: {Corpo}", corpo);
-                _logger.LogInformation("===================================");
+                _logger.LogInformation("=========================================");
                 return;
             }
 
-            // Configuração SMTP para produção (preencher no appsettings.json)
-            var host = _config["Email:Host"] ?? throw new InvalidOperationException("Email:Host não configurado.");
-            var port = int.Parse(_config["Email:Port"] ?? "587");
-            var usuario = _config["Email:Usuario"] ?? throw new InvalidOperationException("Email:Usuario não configurado.");
-            var senha = _config["Email:Senha"] ?? throw new InvalidOperationException("Email:Senha não configurado.");
-            var remetente = _config["Email:Remetente"] ?? usuario;
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress(fromEmail, fromName);
+            var to = new EmailAddress(para);
+            var message = MailHelper.CreateSingleEmail(from, to, assunto, null, corpo);
 
-            using var client = new SmtpClient(host, port)
+            var response = await client.SendEmailAsync(message);
+
+            if (!response.IsSuccessStatusCode)
             {
-                Credentials = new NetworkCredential(usuario, senha),
-                EnableSsl = true
-            };
+                var erro = await response.Body.ReadAsStringAsync();
+                _logger.LogError("Falha ao enviar e-mail via SendGrid: {Status} - {Erro}",
+                    response.StatusCode, erro);
 
-            var mensagem = new MailMessage(remetente, para, assunto, corpo)
-            {
-                IsBodyHtml = true
-            };
+                throw new Exception($"Falha ao enviar e-mail: {response.StatusCode}");
+            }
 
-            await client.SendMailAsync(mensagem);
+            _logger.LogInformation("E-mail enviado via SendGrid para {Para}", para);
         }
     }
 }

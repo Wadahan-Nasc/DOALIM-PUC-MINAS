@@ -15,7 +15,7 @@
 
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        <form asp-action="Registro" asp-controller="Auth" method="post">
+        <form asp-action="Registro" asp-controller="Auth" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
 
             <div class="mb-3">
@@ -72,9 +72,36 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Endereco" class="form-label"></label>
-                <input asp-for="Endereco" class="form-control" placeholder="Rua, número, bairro, cidade" />
-                <span asp-validation-for="Endereco" class="text-danger small"></span>
+                <label class="form-label fw-bold">Endereço</label>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input asp-for="Cep" class="form-control" placeholder="CEP" id="cep" maxlength="9" />
+                        <span asp-validation-for="Cep" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-8">
+                        <input asp-for="Logradouro" class="form-control" placeholder="Logradouro" id="logradouro" />
+                        <span asp-validation-for="Logradouro" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <input asp-for="Numero" class="form-control" placeholder="Número" />
+                        <span asp-validation-for="Numero" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <input asp-for="Complemento" class="form-control" placeholder="Complemento (opcional)" />
+                    </div>
+                    <div class="col-md-4">
+                        <input asp-for="Bairro" class="form-control" placeholder="Bairro" id="bairro" />
+                        <span asp-validation-for="Bairro" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-8">
+                        <input asp-for="Cidade" class="form-control" placeholder="Cidade" id="cidade" />
+                        <span asp-validation-for="Cidade" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <input asp-for="Estado" class="form-control" placeholder="UF" id="estado" maxlength="2" />
+                        <span asp-validation-for="Estado" class="text-danger small"></span>
+                    </div>
+                </div>
             </div>
 
             @* Campo CPF — exibido apenas para PF *@
@@ -93,13 +120,27 @@
 
             <div class="mb-3">
                 <label asp-for="Senha" class="form-label"></label>
-                <input asp-for="Senha" class="form-control" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                <div class="input-group">
+                    <input asp-for="Senha" type="password" class="form-control" id="campoSenha"
+                           placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="alternarSenha('campoSenha', this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="Senha" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="ConfirmaSenha" class="form-label"></label>
-                <input asp-for="ConfirmaSenha" class="form-control" placeholder="Repita a senha" autocomplete="new-password" />
+                <div class="input-group">
+                    <input asp-for="ConfirmaSenha" type="password" class="form-control" id="campoConfirmaSenha"
+                           placeholder="Repita a senha" autocomplete="new-password" />
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="alternarSenha('campoConfirmaSenha', this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="ConfirmaSenha" class="text-danger small"></span>
             </div>
 
@@ -120,6 +161,20 @@
                 <small class="text-muted d-block mt-1">
                     Obrigatório para doadores. Recomendamos ler antes de aceitar.
                 </small>
+            </div>
+
+            <!-- Uploads opcionais -->
+            <div class="mb-3">
+                <label asp-for="FotoPerfilUpload" class="form-label">
+                    Foto do Perfil <span class="text-muted small">(opcional)</span>
+                </label>
+                <input asp-for="FotoPerfilUpload" type="file" class="form-control" accept="image/*" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ArquivoComprovacaoUpload" class="form-label">
+                    Arquivo de Comprovação <span class="text-muted small">(opcional — necessário para doar ou reservar)</span>
+                </label>
+                <input asp-for="ArquivoComprovacaoUpload" type="file" class="form-control" accept=".pdf,.jpg,.png" />
             </div>
 
             <div class="d-grid mb-3">
@@ -219,6 +274,26 @@
                    calc(cnpj, 13) === parseInt(cnpj[13]);
         }
 
+                // Busca automática pelo CEP (ViaCEP)
+        document.getElementById('cep')?.addEventListener('blur', async function () {
+            const cep = this.value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+            const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+            if (data.erro) return;
+            document.getElementById('logradouro').value = data.logradouro;
+            document.getElementById('bairro').value     = data.bairro;
+            document.getElementById('cidade').value     = data.localidade;
+            document.getElementById('estado').value     = data.uf;
+        });
+
+        // Máscara CEP: 00000-000
+        document.getElementById('cep')?.addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 8);
+            if (v.length > 5) v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+            this.value = v;
+        });
+
         // Validação no submit 
         document.querySelector('form').addEventListener('submit', function (e) {
             const ehPF = hiddenTipo.value === '0' || hiddenTipo.value === '2';
@@ -284,5 +359,17 @@
         checkEmpresa.addEventListener('change', atualizarCampos);
 
         atualizarCampos();
+        
+        function alternarSenha(id, btn) {
+            const input = document.getElementById(id);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
     </script>
 }

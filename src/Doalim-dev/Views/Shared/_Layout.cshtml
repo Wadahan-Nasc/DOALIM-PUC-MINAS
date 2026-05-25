@@ -8,11 +8,11 @@
         : null;
 
     var fotoPerfil = emailLogado != null
-        ? await _context.Usuarios
-            .Where(u => u.Email == emailLogado)
-            .Select(u => u.FotoPerfil)
-            .FirstOrDefaultAsync()
-        : null;
+    ? await _context.Usuarios
+        .Where(u => u.Email == emailLogado)
+        .Select(u => u.FotoPerfil)
+        .FirstOrDefaultAsync()
+    : null; // retorno já é byte[]? — sem alteração na query, só no uso abaixo
 }
 
 <!DOCTYPE html>
@@ -74,16 +74,13 @@
                                 <a class="nav-link text-dark"
                                        asp-controller="Usuarios" asp-action="MeuPerfil"
                                        title="Meu Perfil">
-                                    @if (!string.IsNullOrEmpty(fotoPerfil))
+                                    @if (fotoPerfil != null && fotoPerfil.Length > 0)
                                     {
-                                        <img src="@fotoPerfil"
+                                        var base64 = Convert.ToBase64String(fotoPerfil);
+                                        <img src="data:image/jpeg;base64,@base64"
                                              alt="Foto de perfil"
                                              class="rounded-circle"
                                              style="width: 30px; height: 30px; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-person-circle" style="font-size: 1.4rem;"></i>
                                     }
                                 </a>
                             </li>

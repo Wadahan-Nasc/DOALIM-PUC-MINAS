@@ -33,18 +33,11 @@ namespace Doalim_dev.Models
         [MaxLength(20)]
         public string Telefone { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Obrigatório informar o endereço!")]
-        [Display(Name = "Endereço")]
-        [MaxLength(300)]
-        public string Endereco { get; set; } = string.Empty;
-
         [Display(Name = "Foto do Perfil")]
-        [MaxLength(500)]
-        public string? FotoPerfil { get; set; }
+        public byte[]? FotoPerfil { get; set; }
 
         [Display(Name = "Arquivo de Comprovação")]
-        [MaxLength(500)]
-        public string? Arquivocomprovacao { get; set; }
+        public byte[]? Arquivocomprovacao { get; set; }
 
         // Armazena o hash BCrypt — NUNCA a senha em texto puro
         [Required]
@@ -73,5 +66,8 @@ namespace Doalim_dev.Models
 
         // Navegação para termos aceitos (RF-002)
         public ICollection<TermoAceitacao> TermosAceitados { get; set; } = new List<TermoAceitacao>();
+
+        // Navegação para endereço (1:1)
+        public Endereco? Endereco { get; set; }
     }
 }

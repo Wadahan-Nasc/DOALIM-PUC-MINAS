@@ -2,8 +2,12 @@
 
 @{
     ViewData["Title"] = "Detalhes do usuário";
-    var foto = FotoUrl(Model.FotoPerfil);
-    var documento = FotoUrl(Model.Arquivocomprovacao);
+    var foto = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
+    ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
+    : string.Empty;
+    var documento = Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0
+        ? $"data:application/octet-stream;base64,{Convert.ToBase64String(Model.Arquivocomprovacao)}"
+        : string.Empty;
     var documentoAprovado = Model.StatusVerificacao == StatusVerificacao.Aprovado;
 }
 
@@ -19,18 +23,7 @@
         return (primeira + segunda).ToUpperInvariant();
     }
 
-    private string FotoUrl(string foto)
-    {
-        if (string.IsNullOrWhiteSpace(foto))
-            return string.Empty;
-
-        if (foto.StartsWith("http", StringComparison.OrdinalIgnoreCase) || foto.StartsWith("/"))
-            return foto;
-
-        return Url.Content($"~/{foto.TrimStart('~', '/')}");
-    }
-
-    private static string ClasseStatus(StatusVerificacao status)
+        private static string ClasseStatus(StatusVerificacao status)
     {
         return status switch
         {

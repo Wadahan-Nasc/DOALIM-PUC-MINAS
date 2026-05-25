@@ -43,7 +43,14 @@
                     </div>
                     <div class="col-md-5">
                         <label asp-for="SenhaHash" class="form-label">Nova senha</label>
-                        <input name="SenhaHash" id="SenhaHash" class="form-control" type="password" value="" placeholder="Deixe em branco para manter" autocomplete="new-password" />
+                        <div class="input-group">
+                            <input name="SenhaHash" id="SenhaHash" class="form-control" type="password" value=""
+                                   placeholder="Deixe em branco para manter" autocomplete="new-password" />
+                            <button type="button" class="btn btn-outline-secondary"
+                                    onclick="alternarSenha('SenhaHash', this)" tabindex="-1">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <small class="text-muted">Preencha apenas se quiser trocar a senha.</small>
                     </div>
                     <div class="col-md-5">
@@ -51,10 +58,36 @@
                         <input asp-for="Telefone" class="form-control" />
                         <span asp-validation-for="Telefone" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-7">
-                        <label asp-for="Endereco" class="form-label"></label>
-                        <input asp-for="Endereco" class="form-control" />
-                        <span asp-validation-for="Endereco" class="text-danger small"></span>
+                    <div class="col-12">
+                        <h6 class="text-muted mt-2">Endereço</h6>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">CEP</label>
+                        <input name="Endereco.Cep" class="form-control" id="cep" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Logradouro</label>
+                        <input name="Endereco.Logradouro" class="form-control" id="logradouro" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Número</label>
+                        <input name="Endereco.Numero" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Complemento</label>
+                        <input name="Endereco.Complemento" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Bairro</label>
+                        <input name="Endereco.Bairro" class="form-control" id="bairro" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cidade</label>
+                        <input name="Endereco.Cidade" class="form-control" id="cidade" />
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">UF</label>
+                        <input name="Endereco.Estado" class="form-control" id="estado" maxlength="2" />
                     </div>
                 </div>
             </div>
@@ -73,14 +106,14 @@
                         <span asp-validation-for="Cnpj" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="FotoPerfil" class="form-label"></label>
-                        <input asp-for="FotoPerfil" class="form-control" placeholder="URL da foto do perfil" />
-                        <span asp-validation-for="FotoPerfil" class="text-danger small"></span>
+                        <label class="form-label">Foto do Perfil</label>
+                        <input type="file" name="FotoPerfilUpload" class="form-control" accept="image/*" />
+                        <small class="text-muted">Deixe em branco para manter a foto atual.</small>
                     </div>
                     <div class="col-md-6" data-field="documento">
-                        <label asp-for="Arquivocomprovacao" class="form-label">Arquivo de comprovação</label>
-                        <input asp-for="Arquivocomprovacao" class="form-control" placeholder="URL ou caminho do documento" />
-                        <span asp-validation-for="Arquivocomprovacao" class="text-danger small"></span>
+                        <label class="form-label">Arquivo de Comprovação</label>
+                        <input type="file" name="ArquivoComprovacaoUpload" class="form-control" accept=".pdf,.jpg,.png" />
+                        <small class="text-muted">Deixe em branco para manter o arquivo atual.</small>
                     </div>
                     <div class="col-md-6" data-field="status-doc">
                         <label asp-for="StatusVerificacao" class="form-label"></label>
@@ -131,5 +164,33 @@
 
         tipoUsuario.addEventListener('change', atualizarCamposAdmin);
         atualizarCamposAdmin();
+
+        // Busca automática de endereço pelo CEP (ViaCEP)
+        document.getElementById('cep')?.addEventListener('blur', async function () {
+            const cep = this.value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+            if (data.erro) return;
+
+            document.getElementById('logradouro').value = data.logradouro;
+            document.getElementById('bairro').value     = data.bairro;
+            document.getElementById('cidade').value     = data.localidade;
+            document.getElementById('estado').value     = data.uf;
+        });
+
+        function alternarSenha(id, btn) {
+            const input = document.getElementById(id);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
     </script>
+
 }

@@ -117,7 +117,9 @@ namespace Doalim_dev.Controllers
                 return NotFound();
             }
 
-            var usuario = await _context.Usuarios.FindAsync(id);
+            var usuario = await _context.Usuarios
+                .Include(u => u.Endereco)
+                .FirstOrDefaultAsync(u => u.IdUsuario == id);
             if (usuario == null)
             {
                 return NotFound();
@@ -137,7 +139,9 @@ namespace Doalim_dev.Controllers
 
             ModelState.Remove(nameof(usuario.TermosAceitados));
 
-            var usuarioAtual = await _context.Usuarios.FindAsync(id);
+            var usuarioAtual = await _context.Usuarios
+                .Include(u => u.Endereco)
+                .FirstOrDefaultAsync(u => u.IdUsuario == id);
             if (usuarioAtual == null)
                 return NotFound();
 
@@ -291,6 +295,7 @@ namespace Doalim_dev.Controllers
                      ?? User.Identity.Name;
 
             var usuario = await _context.Usuarios
+                .Include(u => u.Endereco)
                 .FirstOrDefaultAsync(u => u.Email == email);
 
             if (usuario == null) return NotFound();
@@ -341,18 +346,9 @@ namespace Doalim_dev.Controllers
                     return View(model);
                 }
 
-                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "fotos-perfil");
-                Directory.CreateDirectory(pastaUpload);
-
-                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
-                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
-
-                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
-                {
-                    await arquivoFotoPerfil.CopyToAsync(stream);
-                }
-
-                usuario.FotoPerfil = $"/uploads/fotos-perfil/{nomeArquivo}";
+                using var msFoto = new MemoryStream();
+                await arquivoFotoPerfil.CopyToAsync(msFoto);
+                usuario.FotoPerfil = msFoto.ToArray();
             }
 
             // Upload do arquivo de comprovação
@@ -374,24 +370,18 @@ namespace Doalim_dev.Controllers
                     return View(model);
                 }
 
-                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "comprovacoes");
-                Directory.CreateDirectory(pastaUpload);
-
-                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
-                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
-
-                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
-                {
-                    await arquivoComprovacao.CopyToAsync(stream);
-                }
-
-                usuario.Arquivocomprovacao = $"/uploads/comprovacoes/{nomeArquivo}";
+                using var msComp = new MemoryStream();
+                await arquivoComprovacao.CopyToAsync(msComp);
+                usuario.Arquivocomprovacao = msComp.ToArray();
             }
 
             usuario.Nome = model.Nome;
+            // Atualiza senha apenas se preenchida
+            if (!string.IsNullOrWhiteSpace(Request.Form["NovaSenha"]))
+                usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Request.Form["NovaSenha"]!);
             usuario.Email = model.Email;
             usuario.Telefone = model.Telefone;
-            usuario.Endereco = model.Endereco;
+            
             // FotoPerfil, Cpf e Cnpj são tratados separadamente acima
 
             _context.Update(usuario);

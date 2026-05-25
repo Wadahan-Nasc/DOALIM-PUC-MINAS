@@ -32,10 +32,32 @@ namespace Doalim_dev.ViewModels
             ErrorMessage = "Telefone inválido. Use o formato (11) 99999-9999.")]
         public string Telefone { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Obrigatório informar o endereço!")]
-        [Display(Name = "Endereço")]
-        [MaxLength(300)]
-        public string Endereco { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Obrigatório informar o CEP!")]
+        [MaxLength(9)]
+        public string Cep { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Obrigatório informar o logradouro!")]
+        [MaxLength(150)]
+        public string Logradouro { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Obrigatório informar o número!")]
+        [MaxLength(20)]
+        public string Numero { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string? Complemento { get; set; }
+
+        [Required(ErrorMessage = "Obrigatório informar o bairro!")]
+        [MaxLength(100)]
+        public string Bairro { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Obrigatório informar a cidade!")]
+        [MaxLength(100)]
+        public string Cidade { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Obrigatório informar o estado!")]
+        [MaxLength(2)]
+        public string Estado { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Obrigatório selecionar o tipo de usuário!")]
         [Display(Name = "Tipo de Usuário")]
@@ -58,5 +80,12 @@ namespace Doalim_dev.ViewModels
         // RF-002: Aceite obrigatório somente se TipoUsuario = DoadorPF ou DoadorPJ
         [Display(Name = "Li e aceito o Termo de Responsabilidade (Lei 14.016/2020)")]
         public bool AceitouTermo { get; set; }
+
+        // Opcionais no cadastro — obrigatórios para doar/reservar
+        [Display(Name = "Foto do Perfil")]
+        public IFormFile? FotoPerfilUpload { get; set; }
+
+        [Display(Name = "Arquivo de Comprovação")]
+        public IFormFile? ArquivoComprovacaoUpload { get; set; }
     }
 }
