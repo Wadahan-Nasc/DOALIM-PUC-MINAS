@@ -14,15 +14,17 @@ namespace Doalim_dev.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(AppDbContext context, IEmailService emailService)
+        public AuthController(AppDbContext context, IEmailService emailService, ILogger<AuthController> logger)
         {
             _context = context;
             _emailService = emailService;
+            _logger = logger;
         }
 
-       // REGISTRO - RF-001 + RF-002
-       
+        // REGISTRO - RF-001 + RF-002
+
         [HttpGet]
         public IActionResult Registro()
         {
