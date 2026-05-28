@@ -26,3 +26,9 @@ namespace Doalim_dev.Models
         public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
     }
 }
+
+/*
+O pedido funciona como um agrupamento de reservas feitas por um beneficiário. 
+Ele tem um status geral que reflete o estado das reservas associadas.
+Sendo assim, cada reserva irá se comunicar com seu respectivo doador independentemente;
+*/

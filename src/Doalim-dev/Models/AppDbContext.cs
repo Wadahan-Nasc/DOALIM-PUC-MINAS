@@ -73,28 +73,28 @@ namespace Doalim_dev.Models
                 .HasOne(r => r.Lote)
                 .WithMany()
                 .HasForeignKey(r => r.IdLote)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Evita exclusão de lote com reservas associadas
 
             // Relacionamento 1:N entre Beneficiario e Reserva
             modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Beneficiario)
                 .WithMany()
                 .HasForeignKey(r => r.IdBeneficiario)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Mantém histórico mesmo se beneficiário for desativado
 
             // Relacionamento 1:N entre Pedido e Reserva
             modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Pedido)
                 .WithMany(p => p.Reservas)
                 .HasForeignKey(r => r.IdPedido)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Evita exclusão de pedido com reservas associadas
 
             // Relacionamento 1:N entre Beneficiario e Pedido
             modelBuilder.Entity<Pedido>()
                 .HasOne(p => p.Beneficiario)
                 .WithMany()
                 .HasForeignKey(p => p.IdBeneficiario)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Mantém histórico de pedidos mesmo se beneficiário for desativado
 
             // Relacionamento 1:N entre Beneficiario e CarrinhoItem
             modelBuilder.Entity<CarrinhoItem>()
@@ -109,6 +109,11 @@ namespace Doalim_dev.Models
                 .WithMany()
                 .HasForeignKey(c => c.IdProduto)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Garante que um beneficiário não adicione o mesmo produto duas vezes no carrinho — controlado via índice único
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasIndex(c => new { c.IdBeneficiario, c.IdProduto })
+                .IsUnique();
         }
     }
 }

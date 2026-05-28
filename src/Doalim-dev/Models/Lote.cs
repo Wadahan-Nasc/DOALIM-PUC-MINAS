@@ -31,5 +31,8 @@ namespace Doalim_dev.Models
 
         [ForeignKey(nameof(IdProduto))]
         public Produto Produto { get; set; }
+
+        // Navegação inversa para Reservas
+        public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
     }
 }

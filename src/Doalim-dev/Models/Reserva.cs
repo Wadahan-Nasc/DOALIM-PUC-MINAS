@@ -8,7 +8,8 @@ namespace Doalim_dev.Models
         Pendente = 0,
         Confirmada = 1,
         Retirada = 2,
-        Cancelada = 3
+        Cancelada = 3,
+        Rejeitada = 4 // Essencial para diferenciar reservas canceladas pelo beneficiário e rejeitadas pelo doador;
     }
 
     [Table("Reservas")]
@@ -23,6 +24,7 @@ namespace Doalim_dev.Models
         [Required]
         public StatusReserva Status { get; set; } = StatusReserva.Pendente;
 
+        // Quantidade efetivamente reservada do produto
         [Required]
         public int QuantidadeReservada { get; set; }
 
@@ -36,11 +38,16 @@ namespace Doalim_dev.Models
 
         public DateTime? DataRetiradaFim { get; set; }
 
+        // Data em que a reserva se encerrou (retirada ou cancelada)
+        // Importante para históricos
+        public DateTime? DataEncerramento { get; set; }
+
         // FK para o Pedido agrupador desta reserva
+        [Required]
         public int? IdPedido { get; set; }
 
         [ForeignKey(nameof(IdPedido))]
-        public Pedido? Pedido { get; set; }
+        public Pedido Pedido { get; set; }
 
         // FK para o Lote reservado
         // Produto fica implícito através do Lote.IdProduto

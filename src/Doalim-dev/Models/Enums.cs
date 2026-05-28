@@ -35,9 +35,9 @@ namespace Doalim_dev.Models
 
     public enum StatusPedido
     {
-        Pendente = 0,
-        Confirmado = 1,
-        Retirado = 2,
-        Cancelado = 3
+        Pendente = 0,       // Todas pendentes
+        Confirmado = 1,     // Alguma confirmada, mas não todas
+        Retirado = 2,       // Todas retiradas
+        Cancelado = 3       // Todas canceladas
     }
 }
