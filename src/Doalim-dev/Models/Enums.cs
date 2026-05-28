@@ -40,4 +40,13 @@ namespace Doalim_dev.Models
         Retirado = 2,       // Todas retiradas
         Cancelado = 3       // Todas canceladas
     }
+    public enum StatusReserva
+    {
+        Pendente = 0,
+        Confirmada = 1,
+        Retirada = 2,
+        Cancelada = 3,
+        Rejeitada = 4 // Essencial para diferenciar reservas canceladas pelo beneficiário e rejeitadas pelo doador;
+    }
+
 }
