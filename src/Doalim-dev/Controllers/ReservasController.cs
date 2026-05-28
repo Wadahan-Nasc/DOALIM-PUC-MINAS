@@ -76,7 +76,7 @@ namespace Doalim_dev.Controllers
             var lote = await _context.Lotes
                 .Include(l => l.Produto)
                 .Where(l => l.IdProduto == viewModel.IdProduto
-                            && l.StatusLote
+                            && l.StatusLote == StatusLote.Disponivel
                             && l.DataValidade.Date >= DateTime.Today
                             && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
@@ -118,13 +118,13 @@ namespace Doalim_dev.Controllers
             // Desativa o lote zerado
             if (lote.Quantidade == 0)
             {
-                lote.StatusLote = false;
+                lote.StatusLote = StatusLote.Inativo;
             }
 
             // Busca se ainda há lotes ativos
             var aindaTemLotes = await _context.Lotes
                 .AnyAsync(l => l.IdProduto == viewModel.IdProduto
-                               && l.StatusLote
+                               && l.StatusLote == StatusLote.Disponivel
                                && l.DataValidade.Date >= DateTime.Today
                                && l.Quantidade > 0
                                && l.IdLote != lote.IdLote);
@@ -132,7 +132,7 @@ namespace Doalim_dev.Controllers
             // Se não houver mais lotes ativos, desativa o produto
             if (aindaTemLotes && lote.Quantidade == 0)
             {
-                lote.StatusLote = false;
+                lote.StatusLote = StatusLote.Inativo;
             }
 
             _context.Reservas.Add(reserva);
@@ -217,7 +217,7 @@ namespace Doalim_dev.Controllers
 
             // Seleciona o lote mais urgente (com menor data de validade) que esteja ativo e com quantidade disponível - FIFO
             var loteMaisUrgente = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
+                .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
                 .FirstOrDefault();
 
@@ -253,7 +253,7 @@ namespace Doalim_dev.Controllers
         {
             var hoje = DateTime.Today;
             var lotes = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
+                .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                 .OrderBy(l => l.DataValidade)
                 .ToList();
 
@@ -266,7 +266,7 @@ namespace Doalim_dev.Controllers
                 {
                     quantidade -= lote.Quantidade;
                     lote.Quantidade = 0;
-                    lote.StatusLote = false;
+                    lote.StatusLote = StatusLote.Inativo;
                     _context.Lotes.Remove(lote);
                 }
                 else
@@ -278,7 +278,7 @@ namespace Doalim_dev.Controllers
 
             // Se não restarem lotes ativos, desativa o produto
             var aindaTemLotes = produto.Lotes
-                .Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0);
+                .Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0);
 
             if (!aindaTemLotes)
                 produto.StatusProduto = false;

@@ -52,13 +52,13 @@ namespace Doalim_dev.Controllers
                 {
                     foreach (var lote in p.Lotes)
                     {
-                        if (lote.DataValidade.Date < DateTime.Today && lote.StatusLote == true)
+                        if (lote.DataValidade.Date < DateTime.Today && lote.StatusLote == StatusLote.Disponivel)
                         {
-                            lote.StatusLote = false;
+                            lote.StatusLote = StatusLote.Inativo;
                             precisaSalvarDB = true;
                         }
 
-                        if (lote.StatusLote == true && lote.DataValidade.Date >= DateTime.Today)
+                        if (lote.StatusLote == StatusLote.Disponivel && lote.DataValidade.Date >= DateTime.Today)
                         {
                             produtoTemLoteValidoEAtivo = true;
                         }
@@ -91,7 +91,7 @@ namespace Doalim_dev.Controllers
             if (apenasAlertas)
             {
                 var limiteAlerta = DateTime.Today.AddDays(1);
-                query = query.Where(p => p.Lotes.Any(l => l.StatusLote == true && l.DataValidade.Date <= limiteAlerta));
+                query = query.Where(p => p.Lotes.Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date <= limiteAlerta));
             }
 
             // Ordenação: ativos para cima e inativos para baixo e depois organiza em ordem alfabética
@@ -127,7 +127,7 @@ namespace Doalim_dev.Controllers
         // POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Produto produto, IFormFile arquivoFoto, string[] NumeroLote, DateTime[] DataValidadeLote, int[] QuantidadeLote, bool[] StatusLote)
+        public async Task<IActionResult> Create(Produto produto, IFormFile arquivoFoto, string[] NumeroLote, DateTime[] DataValidadeLote, int[] QuantidadeLote, bool[] statusLoteForm)
         {
 
             int usuarioId = ObterIdUsuarioLogado();
@@ -168,18 +168,18 @@ namespace Doalim_dev.Controllers
                     {
                         if (!string.IsNullOrWhiteSpace(NumeroLote[i]))
                         {
-                            bool statusAtualLote = (StatusLote != null && StatusLote.Length > i) ? StatusLote[i] : true;
+                            bool ativo = (statusLoteForm != null && statusLoteForm.Length > i) ? statusLoteForm[i] : true;
 
-                            if (DataValidadeLote[i].Date < DateTime.Today) statusAtualLote = false;
+                            if (DataValidadeLote[i].Date < DateTime.Today) ativo = false;
 
-                            if (statusAtualLote) produtoTemLoteValido = true;
+                            if (ativo) produtoTemLoteValido = true;
 
                             var lote = new Lote
                             {
                                 NumeroLote = NumeroLote[i],
                                 DataValidade = DataValidadeLote[i],
                                 Quantidade = QuantidadeLote[i],
-                                StatusLote = statusAtualLote,
+                                StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo,
                                 IdProduto = produto.IdProduto
                             };
                             _context.Add(lote);
@@ -235,7 +235,7 @@ namespace Doalim_dev.Controllers
             var query = _context.Produtos
                 .Include(p => p.Lotes)
                 .Where(p => p.StatusProduto
-                    && p.Lotes.Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0));
+                    && p.Lotes.Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0));
 
             if (!string.IsNullOrWhiteSpace(filtros.NomeBusca))
                 query = query.Where(p => p.NomeProduto.Contains(filtros.NomeBusca));
@@ -253,7 +253,7 @@ namespace Doalim_dev.Controllers
                     nomesDoadores.TryGetValue(p.IdDoador, out var nomeDoador);
 
                     var lotesAtivos = p.Lotes
-                        .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
+                        .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                         .OrderBy(l => l.DataValidade)
                         .ToList();
 
@@ -307,7 +307,7 @@ namespace Doalim_dev.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Produto produto, IFormFile arquivoFoto,
-            int[] IdLote, string[] NumeroLote, DateTime[] DataValidade, int[] Quantidade, bool[] StatusLote, int[] LotesExcluidos)
+            int[] IdLote, string[] NumeroLote, DateTime[] DataValidade, int[] Quantidade, bool[] statusLoteForm, int[] LotesExcluidos)
         {
             if (id != produto.IdProduto) return NotFound();
 
@@ -387,10 +387,10 @@ namespace Doalim_dev.Controllers
                         {
                             if (string.IsNullOrWhiteSpace(NumeroLote[i])) continue;
 
-                            bool statusAtualLote = (StatusLote != null && StatusLote.Length > i) ? StatusLote[i] : true;
-                            if (DataValidade[i].Date < DateTime.Today) statusAtualLote = false;
+                            bool ativo = (statusLoteForm != null && statusLoteForm.Length > i) ? statusLoteForm[i] : true;
+                            if (DataValidade[i].Date < DateTime.Today) ativo = false;
 
-                            if (statusAtualLote) produtoTemLoteValido = true;
+                            if (ativo) produtoTemLoteValido = true;
 
                             if (IdLote != null && i < IdLote.Length && IdLote[i] > 0)
                             {
@@ -400,7 +400,7 @@ namespace Doalim_dev.Controllers
                                     loteExist.NumeroLote = NumeroLote[i];
                                     loteExist.DataValidade = DataValidade[i];
                                     loteExist.Quantidade = Quantidade[i];
-                                    loteExist.StatusLote = statusAtualLote;
+                                    loteExist.StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo;
                                     _context.Update(loteExist);
                                 }
                             }
@@ -412,7 +412,7 @@ namespace Doalim_dev.Controllers
                                     NumeroLote = NumeroLote[i],
                                     DataValidade = DataValidade[i],
                                     Quantidade = Quantidade[i],
-                                    StatusLote = statusAtualLote,
+                                    StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo,
                                     IdProduto = produto.IdProduto
                                 };
                                 _context.Add(novoLote);

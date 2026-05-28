@@ -11,9 +11,11 @@ namespace Doalim_dev.Models
         public DbSet<Doador> Doadores { get; set; }
         public DbSet<Beneficiario> Beneficiarios { get; set; }
         public DbSet<Administrador> Administradores { get; set; }
-        public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Lote> Lotes { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<CarrinhoItem> CarrinhoItens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,18 +68,46 @@ namespace Doalim_dev.Models
                 .HasForeignKey(l => l.IdProduto)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relacionamento N:N entre Reserva e Lote
+            // Relacionamento 1:N entre Lote e Reserva
             modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Lote)
                 .WithMany()
                 .HasForeignKey(r => r.IdLote)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relacionamento 1:N Beneficiário e Reserva
+            // Relacionamento 1:N entre Beneficiario e Reserva
             modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Beneficiario)
                 .WithMany()
                 .HasForeignKey(r => r.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento 1:N entre Pedido e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Pedido)
+                .WithMany(p => p.Reservas)
+                .HasForeignKey(r => r.IdPedido)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento 1:N entre Beneficiario e Pedido
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.Beneficiario)
+                .WithMany()
+                .HasForeignKey(p => p.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relacionamento 1:N entre Beneficiario e CarrinhoItem
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasOne(c => c.Beneficiario)
+                .WithMany()
+                .HasForeignKey(c => c.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento 1:N entre Produto e CarrinhoItem
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasOne(c => c.Produto)
+                .WithMany()
+                .HasForeignKey(c => c.IdProduto)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -145,10 +145,10 @@
                             var qtdTotalAtiva = 0;
                             if (item.StatusProduto && item.Lotes != null)
                             {
-                                qtdTotalAtiva = item.Lotes.Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today).Sum(l => l.Quantidade);
+                                qtdTotalAtiva = item.Lotes.Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= DateTime.Today).Sum(l => l.Quantidade);
                             }
 
-                            var possuiAlertaCritico = item.Lotes != null && item.Lotes.Any(l => l.StatusLote && (l.DataValidade.Date - DateTime.Today).Days <= 1);
+                            var possuiAlertaCritico = item.Lotes != null && item.Lotes.Any(l => l.StatusLote == StatusLote.Disponivel && (l.DataValidade.Date - DateTime.Today).Days <= 1);
 
                             var classeLinha = item.StatusProduto ? "" : "produto-inativo";
 

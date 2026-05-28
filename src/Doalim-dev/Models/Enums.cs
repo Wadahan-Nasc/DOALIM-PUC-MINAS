@@ -24,4 +24,20 @@ namespace Doalim_dev.Models
         Entregue = 3,
         Cancelado = 4
     }
+
+    public enum StatusLote
+    {
+        Disponivel = 0,
+        Reservado = 1,
+        Entregue = 2,
+        Inativo = 3
+    }
+
+    public enum StatusPedido
+    {
+        Pendente = 0,
+        Confirmado = 1,
+        Retirado = 2,
+        Cancelado = 3
+    }
 }

@@ -26,8 +26,24 @@ namespace Doalim_dev.Models
         [Required]
         public int QuantidadeReservada { get; set; }
 
+        // Token gerado pelo sistema quando o doador aprova a reserva.
+        // Informado presencialmente pelo beneficiário ao retirar o produto.
+        public string? TokenConfirmacao { get; set; }
+
+        // Intervalo de retirada definido pelo doador ao aprovar a reserva.
+        // Ambas as datas devem ser anteriores ao vencimento do lote.
+        public DateTime? DataRetiradaInicio { get; set; }
+
+        public DateTime? DataRetiradaFim { get; set; }
+
+        // FK para o Pedido agrupador desta reserva
+        public int? IdPedido { get; set; }
+
+        [ForeignKey(nameof(IdPedido))]
+        public Pedido? Pedido { get; set; }
+
         // FK para o Lote reservado
-        // Produto fica implicito atarvés do Lote.IdProduto
+        // Produto fica implícito através do Lote.IdProduto
         [Required]
         public int IdLote { get; set; }
 

@@ -174,7 +174,7 @@
                                 var textoAlerta = diasParaVencer < 0 ? "❌ Vencido" : (diasParaVencer == 0 ? "⚠️ Vence HOJE" : (diasParaVencer == 1 ? "⚠️ Vence AMANHÃ" : ""));
 
                                 var classeFundoLote = "border-secondary-subtle";
-                                if (!lote.StatusLote)
+                                if (lote.StatusLote != StatusLote.Disponivel)
                                 {
                                     classeFundoLote = "bg-lote-inativo border-dark";
                                 }
@@ -183,8 +183,8 @@
                                     classeFundoLote = "bg-alerta-lote";
                                 }
 
-                                var corInputData = (temAlerta && lote.StatusLote) ? "text-danger fw-bold" : "";
-                                var corTextoSelect = lote.StatusLote ? "text-success" : "text-danger";
+                                var corInputData = (temAlerta && lote.StatusLote == StatusLote.Disponivel) ? "text-danger fw-bold" : "";
+                                var corTextoSelect = lote.StatusLote == StatusLote.Disponivel ? "text-success" : "text-danger";
 
                                 <div class="row lote-item align-items-end mb-3 pb-3 border-bottom @classeFundoLote p-2 rounded">
 
@@ -196,7 +196,7 @@
                                     </div>
                                     <div class="col-md-3 mb-2 mb-md-0">
                                         <label class="form-label fw-semibold small d-flex justify-content-between">
-                                            Validade @if(temAlerta && lote.StatusLote) {
+                                            Validade @if(temAlerta && lote.StatusLote == StatusLote.Disponivel) {
                                             <span class="text-danger fw-bold ms-2">@textoAlerta</span>
                                         }
                                     </label>
@@ -210,8 +210,8 @@
                                 <div class="col-md-2 mb-2 mb-md-0">
                                     <label class="form-label fw-semibold small">Status Lote</label>
                                     <select name="StatusLote" class="form-select bg-white fw-bold @corTextoSelect" onchange="mudarCorStatusLote(this)">
-                                        <!option value="true" @(lote.StatusLote ? "selected" : "")>✅ Ativo</!option>
-                                        <!option value="false" @(!lote.StatusLote ? "selected" : "")>❌ Inativo</!option>
+                                        <!option value="true" @(lote.StatusLote == StatusLote.Disponivel ? "selected" : "")>✅ Ativo</!option>
+                                        <!option value="false" @(lote.StatusLote != StatusLote.Disponivel ? "selected" : "")>❌ Inativo</!option>
                                     </select>
                                 </div>
 
