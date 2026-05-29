@@ -12,7 +12,7 @@ namespace Doalim_dev.Models
         // Quantidade do produto adicionada ao carrinho
         // Ou seja, qtd que o beneficiário deseja reservar, mais ainda não foi efetivada pela reserva;
         [Required]
-        public int Quantidade { get; set; }
+        public int QuantidadeDesejada { get; set; }
 
         // Momento em que o item foi adicionado ao carrinho
         [Required]
