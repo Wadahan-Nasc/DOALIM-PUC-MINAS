@@ -1,9 +1,10 @@
-﻿using System.Security.Claims;
-using Doalim_dev.Models;
+﻿using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Security.Claims;
 
 namespace Doalim_dev.Controllers
 {
@@ -17,136 +18,14 @@ namespace Doalim_dev.Controllers
             _context = context;
         }
 
-        // GET: /Reservas/Reservar/5
-        public async Task<IActionResult> Reservar(int id)
-        {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
-                return RedirectToAction("Login", "Auth");
-
-            if (!await UsuarioPodeReservarAsync(usuarioId))
-            {
-                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdProduto == id);
-
-            if (produto == null || !produto.StatusProduto)
-                return NotFound();
-
-            if (produto.IdDoador == usuarioId)
-            {
-                TempData["Erro"] = "Você não pode reservar a própria doação.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            var viewModel = CriarReservaViewModel(produto);
-            if (viewModel == null)
-            {
-                TempData["Erro"] = "Não há lotes disponíveis para este produto.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            return View(viewModel);
-        }
-
-        // POST: /Reservas/Confirmar
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Confirmar(ReservaViewModel viewModel)
-        {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
-                return RedirectToAction("Login", "Auth");
-
-            if (!await UsuarioPodeReservarAsync(usuarioId))
-            {
-                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            if (!ModelState.IsValid)
-                return await RetornarViewReservaAsync(viewModel);
-
-            // Busca o lote mais urgente (com menor data de validade) - FIFO definido pelo sistema
-            var lote = await _context.Lotes
-                .Include(l => l.Produto)
-                .Where(l => l.IdProduto == viewModel.IdProduto
-                            && l.StatusLote == StatusLote.Disponivel
-                            && l.DataValidade.Date >= DateTime.Today
-                            && l.Quantidade > 0)
-                .OrderBy(l => l.DataValidade)
-                .FirstOrDefaultAsync();
-
-            if (lote == null)
-            {
-                TempData["Erro"] = "Não há lotes disponíveis para este produto.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            if (lote.Produto.IdDoador == usuarioId)
-            {
-                TempData["Erro"] = "Você não pode reservar a própria doação.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            // Validade qtd contra lote mais urgente
-            if (viewModel.QuantidadeReservada > lote.Quantidade)
-            {
-                ModelState.AddModelError("QuantidadeReservada",
-                    $"Quantidade indisponível neste lote. Máximo permitido: {lote.Quantidade}.");
-                return await RetornarViewReservaAsync(viewModel);
-            }
-
-            // Cria a reserva vinculada ao lote mais urgente
-            var reserva = new Reserva
-            {
-                IdLote = lote.IdLote,
-                IdBeneficiario = usuarioId,
-                QuantidadeReservada = viewModel.QuantidadeReservada,
-                Status = StatusReserva.Pendente,
-                DataReserva = DateTime.UtcNow
-            };
-
-            // Deduz a quantidade do lote
-            lote.Quantidade -= viewModel.QuantidadeReservada;
-
-            // Desativa o lote zerado
-            if (lote.Quantidade == 0)
-            {
-                lote.StatusLote = StatusLote.Inativo;
-            }
-
-            // Busca se ainda há lotes ativos
-            var aindaTemLotes = await _context.Lotes
-                .AnyAsync(l => l.IdProduto == viewModel.IdProduto
-                               && l.StatusLote == StatusLote.Disponivel
-                               && l.DataValidade.Date >= DateTime.Today
-                               && l.Quantidade > 0
-                               && l.IdLote != lote.IdLote);
-
-            // Se não houver mais lotes ativos, desativa o produto
-            if (aindaTemLotes && lote.Quantidade == 0)
-            {
-                lote.StatusLote = StatusLote.Inativo;
-            }
-
-            _context.Reservas.Add(reserva);
-            await _context.SaveChangesAsync();
-
-            TempData["Sucesso"] = $"Reserva realizada com sucesso! Seu código é #{reserva.IdReserva}.";
-            return RedirectToAction("Vitrine", "Produtos");
-        }
-
+        // -----------------------------------------------------------------------------------------
         // GET: /Reservas/MinhasReservas
+        // Exibe o histórico de reservas do beneficiário logado, agrupadas por pedido.
+        // -----------------------------------------------------------------------------------------
         public async Task<IActionResult> MinhasReservas()
         {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+            var usuarioId = ObterUsuarioId();
+            if (usuarioId == null)
                 return RedirectToAction("Login", "Auth");
 
             var reservas = await _context.Reservas
@@ -159,9 +38,13 @@ namespace Doalim_dev.Controllers
                 .Select(r => new MinhasReservasViewModel
                 {
                     IdReserva = r.IdReserva,
+                    IdPedido = r.IdPedido ?? 0,
                     DataReserva = r.DataReserva,
                     StatusReserva = r.Status.ToString(),
                     QuantidadeReservada = r.QuantidadeReservada,
+                    TokenConfirmacao = r.TokenConfirmacao,
+                    DataRetiradaInicio = r.DataRetiradaInicio,
+                    DataRetiradaFim = r.DataRetiradaFim,
                     NumeroLote = r.Lote.NumeroLote,
                     DataValidadeLote = r.Lote.DataValidade,
                     NomeProduto = r.Lote.Produto.NomeProduto,
@@ -171,75 +54,102 @@ namespace Doalim_dev.Controllers
                     FotoProduto = r.Lote.Produto.FotoProduto == null
                         ? null
                         : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
-                    NomeDoador = r.Lote.Produto.Doador.Usuario.Nome
+                    NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
+                    TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone
                 })
                 .ToListAsync();
 
             return View(reservas);
         }
 
-        // --- Métodos auxiliares ---
-
-        private async Task<bool> UsuarioPodeReservarAsync(int usuarioId)
+        // -----------------------------------------------------------------------------------------
+        // POST: /Reservas/Cancelar
+        // Cancela uma reserva individual — disponível para status
+        // Pendente e Confirmada. Devolve o lote para a vitrine
+        // se ainda estiver dentro da validade.
+        // -----------------------------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancelar(int idReserva)
         {
-            var usuario = await _context.Usuarios
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+            var usuarioId = ObterUsuarioId();
+            if (usuarioId == null)
+                return RedirectToAction("Login", "Auth");
 
-            if (usuario == null || usuario.StatusVerificacao != StatusVerificacao.Aprovado)
-                return false;
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.IdBeneficiario == usuarioId);
 
-            return await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuarioId);
-        }
-
-        private async Task<IActionResult> RetornarViewReservaAsync(ReservaViewModel viewModel)
-        {
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdProduto == viewModel.IdProduto);
-
-            if (produto == null)
+            if (reserva == null)
                 return NotFound();
 
-            var preenchido = CriarReservaViewModel(produto);
-
-            if (preenchido == null)
-                return NotFound();
-
-            preenchido.QuantidadeReservada = viewModel.QuantidadeReservada;
-            return View("Reservar", preenchido);
-        }
-
-        private ReservaViewModel? CriarReservaViewModel(Produto produto)
-        {
-            var hoje = DateTime.Today;
-
-            // Seleciona o lote mais urgente (com menor data de validade) que esteja ativo e com quantidade disponível - FIFO
-            var loteMaisUrgente = produto.Lotes
-                .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
-                .OrderBy(l => l.DataValidade)
-                .FirstOrDefault();
-
-            // Se não houver lotes disponíveis, retorna null para indicar que a reserva não pode ser feita
-            if (loteMaisUrgente == null)
-                return null;
-
-            return new ReservaViewModel
+            // Valida se a reserva pode ser cancelada
+            if (reserva.Status != StatusReserva.Pendente
+             && reserva.Status != StatusReserva.Confirmada)
             {
-                IdProduto = produto.IdProduto,
-                NomeProduto = produto.NomeProduto,
-                MarcaProduto = produto.MarcaProduto,
-                Categoria = produto.CategoriaProduto,
-                UnidadeMedida = produto.UnidadeMedida,
-                QuantidadePessoaFisica = produto.QuantidadePessoaFisica,
-                QuantidadePessoaJuridica = produto.QuantidadePessoaJuridica,
-                IdLoteMaisUrgente = loteMaisUrgente.IdLote,
-                NumeroLote = loteMaisUrgente.NumeroLote,
-                DataValidadeLote = loteMaisUrgente.DataValidade,
-                QuantidadeDisponivelNoLote = loteMaisUrgente.Quantidade,
-                FotoProduto = produto.FotoProduto
-            };
+                TempData["Erro"] = "Esta reserva não pode ser cancelada.";
+                return RedirectToAction(nameof(MinhasReservas));
+            }
+
+            // Cancela a reserva
+            reserva.Status = StatusReserva.Cancelada;
+            reserva.DataEncerramento = DateTime.UtcNow;
+
+            // Devolve a quantidade ao lote se ainda estiver dentro da validade
+            if (reserva.Lote.DataValidade.Date >= DateTime.Today)
+            {
+                reserva.Lote.Quantidade += reserva.QuantidadeReservada;
+                reserva.Lote.StatusLote = StatusLote.Disponivel;
+                reserva.Lote.Produto.StatusProduto = true; // reativa o produto se estava inativo
+            }
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Reserva cancelada com sucesso.";
+            return RedirectToAction(nameof(MinhasReservas));
         }
+
+
+        // -----------------------------------------------------------------------------------------
+        // MÉTODO AUXILIAR
+        // Atualiza o status do Pedido com base no estado atual
+        // de todas as suas reservas filhas.
+        // -----------------------------------------------------------------------------------------
+        private async Task AtualizarStatusPedidoAsync (int? idPedido)
+        {
+            if (idPedido == null) return;
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.Reservas)
+                .FirstOrDefaultAsync(p=> p.IdPedido == idPedido);
+
+            if (pedido == null) return;
+
+            var statusReservas = pedido.Reservas.Select(r=>r.Status).ToList();
+
+            pedido.StatusPedido = statusReservas.All(s => s == StatusReserva.Retirada)
+                      ? StatusPedido.Retirado
+                      : statusReservas.All(s => s == StatusReserva.Cancelada || s == StatusReserva.Rejeitada)
+                                 ? StatusPedido.Cancelado
+                                 : statusReservas.Any(s => s == StatusReserva.Confirmada)
+                                            ? StatusPedido.Confirmado
+                                            : StatusPedido.Pendente;
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // MÉTODO AUXILIAR
+        // Lê o ID do usuário logado a partir dos Claims.
+        // -----------------------------------------------------------------------------------------
+        private int? ObterUsuarioId()
+        {
+            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(claim, out var id) ? id : null;
+        }
+
     }
 }
