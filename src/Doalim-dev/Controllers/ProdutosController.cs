@@ -18,16 +18,6 @@ namespace Doalim_dev.Controllers
             _context = context;
         }
 
-        private int ObterIdUsuarioLogado()
-        {
-
-            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-
-            if (int.TryParse(claim, out int id)) return id;
-            return 0;
-        }
-
         public async Task<IActionResult> Index(string busca, string categoria, string marca, string numeroLote, DateTime? dataInicio, DateTime? dataFim, bool apenasAlertas, string statusFiltro = "ativos")
         {
             int usuarioId = ObterIdUsuarioLogado();
@@ -151,7 +141,7 @@ namespace Doalim_dev.Controllers
             if (arquivoFoto != null && arquivoFoto.Length > 0)
             {
                 using var ms = new MemoryStream();
-                await arquivoFoto.CopyToAsync(ms); 
+                await arquivoFoto.CopyToAsync(ms);
                 produto.FotoProduto = ms.ToArray();
             }
 
@@ -490,5 +480,269 @@ namespace Doalim_dev.Controllers
 
             return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
         }
+
+        // =======================================================================================
+        // GET: /Produtos/GerenciarReservas
+        // Exibe todas as reservas pendentes e confirmadas dos produtos do doador logado.
+        // =======================================================================================
+        [Authorize]
+        public async Task<IActionResult> GerenciarReservas()
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var reservas = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                        .ThenInclude(p => p.Doador)
+                .Include(r => r.Beneficiario)
+                    .ThenInclude(b => b.Usuario)
+                .Where(r => r.Lote.Produto.IdDoador == usuarioId
+                            && (r.Status == StatusReserva.Pendente
+                                   || r.Status == StatusReserva.Confirmada))
+                .OrderByDescending(r => r.DataReserva)
+                .Select(r => new GerenciarReservaDoadorViewModel
+                {
+                    IdReserva = r.IdReserva,
+                    IdPedido = r.IdPedido ?? 0,
+                    DataReserva = r.DataReserva,
+                    StatusReserva = r.Status.ToString(),
+                    QuantidadeReservada = r.QuantidadeReservada,
+                    NumeroLote = r.Lote.NumeroLote,
+                    DataValidadeLote = r.Lote.DataValidade,
+                    IdProduto = r.Lote.Produto.IdProduto,
+                    NomeProduto = r.Lote.Produto.NomeProduto,
+                    MarcaProduto = r.Lote.Produto.MarcaProduto,
+                    CategoriaProduto = r.Lote.Produto.CategoriaProduto,
+                    UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
+                    FotoProduto = r.Lote.Produto.FotoProduto == null
+                        ? null
+                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                    NomeBeneficiario = r.Beneficiario.Usuario.Nome,
+                    TelefoneBeneficiario = r.Beneficiario.Usuario.Telefone,
+                    EhOng = r.Beneficiario.Eong,
+                    DataRetiradaInicio = r.DataRetiradaInicio,
+                    DataRetiradaFim = r.DataRetiradaFim,
+                    TokenConfirmacao = r.TokenConfirmacao
+                })
+                .ToListAsync();
+
+            return View(reservas);
+        }
+
+        // =========================================================================================
+        // POST: /Produtos/AprovarReserva
+        // Doador aprova a reserva, define o intervalo de retirada e gera o token de confirmação.
+        // =========================================================================================
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AprovarReserva(AprovarReservaViewModel viewModel)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Erro"] = "Informe o intervalo de retirada corretamente.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            var reserva = await _context.Reservas
+                   .Include(r => r.Lote)
+                       .ThenInclude(l => l.Produto)
+                   .FirstOrDefaultAsync(r => r.IdReserva == viewModel.IdReserva
+                                          && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            // Valida se status da resevra é diferente de pendente
+            if (reserva.Status != StatusReserva.Pendente)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser aprovada.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida se o intervalo de retirada é anterior ao vencimento do lote
+            if (viewModel.DataRetiradaFim.Date > reserva.Lote.DataValidade.Date)
+            {
+                TempData["Erro"] = $"A data fim de retirada deve ser anterior ao " +
+                                   $"vencimento do lote ({reserva.Lote.DataValidade:dd/MM/yyyy}).";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida que a data início é anterior ou igual à data fim
+            if (viewModel.DataRetiradaInicio.Date > viewModel.DataRetiradaFim.Date)
+            {
+                TempData["Erro"] = "A data de início deve ser anterior à data fim.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Gera o token de confirmação — 8 caracteres alfanuméricos em maiúsculo
+            reserva.TokenConfirmacao = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            reserva.DataRetiradaInicio = viewModel.DataRetiradaInicio;
+            reserva.DataRetiradaFim = viewModel.DataRetiradaFim;
+            reserva.Status = StatusReserva.Confirmada;
+
+            // Marca o lote como Reservado — sai da vitrine
+            reserva.Lote.StatusLote = StatusLote.Reservado;
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Reserva #{reserva.IdReserva} aprovada com sucesso!";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
+        // =====================================================================
+        // POST: /Produtos/RejeitarReserva
+        // Doador rejeita a reserva. O lote volta para a vitrine
+        // se ainda estiver dentro da validade.
+        // =====================================================================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejeitarReserva(int idReserva)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            if (reserva.Status != StatusReserva.Pendente)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser rejeitada.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Rejeita de fato a reserva
+            reserva.Status = StatusReserva.Rejeitada;
+            reserva.DataEncerramento = DateTime.UtcNow;
+
+            // Devolve o lote para a vitrine se ainda estiver dentro da validade
+            if (reserva.Lote.DataValidade.Date >= DateTime.Today)
+            {
+                reserva.Lote.Quantidade += reserva.QuantidadeReservada;
+                reserva.Lote.StatusLote = StatusLote.Disponivel;
+                reserva.Lote.Produto.StatusProduto = true;
+            }
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Reserva #{reserva.IdReserva} rejeitada.";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
+        // =====================================================================
+        // POST: /Produtos/ConfirmarEntrega
+        // Doador insere o token informado pelo beneficiário.
+        // Se válido, marca a reserva como Entregue e o lote como Entregue.
+        // =====================================================================
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmarEntrega(int idReserva, string tokenInformado)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            // Valida se o status da reserva encontra-se como confirmada
+            if (reserva.Status != StatusReserva.Confirmada)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser confirmada como entregue.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida o token — comparação case-insensitive
+            if (!string.Equals(reserva.TokenConfirmacao, tokenInformado?.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Erro"] = "Token inválido. Verifique o código informado pelo beneficiário.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Marca a reserva como retirada
+            reserva.Status = StatusReserva.Retirada;
+            reserva.DataEncerramento = DateTime.UtcNow;
+
+            // Marca o lote como entregue — sai da vitrine e vai para o histórico
+            reserva.Lote.StatusLote = StatusLote.Entregue;
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Entrega da reserva #{reserva.IdReserva} confirmada com sucesso!";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
+
+        // =====================================================================
+        // MÉTODO AUXILIAR
+        // Lê o ID do usuário logado a partir dos Claims.
+        // =====================================================================
+
+        private int ObterIdUsuarioLogado()
+        {
+            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return int.TryParse(claim, out var id) ? id : 0;
+        }
+
+        // =====================================================================
+        // MÉTODO AUXILIAR
+        // Recalcula e atualiza o status do Pedido com base
+        // no estado atual de todas as suas reservas filhas.
+        // =====================================================================
+
+        private async Task AtualizarStatusPedidoAsync(int? idPedido)
+        {
+            if (idPedido == null) return;
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.Reservas)
+                .FirstOrDefaultAsync(p => p.IdPedido == idPedido);
+
+            if (pedido == null) return;
+
+            var statusReservas = pedido.Reservas.Select(r => r.Status).ToList();
+
+            pedido.StatusPedido = statusReservas.All(s => s == StatusReserva.Retirada)
+                      ? StatusPedido.Retirado
+                      : statusReservas.All(s => s == StatusReserva.Cancelada || s == StatusReserva.Rejeitada)
+                                 ? StatusPedido.Cancelado
+                                 : statusReservas.Any(s => s == StatusReserva.Confirmada)
+                                            ? StatusPedido.Confirmado
+                                            : StatusPedido.Pendente;
+        }
+
     }
 }
