@@ -21,7 +21,7 @@ namespace Doalim_dev.Models
         // Expiração do carrinho: 30 minutos após a criação do primeiro item do grupo
         // Todos os itens de um mesmo beneficiário compartilham a mesma expiração
         [Required]
-        public DateTime Expiracao { get; set; }
+        public DateTime DataExpiracao { get; set; }
 
         // FK para o Beneficiario dono do carrinho
         [Required]

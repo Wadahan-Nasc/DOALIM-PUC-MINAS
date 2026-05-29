@@ -166,8 +166,8 @@ namespace Doalim_dev.Controllers
                     DataValidadeLote = r.Lote.DataValidade,
                     NomeProduto = r.Lote.Produto.NomeProduto,
                     MarcaProduto = r.Lote.Produto.MarcaProduto,
-                    Categoria = r.Lote.Produto.CategoriaProduto,
-                    UnidadeMedida = r.Lote.Produto.UnidadeMedida,
+                    CategoriaProduto = r.Lote.Produto.CategoriaProduto,
+                    UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
                     FotoProduto = r.Lote.Produto.FotoProduto == null
                         ? null
                         : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
@@ -241,48 +241,5 @@ namespace Doalim_dev.Controllers
                 FotoProduto = produto.FotoProduto
             };
         }
-
-        /* APAGAR DEPOIS DE TESTAR - MANTIDO PARA REFERÊNCIA DE LÓGICA DE DEDUÇÃO DE QUANTIDADE DOS LOTES
-        
-        /// <summary>
-        /// Deduz a quantidade reservada dos lotes ativos do produto,
-        /// começando pelos mais próximos do vencimento (FIFO).
-        /// Remove lotes que ficam zerados e atualiza StatusProduto se necessário.
-        /// </summary>
-        private void DeduzirQuantidadeLotes(Produto produto, int quantidade)
-        {
-            var hoje = DateTime.Today;
-            var lotes = produto.Lotes
-                .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
-                .OrderBy(l => l.DataValidade)
-                .ToList();
-
-            foreach (var lote in lotes)
-            {
-                if (quantidade <= 0)
-                    break;
-
-                if (lote.Quantidade <= quantidade)
-                {
-                    quantidade -= lote.Quantidade;
-                    lote.Quantidade = 0;
-                    lote.StatusLote = StatusLote.Inativo;
-                    _context.Lotes.Remove(lote);
-                }
-                else
-                {
-                    lote.Quantidade -= quantidade;
-                    quantidade = 0;
-                }
-            }
-
-            // Se não restarem lotes ativos, desativa o produto
-            var aindaTemLotes = produto.Lotes
-                .Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0);
-
-            if (!aindaTemLotes)
-                produto.StatusProduto = false;
-        }
-        */
     }
 }
