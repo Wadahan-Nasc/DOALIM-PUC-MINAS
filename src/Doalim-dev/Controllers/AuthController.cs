@@ -81,7 +81,7 @@ namespace Doalim_dev.Controllers
                 Endereco           = vm.Endereco,
                 Ativo              = true,
                 DataCadastro       = DateTime.UtcNow,
-                // Todo usuário começa pendente até o administrador validar a documentação.
+                // Todo usuï¿½rio comeï¿½a pendente atï¿½ o administrador validar a documentaï¿½ï¿½o.
                 StatusVerificacao  = StatusVerificacao.Pendente
             };
 
@@ -93,7 +93,7 @@ namespace Doalim_dev.Controllers
                 _context.Doadores.Add(new Doador
                 {
                     IdUsuario = usuario.IdUsuario,
-                    QtdAlimentosDoados = "0"
+                    QtdAlimentosDoados = 0
                 });
                 await _context.SaveChangesAsync();
             }
@@ -321,7 +321,10 @@ namespace Doalim_dev.Controllers
                 new Claim(ClaimTypes.Email,          usuario.Email),
                 // A Claim de Role permite que outros controllers usem
                 // [Authorize(Roles = "Admin")] ou [Authorize(Roles = "DoadorPJ")] etc.
-                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString())
+                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString()),
+                // FotoPerfil armazenada no cookie para evitar query ao banco no _Layout
+                // Nota: atualiza apenas no prÃ³ximo login se o usuÃ¡rio trocar a foto
+                new Claim("FotoPerfil",              usuario.FotoPerfil ?? string.Empty)
             };
 
             var identidade  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

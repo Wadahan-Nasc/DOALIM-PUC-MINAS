@@ -6,48 +6,100 @@
     var usuarioBeneficiario = ViewBag.UsuarioBeneficiario == true;
     var usuarioAprovado = ViewBag.UsuarioAprovado == true;
     var podeReservar = ViewBag.PodeReservar == true;
+    var ehBeneficiarioPF = ViewBag.EhBeneficiarioPF == true;
 }
 
-<h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="mb-1">🛒 Alimentos Disponíveis para Doação</h2>
+        <p class="text-muted mb-0">Encontre alimentos disponíveis e adicione ao seu carrinho.</p>
+    </div>
+</div>
 
+@* Filtros *@
 <form method="get" asp-controller="Produtos" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label fw-semibold">Buscar por nome</label>
+    <div class="row g-3">
+
+        <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold small mb-1">Buscar por nome</label>
             <input type="text"
                    name="NomeBusca"
                    value="@Model.Filtros.NomeBusca"
-                   class="form-control"
+                   class="form-control form-control-sm"
                    placeholder="Ex: Arroz, feijão, macarrão..." />
         </div>
 
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Quantidade Mínima</label>
-            <input type="number"
-                   name="QuantidadeMinima"
-                   value="@Model.Filtros.QuantidadeMinima"
-                   class="form-control"
-                   placeholder="Ex: 10" />
-        </div>
-
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Ordenar por validade</label>
-            <select name="OrdemValidade" class="form-select">
-                <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">
-                    Mais próxima de vencer
-                </option>
-                <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">
-                    Mais distante de vencer
-                </option>
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Categoria</label>
+            <select name="Categoria" class="form-select form-select-sm">
+                <option value="" selected="@(string.IsNullOrEmpty(Model.Filtros.Categoria))">Todas</option>
+                @foreach (var cat in ViewBag.CategoriasVitrine as List<string> ?? new List<string>())
+                {
+                    <option value="@cat" selected="@(Model.Filtros.Categoria == cat)">@cat</option>
+                }
             </select>
         </div>
 
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Quantidade mínima</label>
+            <input type="number"
+                   name="QuantidadeMinima"
+                   value="@Model.Filtros.QuantidadeMinima"
+                   class="form-control form-control-sm"
+                   placeholder="Ex: 10" />
         </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Ordenar por validade</label>
+            <select name="OrdemValidade" class="form-select form-select-sm">
+                <option value="asc"  selected="@(Model.Filtros.OrdemValidade == "asc")">Mais próxima de vencer</option>
+                <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">Mais distante de vencer</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="bi bi-search me-1"></i> Filtrar
+            </button>
+            <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary btn-sm w-100">
+                Limpar
+            </a>
+        </div>
+
     </div>
 </form>
+
+@section Scripts {
+<script>
+    // Validação em tempo real do limite de quantidade por categoria (CPF / CNPJ)
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.qtd-input').forEach(function (input) {
+            input.addEventListener('input', function () {
+                var max  = parseInt(this.dataset.max);
+                var tipo = this.dataset.tipo;
+                var val  = parseInt(this.value);
+                var form  = this.closest('form');
+                var btn   = form.querySelector('.btn-adicionar');
+                var aviso = form.querySelector('.aviso-limite');
+
+                if (isNaN(val) || val < 1) {
+                    aviso.textContent = '⚠️ A quantidade mínima é 1.';
+                    aviso.style.display = 'block';
+                    btn.disabled = true;
+                } else if (val > max) {
+                    aviso.textContent = '⚠️ Limite para ' + tipo + ': máximo ' + max + ' unidade(s).';
+                    aviso.style.display = 'block';
+                    btn.disabled = true;
+                } else {
+                    aviso.textContent = '';
+                    aviso.style.display = 'none';
+                    btn.disabled = false;
+                }
+            });
+        });
+    });
+</script>
+}
 
 @if (!Model.Produtos.Any())
 {
@@ -55,94 +107,116 @@
 }
 else
 {
-    <div class="container">
-        <div class="row fw-bold border-bottom pb-2 mb-2 text-muted d-none d-md-flex">
-            <div class="col-md-1"></div>
-            <div class="col-md-2">Alimento</div>
-            <div class="col-md-1">Marca</div>
-            <div class="col-md-2">Categoria</div>
-            <div class="col-md-2">Armazenamento</div>
-            <div class="col-md-1 text-center">Qtd.</div>
-            <div class="col-md-1 text-center">Validade</div>
-            <div class="col-md-1">Doador</div>
-            <div class="col-md-1"></div>
-        </div>
-
+    <div class="row g-3">
         @foreach (var alimento in Model.Produtos)
         {
-            <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
-                <div class="col-md-1 text-center">
+            var limiteDoUsuario = ehBeneficiarioPF
+                ? (alimento.LimitePF > 0 ? Math.Min(alimento.QuantidadeDisponivel, alimento.LimitePF) : alimento.QuantidadeDisponivel)
+                : (alimento.LimitePJ > 0 ? Math.Min(alimento.QuantidadeDisponivel, alimento.LimitePJ) : alimento.QuantidadeDisponivel);
+
+            <div class="col-sm-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+
+                    @* Foto do produto *@
                     @if (!string.IsNullOrEmpty(alimento.FotoProduto))
                     {
                         <img src="@alimento.FotoProduto"
+                             class="card-img-top"
                              alt="@alimento.Nome"
-                             class="rounded"
-                             style="width:56px; height:56px; object-fit:cover;" />
+                             style="height:180px; object-fit:cover;" />
                     }
                     else
                     {
-                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                             style="width:56px; height:56px; font-size:1.4rem;">
+                        <div class="bg-light d-flex align-items-center justify-content-center"
+                             style="height:180px; font-size:3.5rem;">
                             🍱
                         </div>
                     }
-                </div>
 
-                <div class="col-md-2">
-                    <strong>@alimento.Nome</strong>
-                </div>
+                    <div class="card-body d-flex flex-column">
 
-                <div class="col-md-1 text-muted small">
-                    @alimento.MarcaProduto
-                </div>
+                        @* Nome e categoria *@
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                            <h5 class="card-title mb-0 fw-bold">@alimento.Nome</h5>
+                            <span class="badge bg-secondary flex-shrink-0">@alimento.Categoria</span>
+                        </div>
 
-                <div class="col-md-2">
-                    <span class="badge bg-secondary">@alimento.Categoria</span>
-                </div>
+                        <p class="card-text text-muted small mb-3">
+                            @alimento.MarcaProduto
+                            @if (!string.IsNullOrEmpty(alimento.TipoArmazenamento))
+                            {
+                                <span>&bull; @alimento.TipoArmazenamento</span>
+                            }
+                        </p>
 
-                <div class="col-md-2 text-muted small">
-                    @alimento.TipoArmazenamento
-                </div>
+                        @* Informações do lote *@
+                        <dl class="row small mb-3">
+                            <dt class="col-6 text-muted fw-normal">Disponível</dt>
+                            <dd class="col-6 fw-semibold">@alimento.QuantidadeDisponivel unid.</dd>
 
-                <div class="col-md-1 text-center">
-                    @alimento.QuantidadeDisponivel
-                </div>
+                            <dt class="col-6 text-muted fw-normal">Validade</dt>
+                            <dd class="col-6 fw-semibold">@alimento.DataValidade.ToString("dd/MM/yyyy")</dd>
 
-                <div class="col-md-1 text-center small">
-                    @alimento.DataValidade.ToString("dd/MM/yyyy")
-                </div>
+                            <dt class="col-6 text-muted fw-normal">Doador</dt>
+                            <dd class="col-6">@alimento.NomeDoador</dd>
 
-                <div class="col-md-1 small">
-                    @alimento.NomeDoador
-                </div>
+                            @if (podeReservar && (ehBeneficiarioPF ? alimento.LimitePF : alimento.LimitePJ) > 0)
+                            {
+                                <dt class="col-6 text-muted fw-normal">Limite @(ehBeneficiarioPF ? "PF" : "PJ")</dt>
+                                <dd class="col-6 fw-semibold text-warning">
+                                    @(ehBeneficiarioPF ? alimento.LimitePF : alimento.LimitePJ) unid.
+                                </dd>
+                            }
+                        </dl>
 
-                <div class="col-md-1 text-end">
-                    @if (podeReservar)
-                    {
-                        <a asp-controller="Reservas"
-                           asp-action="Reservar"
-                           asp-route-id="@alimento.IdProduto"
-                           class="btn btn-success btn-sm">
-                            Reservar
-                        </a>
-                    }
-                    else if (!usuarioLogado)
-                    {
-                        <a asp-controller="Auth"
-                           asp-action="Login"
-                           asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")"
-                           class="btn btn-outline-success btn-sm">
-                            Entrar para reservar
-                        </a>
-                    }
-                    else if (!usuarioAprovado)
-                    {
-                        <button type="button" class="btn btn-outline-warning btn-sm" disabled>Aguardando aprovação</button>
-                    }
-                    else if (!usuarioBeneficiario)
-                    {
-                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Somente beneficiários</button>
-                    }
+                        @* Ação — ocupa o rodapé do card *@
+                        <div class="mt-auto">
+                            @if (podeReservar)
+                            {
+                                <form asp-controller="Carrinho" asp-action="Adicionar" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idProduto" value="@alimento.IdProduto" />
+                                    <div class="d-flex gap-2">
+                                        <input type="number"
+                                               name="quantidade"
+                                               value="1"
+                                               min="1"
+                                               max="@limiteDoUsuario"
+                                               data-max="@limiteDoUsuario"
+                                               data-tipo="@(ehBeneficiarioPF ? "CPF" : "CNPJ")"
+                                               class="form-control form-control-sm text-center qtd-input"
+                                               style="width:80px;" />
+                                        <button type="submit" class="btn btn-success btn-sm flex-grow-1 btn-adicionar">
+                                            <i class="bi bi-cart-plus me-1"></i> Adicionar
+                                        </button>
+                                    </div>
+                                    <small class="text-danger aviso-limite mt-1" style="display:none; font-size:0.78rem;"></small>
+                                </form>
+                            }
+                            else if (!usuarioLogado)
+                            {
+                                <a asp-controller="Auth"
+                                   asp-action="Login"
+                                   asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")"
+                                   class="btn btn-outline-success btn-sm w-100">
+                                    Entrar para reservar
+                                </a>
+                            }
+                            else if (!usuarioAprovado)
+                            {
+                                <button type="button" class="btn btn-outline-warning btn-sm w-100" disabled>
+                                    <i class="bi bi-hourglass-split me-1"></i> Aguardando aprovação
+                                </button>
+                            }
+                            else if (!usuarioBeneficiario)
+                            {
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                    Somente beneficiários
+                                </button>
+                            }
+                        </div>
+
+                    </div>
                 </div>
             </div>
         }

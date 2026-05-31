@@ -269,7 +269,7 @@ namespace Doalim_dev.Controllers
             else if (usuario.TipoUsuario == TipoUsuario.DoadorPF || usuario.TipoUsuario == TipoUsuario.DoadorPJ)
             {
                 if (!await _context.Doadores.AnyAsync(d => d.IdUsuario == usuario.IdUsuario))
-                    _context.Doadores.Add(new Doador { IdUsuario = usuario.IdUsuario, QtdAlimentosDoados = "0" });
+                    _context.Doadores.Add(new Doador { IdUsuario = usuario.IdUsuario, QtdAlimentosDoados = 0 });
             }
             else if (usuario.TipoUsuario == TipoUsuario.BeneficiarioPF || usuario.TipoUsuario == TipoUsuario.BeneficiarioPJ)
             {

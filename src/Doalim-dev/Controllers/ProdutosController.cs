@@ -8,15 +8,9 @@ using System.Security.Claims;
 namespace Doalim_dev.Controllers
 {
     [Authorize]
-    public class ProdutosController : Controller
+    public class ProdutosController : BaseController
     {
-
-        private readonly AppDbContext _context;
-
-        public ProdutosController(AppDbContext context)
-        {
-            _context = context;
-        }
+        public ProdutosController(AppDbContext context) : base(context) { }
 
         public async Task<IActionResult> Index(string busca, string categoria, string marca, string numeroLote, DateTime? dataInicio, DateTime? dataFim, bool apenasAlertas, string statusFiltro = "ativos")
         {
@@ -98,12 +92,19 @@ namespace Doalim_dev.Controllers
             ViewBag.ApenasAlertas = apenasAlertas;
             ViewBag.StatusFiltro = statusFiltro;
 
+            // Categorias disponíveis para o filtro — carregadas do domínio extensível
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
+
             return View(produtos);
         }
 
 
         // GET
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
             if (!ehDoador)
@@ -111,6 +112,7 @@ namespace Doalim_dev.Controllers
                 TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores podem cadastrar produtos.";
                 return RedirectToAction("Index", "Home");
             }
+            await CarregarLookupsAsync();
             return View();
         }
 
@@ -178,7 +180,7 @@ namespace Doalim_dev.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Regra de négocio
+                // Regra de negócio
                 if (!produtoTemLoteValido && produto.StatusProduto)
                 {
                     produto.StatusProduto = false;
@@ -189,6 +191,7 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -220,6 +223,7 @@ namespace Doalim_dev.Controllers
             ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
             ViewBag.UsuarioAprovado = usuarioAprovado;
             ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+            ViewBag.EhBeneficiarioPF = User.IsInRole("BeneficiarioPF");
 
             var hoje = DateTime.Today;
             var query = _context.Produtos
@@ -229,6 +233,16 @@ namespace Doalim_dev.Controllers
 
             if (!string.IsNullOrWhiteSpace(filtros.NomeBusca))
                 query = query.Where(p => p.NomeProduto.Contains(filtros.NomeBusca));
+
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(p => p.CategoriaProduto == filtros.Categoria);
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasVitrine = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
 
             var produtos = await query.ToListAsync();
             var idsDoadores = produtos.Select(p => p.IdDoador).Distinct().ToList();
@@ -257,7 +271,9 @@ namespace Doalim_dev.Controllers
                         TipoArmazenamento = p.TipoArmazenamento ?? "",
                         FotoProduto = ObterFotoProdutoDataUrl(p.FotoProduto),
                         QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
-                        NomeDoador = nomeDoador ?? "Doador"
+                        NomeDoador = nomeDoador ?? "Doador",
+                        LimitePF = p.QuantidadePessoaFisica,
+                        LimitePJ = p.QuantidadePessoaJuridica
                     };
                 })
                 .Where(p => !filtros.QuantidadeMinima.HasValue || p.QuantidadeDisponivel >= filtros.QuantidadeMinima.Value);
@@ -290,6 +306,7 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -427,6 +444,7 @@ namespace Doalim_dev.Controllers
             }
 
             produto.Lotes = await _context.Lotes.Where(l => l.IdProduto == id).ToListAsync();
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -446,6 +464,124 @@ namespace Doalim_dev.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // =======================================================================================
+        // GET: /Produtos/HistoricoDoacoes
+        // Relatório de doações concluídas (Retirada) e rejeitadas do doador logado.
+        // =======================================================================================
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        public async Task<IActionResult> HistoricoDoacoes(HistoricoDoadorFiltroViewModel filtros)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var query = _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .Include(r => r.Beneficiario)
+                    .ThenInclude(b => b.Usuario)
+                .Where(r => r.Lote.Produto.IdDoador == usuarioId
+                         && (r.Status == StatusReserva.Retirada || r.Status == StatusReserva.Rejeitada))
+                .AsQueryable();
+
+            // Filtro por status
+            if (!string.IsNullOrWhiteSpace(filtros.Status) &&
+                Enum.TryParse<StatusReserva>(filtros.Status, out var statusEnum))
+                query = query.Where(r => r.Status == statusEnum);
+
+            // Filtro por categoria
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(r => r.Lote.Produto.CategoriaProduto == filtros.Categoria);
+
+            // Filtro por nome do produto
+            if (!string.IsNullOrWhiteSpace(filtros.NomeProduto))
+                query = query.Where(r => r.Lote.Produto.NomeProduto.Contains(filtros.NomeProduto));
+
+            // Filtro por nome do beneficiário
+            if (!string.IsNullOrWhiteSpace(filtros.NomeBeneficiario))
+                query = query.Where(r => r.Beneficiario.Usuario.Nome.Contains(filtros.NomeBeneficiario));
+
+            // Filtro por validade do lote
+            if (filtros.ValidadeInicio.HasValue)
+            {
+                var inicio = filtros.ValidadeInicio.Value.Date;
+                query = query.Where(r => r.Lote.DataValidade >= inicio);
+            }
+            if (filtros.ValidadeFim.HasValue)
+            {
+                var fim = filtros.ValidadeFim.Value.Date.AddDays(1);
+                query = query.Where(r => r.Lote.DataValidade < fim);
+            }
+
+            // Filtro por data de reserva
+            if (filtros.DataReservaInicio.HasValue)
+            {
+                var inicio = filtros.DataReservaInicio.Value.Date;
+                query = query.Where(r => r.DataReserva >= inicio);
+            }
+            if (filtros.DataReservaFim.HasValue)
+            {
+                var fim = filtros.DataReservaFim.Value.Date.AddDays(1);
+                query = query.Where(r => r.DataReserva < fim);
+            }
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
+
+            // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
+            var reservasDb = await query
+                .OrderByDescending(r => r.DataEncerramento ?? r.DataReserva)
+                .ToListAsync();
+
+            var itens = reservasDb.Select(r => new HistoricoDoadorViewModel
+            {
+                IdReserva = r.IdReserva,
+                IdPedido = r.IdPedido ?? 0,
+                NomeProduto = r.Lote.Produto.NomeProduto,
+                MarcaProduto = r.Lote.Produto.MarcaProduto ?? "",
+                CategoriaProduto = r.Lote.Produto.CategoriaProduto ?? "",
+                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida ?? "",
+                FotoProduto = ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
+                NumeroLote = r.Lote.NumeroLote,
+                DataValidadeLote = r.Lote.DataValidade,
+                QuantidadeReservada = r.QuantidadeReservada,
+                StatusReserva = r.Status.ToString(),
+                DataReserva = r.DataReserva,
+                DataEncerramento = r.DataEncerramento,
+                MotivoRejeicao = r.MotivoRejeicao,
+                NomeBeneficiario = r.Beneficiario.Usuario.Nome,
+                EhOng = r.Beneficiario.Eong
+            }).ToList();
+
+            var viewModel = new HistoricoDoadorPageViewModel
+            {
+                Filtros = filtros,
+                Itens = itens
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Carrega os valores ativos de domínio (Categoria, TipoArmazenamento, UnidadeMedida)
+        /// e os disponibiliza via ViewBag para os formulários de Create e Edit.
+        /// </summary>
+        private async Task CarregarLookupsAsync()
+        {
+            var todos = await _context.ValoresLookup
+                .Where(v => v.Ativo)
+                .OrderBy(v => v.Nome)
+                .ToListAsync();
+
+            ViewBag.Categorias          = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
+            ViewBag.TiposArmazenamento  = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
+            ViewBag.UnidadesMedida      = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
         }
 
         private bool ProdutoExists(int id) => _context.Produtos.Any(e => e.IdProduto == id);
@@ -485,7 +621,7 @@ namespace Doalim_dev.Controllers
         // GET: /Produtos/GerenciarReservas
         // Exibe todas as reservas pendentes e confirmadas dos produtos do doador logado.
         // =======================================================================================
-        [Authorize]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
         public async Task<IActionResult> GerenciarReservas()
         {
             var usuarioId = ObterIdUsuarioLogado();
@@ -534,10 +670,11 @@ namespace Doalim_dev.Controllers
         // =========================================================================================
         // POST: /Produtos/AprovarReserva
         // Doador aprova a reserva, define o intervalo de retirada e gera o token de confirmação.
+        // A quantidade já foi deduzida do lote em Finalizar — não alteramos StatusLote aqui.
         // =========================================================================================
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AprovarReserva(AprovarReservaViewModel viewModel)
         {
@@ -560,7 +697,7 @@ namespace Doalim_dev.Controllers
             if (reserva == null)
                 return NotFound();
 
-            // Valida se status da resevra é diferente de pendente
+            // Valida se status da reserva é diferente de pendente
             if (reserva.Status != StatusReserva.Pendente)
             {
                 TempData["Erro"] = "Esta reserva não pode ser aprovada.";
@@ -588,8 +725,10 @@ namespace Doalim_dev.Controllers
             reserva.DataRetiradaFim = viewModel.DataRetiradaFim;
             reserva.Status = StatusReserva.Confirmada;
 
-            // Marca o lote como Reservado — sai da vitrine
-            reserva.Lote.StatusLote = StatusLote.Reservado;
+            // NOTA: O StatusLote NÃO é alterado aqui.
+            // A quantidade já foi deduzida do lote em Finalizar.
+            // O lote permanece Disponivel para eventuais quantidades restantes,
+            // ou Inativo se foi totalmente consumido.
 
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(reserva.IdPedido);
@@ -606,13 +745,19 @@ namespace Doalim_dev.Controllers
         // se ainda estiver dentro da validade.
         // =====================================================================
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RejeitarReserva(int idReserva)
+        public async Task<IActionResult> RejeitarReserva(int idReserva, string? motivoRejeicao)
         {
             var usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
+
+            if (string.IsNullOrWhiteSpace(motivoRejeicao))
+            {
+                TempData["Erro"] = "Informe o motivo da rejeição.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
 
             var reserva = await _context.Reservas
                 .Include(r => r.Lote)
@@ -629,15 +774,20 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction(nameof(GerenciarReservas));
             }
 
-            // Rejeita de fato a reserva
+            // Rejeita a reserva com o motivo informado
             reserva.Status = StatusReserva.Rejeitada;
+            reserva.MotivoRejeicao = motivoRejeicao.Trim();
             reserva.DataEncerramento = DateTime.UtcNow;
 
             // Devolve o lote para a vitrine se ainda estiver dentro da validade
             if (reserva.Lote.DataValidade.Date >= DateTime.Today)
             {
                 reserva.Lote.Quantidade += reserva.QuantidadeReservada;
-                reserva.Lote.StatusLote = StatusLote.Disponivel;
+
+                // Garante que o lote volte a Disponivel (pode estar Inativo se foi zerado)
+                if (reserva.Lote.StatusLote == StatusLote.Inativo)
+                    reserva.Lote.StatusLote = StatusLote.Disponivel;
+
                 reserva.Lote.Produto.StatusProduto = true;
             }
 
@@ -653,10 +803,11 @@ namespace Doalim_dev.Controllers
         // =====================================================================
         // POST: /Produtos/ConfirmarEntrega
         // Doador insere o token informado pelo beneficiário.
-        // Se válido, marca a reserva como Entregue e o lote como Entregue.
+        // Se válido, marca a reserva como Retirada.
+        // O lote só é marcado como Entregue se a quantidade for zero.
         // =====================================================================
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmarEntrega(int idReserva, string tokenInformado)
         {
@@ -692,8 +843,11 @@ namespace Doalim_dev.Controllers
             reserva.Status = StatusReserva.Retirada;
             reserva.DataEncerramento = DateTime.UtcNow;
 
-            // Marca o lote como entregue — sai da vitrine e vai para o histórico
-            reserva.Lote.StatusLote = StatusLote.Entregue;
+            // Marca o lote como Entregue apenas se não houver mais estoque.
+            // Se ainda houver quantidade disponível, o lote permanece como está
+            // para não bloquear outras reservas em andamento.
+            if (reserva.Lote.Quantidade == 0)
+                reserva.Lote.StatusLote = StatusLote.Entregue;
 
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(reserva.IdPedido);
@@ -703,46 +857,5 @@ namespace Doalim_dev.Controllers
             TempData["Sucesso"] = $"Entrega da reserva #{reserva.IdReserva} confirmada com sucesso!";
             return RedirectToAction(nameof(GerenciarReservas));
         }
-
-
-        // =====================================================================
-        // MÉTODO AUXILIAR
-        // Lê o ID do usuário logado a partir dos Claims.
-        // =====================================================================
-
-        private int ObterIdUsuarioLogado()
-        {
-            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            return int.TryParse(claim, out var id) ? id : 0;
-        }
-
-        // =====================================================================
-        // MÉTODO AUXILIAR
-        // Recalcula e atualiza o status do Pedido com base
-        // no estado atual de todas as suas reservas filhas.
-        // =====================================================================
-
-        private async Task AtualizarStatusPedidoAsync(int? idPedido)
-        {
-            if (idPedido == null) return;
-
-            var pedido = await _context.Pedidos
-                .Include(p => p.Reservas)
-                .FirstOrDefaultAsync(p => p.IdPedido == idPedido);
-
-            if (pedido == null) return;
-
-            var statusReservas = pedido.Reservas.Select(r => r.Status).ToList();
-
-            pedido.StatusPedido = statusReservas.All(s => s == StatusReserva.Retirada)
-                      ? StatusPedido.Retirado
-                      : statusReservas.All(s => s == StatusReserva.Cancelada || s == StatusReserva.Rejeitada)
-                                 ? StatusPedido.Cancelado
-                                 : statusReservas.Any(s => s == StatusReserva.Confirmada)
-                                            ? StatusPedido.Confirmado
-                                            : StatusPedido.Pendente;
-        }
-
     }
 }

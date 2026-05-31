@@ -1,65 +1,118 @@
-﻿using Doalim_dev.Models;
+using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Security.Claims;
 
 namespace Doalim_dev.Controllers
 {
     [Authorize]
-    public class ReservasController : Controller
+    public class ReservasController : BaseController
     {
-        private readonly AppDbContext _context;
-
-        public ReservasController(AppDbContext context)
-        {
-            _context = context;
-        }
+        public ReservasController(AppDbContext context) : base(context) { }
 
         // -----------------------------------------------------------------------------------------
         // GET: /Reservas/MinhasReservas
-        // Exibe o histórico de reservas do beneficiário logado, agrupadas por pedido.
+        // Exibe o histórico de reservas do beneficiário logado com filtros opcionais.
         // -----------------------------------------------------------------------------------------
-        public async Task<IActionResult> MinhasReservas()
+        public async Task<IActionResult> MinhasReservas(MinhasReservasFiltroViewModel filtros)
         {
-            var usuarioId = ObterUsuarioId();
-            if (usuarioId == null)
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
 
-            var reservas = await _context.Reservas
+            var query = _context.Reservas
                 .Include(r => r.Lote)
                     .ThenInclude(l => l.Produto)
                         .ThenInclude(p => p.Doador)
                             .ThenInclude(d => d.Usuario)
                 .Where(r => r.IdBeneficiario == usuarioId)
-                .OrderByDescending(r => r.DataReserva)
-                .Select(r => new MinhasReservasViewModel
-                {
-                    IdReserva = r.IdReserva,
-                    IdPedido = r.IdPedido ?? 0,
-                    DataReserva = r.DataReserva,
-                    StatusReserva = r.Status.ToString(),
-                    QuantidadeReservada = r.QuantidadeReservada,
-                    TokenConfirmacao = r.TokenConfirmacao,
-                    DataRetiradaInicio = r.DataRetiradaInicio,
-                    DataRetiradaFim = r.DataRetiradaFim,
-                    NumeroLote = r.Lote.NumeroLote,
-                    DataValidadeLote = r.Lote.DataValidade,
-                    NomeProduto = r.Lote.Produto.NomeProduto,
-                    MarcaProduto = r.Lote.Produto.MarcaProduto,
-                    CategoriaProduto = r.Lote.Produto.CategoriaProduto,
-                    UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
-                    FotoProduto = r.Lote.Produto.FotoProduto == null
-                        ? null
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
-                    NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
-                    TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone
-                })
+                .AsQueryable();
+
+            // Filtro por status
+            if (!string.IsNullOrWhiteSpace(filtros.Status) &&
+                Enum.TryParse<StatusReserva>(filtros.Status, out var statusEnum))
+                query = query.Where(r => r.Status == statusEnum);
+
+            // Filtro por categoria
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(r => r.Lote.Produto.CategoriaProduto == filtros.Categoria);
+
+            // Filtro por nome do produto
+            if (!string.IsNullOrWhiteSpace(filtros.NomeProduto))
+                query = query.Where(r => r.Lote.Produto.NomeProduto.Contains(filtros.NomeProduto));
+
+            // Filtro por nome do doador
+            if (!string.IsNullOrWhiteSpace(filtros.NomeDoador))
+                query = query.Where(r => r.Lote.Produto.Doador.Usuario.Nome.Contains(filtros.NomeDoador));
+
+            // Filtro por validade do lote
+            if (filtros.ValidadeInicio.HasValue)
+            {
+                var inicio = filtros.ValidadeInicio.Value.Date;
+                query = query.Where(r => r.Lote.DataValidade >= inicio);
+            }
+            if (filtros.ValidadeFim.HasValue)
+            {
+                var fim = filtros.ValidadeFim.Value.Date.AddDays(1); // inclui o dia final
+                query = query.Where(r => r.Lote.DataValidade < fim);
+            }
+
+            // Filtro por data de reserva
+            if (filtros.DataReservaInicio.HasValue)
+            {
+                var inicio = filtros.DataReservaInicio.Value.Date;
+                query = query.Where(r => r.DataReserva >= inicio);
+            }
+            if (filtros.DataReservaFim.HasValue)
+            {
+                var fim = filtros.DataReservaFim.Value.Date.AddDays(1); // inclui o dia final
+                query = query.Where(r => r.DataReserva < fim);
+            }
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
                 .ToListAsync();
 
-            return View(reservas);
+            // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
+            var reservasDb = await query
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
+
+            var reservas = reservasDb.Select(r => new MinhasReservasViewModel
+            {
+                IdReserva = r.IdReserva,
+                IdPedido = r.IdPedido ?? 0,
+                DataReserva = r.DataReserva,
+                StatusReserva = r.Status.ToString(),
+                QuantidadeReservada = r.QuantidadeReservada,
+                TokenConfirmacao = r.TokenConfirmacao,
+                DataRetiradaInicio = r.DataRetiradaInicio,
+                DataRetiradaFim = r.DataRetiradaFim,
+                NumeroLote = r.Lote.NumeroLote,
+                DataValidadeLote = r.Lote.DataValidade,
+                NomeProduto = r.Lote.Produto.NomeProduto,
+                MarcaProduto = r.Lote.Produto.MarcaProduto,
+                CategoriaProduto = r.Lote.Produto.CategoriaProduto,
+                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
+                FotoProduto = r.Lote.Produto.FotoProduto == null
+                    ? null
+                    : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
+                TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone,
+                MotivoRejeicao = r.MotivoRejeicao
+            }).ToList();
+
+            var viewModel = new MinhasReservasPageViewModel
+            {
+                Filtros = filtros,
+                Reservas = reservas
+            };
+
+            return View(viewModel);
         }
 
         // -----------------------------------------------------------------------------------------
@@ -72,8 +125,8 @@ namespace Doalim_dev.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancelar(int idReserva)
         {
-            var usuarioId = ObterUsuarioId();
-            if (usuarioId == null)
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
 
             var reserva = await _context.Reservas
@@ -113,43 +166,5 @@ namespace Doalim_dev.Controllers
             TempData["Sucesso"] = "Reserva cancelada com sucesso.";
             return RedirectToAction(nameof(MinhasReservas));
         }
-
-
-        // -----------------------------------------------------------------------------------------
-        // MÉTODO AUXILIAR
-        // Atualiza o status do Pedido com base no estado atual
-        // de todas as suas reservas filhas.
-        // -----------------------------------------------------------------------------------------
-        private async Task AtualizarStatusPedidoAsync (int? idPedido)
-        {
-            if (idPedido == null) return;
-
-            var pedido = await _context.Pedidos
-                .Include(p => p.Reservas)
-                .FirstOrDefaultAsync(p=> p.IdPedido == idPedido);
-
-            if (pedido == null) return;
-
-            var statusReservas = pedido.Reservas.Select(r=>r.Status).ToList();
-
-            pedido.StatusPedido = statusReservas.All(s => s == StatusReserva.Retirada)
-                      ? StatusPedido.Retirado
-                      : statusReservas.All(s => s == StatusReserva.Cancelada || s == StatusReserva.Rejeitada)
-                                 ? StatusPedido.Cancelado
-                                 : statusReservas.Any(s => s == StatusReserva.Confirmada)
-                                            ? StatusPedido.Confirmado
-                                            : StatusPedido.Pendente;
-        }
-
-        // -----------------------------------------------------------------------------------------
-        // MÉTODO AUXILIAR
-        // Lê o ID do usuário logado a partir dos Claims.
-        // -----------------------------------------------------------------------------------------
-        private int? ObterUsuarioId()
-        {
-            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.TryParse(claim, out var id) ? id : null;
-        }
-
     }
 }

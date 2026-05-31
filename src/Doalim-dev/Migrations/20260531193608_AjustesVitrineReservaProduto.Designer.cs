@@ -4,6 +4,7 @@ using Doalim_dev.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doalim_dev.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260531193608_AjustesVitrineReservaProduto")]
+    partial class AjustesVitrineReservaProduto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,9 +242,6 @@ namespace Doalim_dev.Migrations
                     b.Property<int?>("LoteIdLote")
                         .HasColumnType("int");
 
-                    b.Property<string>("MotivoRejeicao")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("QuantidadeReservada")
                         .HasColumnType("int");
 
@@ -367,147 +367,6 @@ namespace Doalim_dev.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.ValorLookup", b =>
-                {
-                    b.Property<int>("IdValor")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdValor"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdValor");
-
-                    b.HasIndex("Tipo", "Nome")
-                        .IsUnique();
-
-                    b.ToTable("ValoresLookup");
-
-                    b.HasData(
-                        new
-                        {
-                            IdValor = 1,
-                            Ativo = true,
-                            Nome = "Grão",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 2,
-                            Ativo = true,
-                            Nome = "Bebida",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 3,
-                            Ativo = true,
-                            Nome = "Carne",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 4,
-                            Ativo = true,
-                            Nome = "Produtos de Limpeza",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 5,
-                            Ativo = true,
-                            Nome = "Higiene Pessoal",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 6,
-                            Ativo = true,
-                            Nome = "Laticínios",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 7,
-                            Ativo = true,
-                            Nome = "Verdura",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 8,
-                            Ativo = true,
-                            Nome = "Legume",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 9,
-                            Ativo = true,
-                            Nome = "Fruta",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 10,
-                            Ativo = true,
-                            Nome = "Kg",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 11,
-                            Ativo = true,
-                            Nome = "mg",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 12,
-                            Ativo = true,
-                            Nome = "L",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 13,
-                            Ativo = true,
-                            Nome = "ml",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 14,
-                            Ativo = true,
-                            Nome = "Ambiente",
-                            Tipo = 1
-                        },
-                        new
-                        {
-                            IdValor = 15,
-                            Ativo = true,
-                            Nome = "Congelado",
-                            Tipo = 1
-                        },
-                        new
-                        {
-                            IdValor = 16,
-                            Ativo = true,
-                            Nome = "Local fechado",
-                            Tipo = 1
-                        });
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>

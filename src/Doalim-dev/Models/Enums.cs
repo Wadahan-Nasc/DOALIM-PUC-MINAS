@@ -17,14 +17,6 @@ namespace Doalim_dev.Models
         Rejeitado = 3
     }
 
-    public enum StatusDoacao
-    {
-        Disponivel = 1,
-        Reservado = 2,
-        Entregue = 3,
-        Cancelado = 4
-    }
-
     public enum StatusLote
     {
         Disponivel = 0,
@@ -35,18 +27,9 @@ namespace Doalim_dev.Models
 
     public enum StatusPedido
     {
-        Pendente = 0,       // Todas pendentes
-        Confirmado = 1,     // Alguma confirmada, mas não todas
-        Retirado = 2,       // Todas retiradas
-        Cancelado = 3       // Todas canceladas
-    }
-    public enum StatusReserva
-    {
         Pendente = 0,
-        Confirmada = 1,
-        Retirada = 2,
-        Cancelada = 3,
-        Rejeitada = 4 // Essencial para diferenciar reservas canceladas pelo beneficiário e rejeitadas pelo doador;
+        Confirmado = 1,
+        Retirado = 2,
+        Cancelado = 3
     }
-
 }

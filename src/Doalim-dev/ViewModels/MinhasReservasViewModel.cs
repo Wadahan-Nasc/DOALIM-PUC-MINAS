@@ -33,6 +33,9 @@
         public string NomeDoador { get; set; }
         public string TelefoneDoador { get; set; }
 
+        // Motivo informado pelo doador ao rejeitar — exibido apenas quando Rejeitada
+        public string? MotivoRejeicao { get; set; }
+
         //Campos Calculados
         public bool PodeSerCancelada =>
             StatusReserva == "Pendente" ||
@@ -42,6 +45,6 @@
             StatusReserva == "Confirmada" && !string.IsNullOrEmpty(TokenConfirmacao);
 
         public bool RetiradaProxima =>
-            DataRetiradaFim.HasValue && (DataRetiradaFim.Value - DateTime.Now).TotalDays <= 2;
+            DataRetiradaFim.HasValue && (DataRetiradaFim.Value.Date - DateTime.Today).TotalDays <= 2;
     }
 }

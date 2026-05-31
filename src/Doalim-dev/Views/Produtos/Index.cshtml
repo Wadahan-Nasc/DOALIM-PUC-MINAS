@@ -71,7 +71,13 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold small text-muted">Categoria</label>
-                        <input type="text" name="categoria" value="@ViewBag.Categoria" class="form-control bg-white border-success-subtle" placeholder="Ex: Grãos..." />
+                        <select name="categoria" class="form-select bg-white border-success-subtle">
+                            <option value="">Todas as categorias</option>
+                            @foreach (var cat in ViewBag.CategoriasDisponiveis as List<string> ?? new List<string>())
+                            {
+                                <option value="@cat" selected="@(ViewBag.Categoria == cat)">@cat</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold small text-muted">Marca</label>
@@ -80,9 +86,9 @@
                     <div class="col-md-3">
                         <label class="form-label fw-semibold small text-muted">Status do Produto</label>
                         <select name="statusFiltro" class="form-select bg-white border-success-subtle fw-bold text-dark">
-                            <!option value="ativos" @(ViewBag.StatusFiltro == "ativos" ? "selected" : "")>✅ Apenas Ativos (Padrão)</!option>
-                            <!option value="inativos" @(ViewBag.StatusFiltro == "inativos" ? "selected" : "")>❌ Apenas Inativos</!option>
-                            <!option value="todos" @(ViewBag.StatusFiltro == "todos" ? "selected" : "")>Todos os Produtos</!option>
+                            <option value="ativos" selected="@(ViewBag.StatusFiltro == "ativos" || ViewBag.StatusFiltro == null)">✅ Apenas Ativos (Padrão)</option>
+                            <option value="inativos" selected="@(ViewBag.StatusFiltro == "inativos")">❌ Apenas Inativos</option>
+                            <option value="todos" selected="@(ViewBag.StatusFiltro == "todos")">Todos os Produtos</option>
                         </select>
                     </div>
 

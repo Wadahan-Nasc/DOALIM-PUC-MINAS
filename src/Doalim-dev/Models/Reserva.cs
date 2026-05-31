@@ -1,8 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Doalim_dev.Models
 {
+    public enum StatusReserva
+    {
+        Pendente = 0,
+        Confirmada = 1,
+        Retirada = 2,
+        Cancelada = 3,
+        Rejeitada = 4
+    }
+
     [Table("Reservas")]
     public class Reserva
     {
@@ -15,7 +24,6 @@ namespace Doalim_dev.Models
         [Required]
         public StatusReserva Status { get; set; } = StatusReserva.Pendente;
 
-        // Quantidade efetivamente reservada do produto
         [Required]
         public int QuantidadeReservada { get; set; }
 
@@ -29,16 +37,17 @@ namespace Doalim_dev.Models
 
         public DateTime? DataRetiradaFim { get; set; }
 
-        // Data em que a reserva se encerrou (retirada ou cancelada)
-        // Importante para históricos
+        // Preenchido quando a reserva é encerrada (cancelada, rejeitada ou entregue).
         public DateTime? DataEncerramento { get; set; }
 
+        // Motivo informado pelo doador ao rejeitar a reserva.
+        public string? MotivoRejeicao { get; set; }
+
         // FK para o Pedido agrupador desta reserva
-        [Required]
         public int? IdPedido { get; set; }
 
         [ForeignKey(nameof(IdPedido))]
-        public Pedido Pedido { get; set; }
+        public Pedido? Pedido { get; set; }
 
         // FK para o Lote reservado
         // Produto fica implícito através do Lote.IdProduto

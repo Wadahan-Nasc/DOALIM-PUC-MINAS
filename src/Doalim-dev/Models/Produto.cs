@@ -14,9 +14,8 @@ namespace Doalim_dev.Models
         [Display(Name = "Nome do Produto")]
         public string NomeProduto { get; set; }
 
-        [Required(ErrorMessage = "O código de barras é obrigatório.")]
         [Display(Name = "Código de Barras")]
-        public string CodigoBarras { get; set; }
+        public string? CodigoBarras { get; set; }
 
         [Required(ErrorMessage = "A marca é obrigatória.")]
         [Display(Name = "Marca")]

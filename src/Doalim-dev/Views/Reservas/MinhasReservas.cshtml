@@ -1,7 +1,8 @@
-@model IEnumerable<Doalim_dev.ViewModels.MinhasReservasViewModel>
+@model Doalim_dev.ViewModels.MinhasReservasPageViewModel
 
 @{
     ViewData["Title"] = "Minhas Reservas";
+    var filtros = Model.Filtros;
 }
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
@@ -9,87 +10,253 @@
         <h2 class="mb-1">Minhas Reservas</h2>
         <p class="text-muted mb-0">Alimentos reservados por você aparecem aqui.</p>
     </div>
-    <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success">
-        <i class="bi bi-shop me-1"></i> Ver vitrine
-    </a>
+    <div class="d-flex gap-2">
+        <a asp-controller="Carrinho" asp-action="Index" class="btn btn-outline-primary">
+            <i class="bi bi-cart me-1"></i> Meu carrinho
+        </a>
+        <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success">
+            <i class="bi bi-shop me-1"></i> Ver vitrine
+        </a>
+    </div>
 </div>
 
-@if (TempData["Sucesso"] != null)
-{
-    <div class="alert alert-success">@TempData["Sucesso"]</div>
-}
+<form method="get" asp-controller="Reservas" asp-action="MinhasReservas" class="card p-3 mb-4 shadow-sm bg-light">
+    <div class="row g-3">
 
-@if (TempData["Erro"] != null)
-{
-    <div class="alert alert-danger">@TempData["Erro"]</div>
-}
 
-@if (!Model.Any())
+        <div class="col-6 col-md-2">
+            <label class="form-label fw-semibold small mb-1">Status</label>
+            <select name="Status" class="form-select form-select-sm">
+                <option value=""           selected="@(string.IsNullOrEmpty(filtros.Status))">Todos</option>
+                <option value="Pendente"   selected="@(filtros.Status == "Pendente")">Pendente</option>
+                <option value="Confirmada" selected="@(filtros.Status == "Confirmada")">Confirmada</option>
+                <option value="Retirada"   selected="@(filtros.Status == "Retirada")">Retirada</option>
+                <option value="Cancelada"  selected="@(filtros.Status == "Cancelada")">Cancelada</option>
+                <option value="Rejeitada"  selected="@(filtros.Status == "Rejeitada")">Rejeitada</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Categoria</label>
+            <select name="Categoria" class="form-select form-select-sm">
+                <option value="" selected="@(string.IsNullOrEmpty(filtros.Categoria))">Todas</option>
+                @foreach (var cat in ViewBag.CategoriasDisponiveis as List<string> ?? new List<string>())
+                {
+                    <option value="@cat" selected="@(filtros.Categoria == cat)">@cat</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Nome do produto</label>
+            <input type="text" name="NomeProduto" value="@filtros.NomeProduto"
+                   class="form-control form-control-sm" placeholder="Ex: Arroz, Feijão..." />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <label class="form-label fw-semibold small mb-1">Nome do doador</label>
+            <input type="text" name="NomeDoador" value="@filtros.NomeDoador"
+                   class="form-control form-control-sm" placeholder="Ex: Maria" />
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Validade — de</label>
+            <input type="date" name="ValidadeInicio"
+                   value="@filtros.ValidadeInicio?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Validade — até</label>
+            <input type="date" name="ValidadeFim"
+                   value="@filtros.ValidadeFim?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Data de reserva — de</label>
+            <input type="date" name="DataReservaInicio"
+                   value="@filtros.DataReservaInicio?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold small mb-1">Data de reserva — até</label>
+            <input type="date" name="DataReservaFim"
+                   value="@filtros.DataReservaFim?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+
+
+        <div class="col-12 d-flex justify-content-end gap-2 pt-1 border-top">
+            <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-outline-secondary btn-sm px-4">
+                Limpar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm px-4">
+                <i class="bi bi-search me-1"></i> Filtrar
+            </button>
+        </div>
+
+    </div>
+</form>
+
+@if (filtros.TemFiltroAtivo && !Model.Reservas.Any())
+{
+    <div class="alert alert-info">Nenhuma reserva encontrada para os filtros aplicados.</div>
+}
+else if (!Model.Reservas.Any())
 {
     <div class="alert alert-info">Você ainda não possui reservas.</div>
 }
 else
 {
+    @if (filtros.TemFiltroAtivo)
+    {
+        <p class="text-muted small mb-3">
+            <i class="bi bi-funnel me-1"></i>
+            Exibindo <strong>@Model.Reservas.Count</strong> reserva(s) com filtros ativos.
+            <a asp-controller="Reservas" asp-action="MinhasReservas" class="ms-1">Limpar filtros</a>
+        </p>
+    }
+
     <div class="row g-3">
-        @foreach (var item in Model)
+        @foreach (var item in Model.Reservas)
         {
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm @(item.RetiradaProxima ? "border-warning" : "")">
 
                     @if (!string.IsNullOrEmpty(item.FotoProduto))
                     {
                         <img src="@item.FotoProduto"
                              class="card-img-top"
                              alt="@item.NomeProduto"
-                             style="height:180px; object-fit:cover;" />
+                             style="height:160px; object-fit:cover;" />
                     }
                     else
                     {
                         <div class="bg-light d-flex align-items-center justify-content-center"
-                             style="height:180px; font-size:3rem;">
+                             style="height:160px; font-size:3rem;">
                             🍱
                         </div>
                     }
 
-                    <div class="card-body">
+                    <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                             <h5 class="card-title mb-0">@item.NomeProduto</h5>
-                            <span class="badge @(item.StatusReserva == "Pendente" ? "bg-warning text-dark" :
-                                    item.StatusReserva == "Confirmada" ? "bg-success" :
-                                    item.StatusReserva == "Retirada" ? "bg-primary" : "bg-secondary")">
-
+                            <span class="badge flex-shrink-0
+                                @(item.StatusReserva == "Pendente"   ? "bg-warning text-dark" :
+                                  item.StatusReserva == "Confirmada" ? "bg-success" :
+                                  item.StatusReserva == "Retirada"   ? "bg-primary" :
+                                  item.StatusReserva == "Rejeitada"  ? "bg-danger"  : "bg-secondary")">
                                 @item.StatusReserva
                             </span>
                         </div>
 
-                        <p class="card-text text-muted mb-2">@item.MarcaProduto</p>
+                        <p class="card-text text-muted small mb-3">@item.MarcaProduto &bull; @item.CategoriaProduto</p>
 
-                        <dl class="row small mb-0">
-                            <dt class="col-5">Categoria</dt>
-                            @*<dd class="col-7">@item.Categoria</dd>*@
+                        <dl class="row small mb-2">
+                            <dt class="col-6">Quantidade</dt>
+                            <dd class="col-6">@item.QuantidadeReservada</dd>
 
-                            <dt class="col-5">Quantidade</dt>
-                            <dd class="col-7">@item.QuantidadeReservada</dd>
+                            <dt class="col-6">Unid. medida</dt>
+                            <dd class="col-6">@item.UnidadeMedidaProduto</dd>
 
-                            <dt class="col-5">Unidade</dt>
-                            @*<dd class="col-7">@item.UnidadeMedida</dd>*@
+                            <dt class="col-6">Lote</dt>
+                            <dd class="col-6">@item.NumeroLote</dd>
 
-                            <dt class="col-5">Lote</dt>
-                            <dd class="col-7">@item.NumeroLote</dd>
+                            <dt class="col-6">Validade do lote</dt>
+                            <dd class="col-6">@item.DataValidadeLote.ToString("dd/MM/yyyy")</dd>
 
-                            <dt class="col-5">Validade do lote</dt>
-                            <dd class="col-7">@item.DataValidadeLote.ToString("dd/MM/yyyy")</dd>
+                            <dt class="col-6">Doador</dt>
+                            <dd class="col-6">@item.NomeDoador</dd>
 
-                            <dt class="col-5">Doador</dt>
-                            <dd class="col-7">@item.NomeDoador</dd>
+                            @if (!string.IsNullOrEmpty(item.TelefoneDoador) && item.StatusReserva == "Confirmada")
+                            {
+                                <dt class="col-6">Telefone doador</dt>
+                                <dd class="col-6">@item.TelefoneDoador</dd>
+                            }
 
-                            <dt class="col-5">Reservado em</dt>
-                            <dd class="col-7">@item.DataReserva.ToString("dd/MM/yyyy HH:mm")</dd>
+                            <dt class="col-6">Pedido</dt>
+                            <dd class="col-6">#@item.IdPedido</dd>
+
+                            <dt class="col-6">Reservado em</dt>
+                            <dd class="col-6">@item.DataReserva.ToString("dd/MM/yyyy HH:mm")</dd>
                         </dl>
+
+                        @if (item.StatusReserva == "Confirmada" && item.DataRetiradaInicio.HasValue && item.DataRetiradaFim.HasValue)
+                        {
+                            <div class="alert @(item.RetiradaProxima ? "alert-warning" : "alert-success") py-2 px-3 small mb-2">
+                                <i class="bi bi-calendar-check me-1"></i>
+                                <strong>Retirada:</strong>
+                                @item.DataRetiradaInicio.Value.ToString("dd/MM/yyyy")
+                                até
+                                @item.DataRetiradaFim.Value.ToString("dd/MM/yyyy")
+                                @if (item.RetiradaProxima)
+                                {
+                                    <span class="d-block mt-1 fw-semibold">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Retirada próxima!
+                                    </span>
+                                }
+                            </div>
+                        }
+
+                        @if (item.StatusReserva == "Rejeitada" && !string.IsNullOrEmpty(item.MotivoRejeicao))
+                        {
+                            <div class="alert alert-danger py-2 px-3 small mb-2">
+                                <div class="fw-semibold mb-1">
+                                    <i class="bi bi-x-circle me-1"></i> Motivo da rejeição:
+                                </div>
+                                <span>@item.MotivoRejeicao</span>
+                            </div>
+                        }
+
+                        @if (item.ExibirToken)
+                        {
+                            <div class="alert alert-info py-2 px-3 mb-2">
+                                <div class="small text-muted mb-1">Token de confirmação — apresente ao doador:</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-5 fw-bold font-monospace letter-spacing-2" id="token-@item.IdReserva">@item.TokenConfirmacao</span>
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm py-0"
+                                            onclick="copiarToken('@item.TokenConfirmacao', this)"
+                                            title="Copiar token">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mt-auto">
+                            @if (item.PodeSerCancelada)
+                            {
+                                <form asp-controller="Reservas" asp-action="Cancelar" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idReserva" value="@item.IdReserva" />
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-sm w-100"
+                                            onclick="return confirm('Cancelar a reserva de @item.NomeProduto? O lote será devolvido para a vitrine.')">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelar reserva
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </div>
 
                 </div>
             </div>
         }
     </div>
+}
+
+@section Scripts {
+<script>
+    function copiarToken(token, btn) {
+        navigator.clipboard.writeText(token).then(function () {
+            var icon = btn.querySelector('i');
+            icon.classList.replace('bi-clipboard', 'bi-clipboard-check');
+            setTimeout(function () { icon.classList.replace('bi-clipboard-check', 'bi-clipboard'); }, 2000);
+        });
+    }
+</script>
 }
