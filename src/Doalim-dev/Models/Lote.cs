@@ -23,12 +23,16 @@ namespace Doalim_dev.Models
         [Display(Name = "Quantidade")]
         public int Quantidade { get; set; }
 
-        public bool StatusLote { get; set; } = true; // Por padrão, o lote nasce ativo
+        [Display(Name = "Status do Lote")]
+        public StatusLote StatusLote { get; set; } = StatusLote.Disponivel; // Por padrão, o lote nasce disponível
 
         // Chave estrangeira
         public int IdProduto { get; set; }
 
         [ForeignKey(nameof(IdProduto))]
         public Produto Produto { get; set; }
+
+        // Navegação inversa para Reservas
+        public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
     }
 }

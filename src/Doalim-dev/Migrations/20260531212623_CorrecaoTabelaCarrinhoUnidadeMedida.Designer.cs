@@ -4,6 +4,7 @@ using Doalim_dev.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doalim_dev.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260531212623_CorrecaoTabelaCarrinhoUnidadeMedida")]
+    partial class CorrecaoTabelaCarrinhoUnidadeMedida
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,89 +98,6 @@ namespace Doalim_dev.Migrations
                     b.HasKey("IdUsuario");
 
                     b.ToTable("Doadores");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.DocumentoVerificacao", b =>
-                {
-                    b.Property<int>("IdDocumento")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDocumento"));
-
-                    b.Property<byte[]>("Arquivo")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime>("DataEnvio")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StatusValidacao")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TipoDocumento")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdDocumento");
-
-                    b.HasIndex("IdUsuario");
-
-                    b.ToTable("DocumentosVerificacao");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Endereco", b =>
-                {
-                    b.Property<int>("IdEndereco")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEndereco"));
-
-                    b.Property<string>("Bairro")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Cep")
-                        .IsRequired()
-                        .HasMaxLength(9)
-                        .HasColumnType("nvarchar(9)");
-
-                    b.Property<string>("Cidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Complemento")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar(2)");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Logradouro")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("IdEndereco");
-
-                    b.HasIndex("IdUsuario")
-                        .IsUnique();
-
-                    b.ToTable("Enderecos");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Lote", b =>
@@ -385,15 +305,12 @@ namespace Doalim_dev.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUsuario"));
 
-                    b.Property<byte[]>("Arquivocomprovacao")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("Arquivocomprovacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Cnpj")
                         .HasMaxLength(18)
@@ -411,8 +328,14 @@ namespace Doalim_dev.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<byte[]>("FotoPerfil")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("Endereco")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("FotoPerfil")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -447,147 +370,6 @@ namespace Doalim_dev.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.ValorLookup", b =>
-                {
-                    b.Property<int>("IdValor")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdValor"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdValor");
-
-                    b.HasIndex("Tipo", "Nome")
-                        .IsUnique();
-
-                    b.ToTable("ValoresLookup");
-
-                    b.HasData(
-                        new
-                        {
-                            IdValor = 1,
-                            Ativo = true,
-                            Nome = "Grão",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 2,
-                            Ativo = true,
-                            Nome = "Bebida",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 3,
-                            Ativo = true,
-                            Nome = "Carne",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 4,
-                            Ativo = true,
-                            Nome = "Produtos de Limpeza",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 5,
-                            Ativo = true,
-                            Nome = "Higiene Pessoal",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 6,
-                            Ativo = true,
-                            Nome = "Laticínios",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 7,
-                            Ativo = true,
-                            Nome = "Verdura",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 8,
-                            Ativo = true,
-                            Nome = "Legume",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 9,
-                            Ativo = true,
-                            Nome = "Fruta",
-                            Tipo = 0
-                        },
-                        new
-                        {
-                            IdValor = 10,
-                            Ativo = true,
-                            Nome = "Kg",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 11,
-                            Ativo = true,
-                            Nome = "mg",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 12,
-                            Ativo = true,
-                            Nome = "L",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 13,
-                            Ativo = true,
-                            Nome = "ml",
-                            Tipo = 2
-                        },
-                        new
-                        {
-                            IdValor = 14,
-                            Ativo = true,
-                            Nome = "Ambiente",
-                            Tipo = 1
-                        },
-                        new
-                        {
-                            IdValor = 15,
-                            Ativo = true,
-                            Nome = "Congelado",
-                            Tipo = 1
-                        },
-                        new
-                        {
-                            IdValor = 16,
-                            Ativo = true,
-                            Nome = "Local fechado",
-                            Tipo = 1
-                        });
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
@@ -636,28 +418,6 @@ namespace Doalim_dev.Migrations
                     b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
                         .WithOne()
                         .HasForeignKey("Doalim_dev.Models.Doador", "IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.DocumentoVerificacao", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Doalim_dev.Models.Endereco", b =>
-                {
-                    b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
-                        .WithOne("Endereco")
-                        .HasForeignKey("Doalim_dev.Models.Endereco", "IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -760,8 +520,6 @@ namespace Doalim_dev.Migrations
 
             modelBuilder.Entity("Doalim_dev.Models.Usuario", b =>
                 {
-                    b.Navigation("Endereco");
-
                     b.Navigation("TermosAceitados");
                 });
 #pragma warning restore 612, 618

@@ -58,11 +58,24 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="CategoriaProduto" class="form-label fw-semibold"></label>
-                                <input asp-for="CategoriaProduto" class="form-control bg-light" />
+                                <select asp-for="CategoriaProduto" class="form-select bg-light">
+                                    <option value="">Selecione a categoria...</option>
+                                    @foreach (var cat in ViewBag.Categorias as List<string> ?? new List<string>())
+                                    {
+                                        <option value="@cat">@cat</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoriaProduto" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="TipoArmazenamento" class="form-label fw-semibold"></label>
-                                <input asp-for="TipoArmazenamento" class="form-control bg-light" />
+                                <select asp-for="TipoArmazenamento" class="form-select bg-light">
+                                    <option value="">Selecione o tipo...</option>
+                                    @foreach (var tipo in ViewBag.TiposArmazenamento as List<string> ?? new List<string>())
+                                    {
+                                        <option value="@tipo">@tipo</option>
+                                    }
+                                </select>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -76,7 +89,14 @@
 
                             <div class="col-md-12 mb-3">
                                 <label asp-for="UnidadeMedida" class="form-label fw-semibold"></label>
-                                <input asp-for="UnidadeMedida" class="form-control bg-light" placeholder="Kg, Unid..." />
+                                <select asp-for="UnidadeMedida" class="form-select bg-light">
+                                    <option value="">Selecione a unidade de medida...</option>
+                                    @foreach (var um in ViewBag.UnidadesMedida as List<string> ?? new List<string>())
+                                    {
+                                        <option value="@um">@um</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="UnidadeMedida" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-12 mt-2 p-3 bg-light rounded border border-2">

@@ -1,0 +1,198 @@
+@model IEnumerable<Doalim_dev.Models.ValorLookup>
+@using Doalim_dev.Models
+
+@{
+    ViewData["Title"] = "Gerenciar Domínios";
+
+    var categorias         = Model.Where(v => v.Tipo == TipoLookup.Categoria).ToList();
+    var tiposArmazenamento = Model.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).ToList();
+    var unidadesMedida     = Model.Where(v => v.Tipo == TipoLookup.UnidadeMedida).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Gerenciar Valores de Domínio</h2>
+        <p class="text-muted mb-0">Defina os valores disponíveis nos formulários de cadastro de produto.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    @* ── CATEGORIA ────────────────────────────────────────────── *@
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-tags me-2 text-success"></i>Categoria
+                <span class="badge bg-secondary ms-2">@categorias.Count</span>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var v in categorias)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(!v.Ativo ? "text-muted bg-light" : "")">
+                            <span>
+                                @v.Nome
+                                @if (!v.Ativo) { <span class="badge bg-secondary ms-1 small">inativo</span> }
+                                @if (v.IdValor <= 16) { <span class="badge bg-light text-secondary border ms-1 small">padrão</span> }
+                            </span>
+                            <div class="d-flex gap-1">
+                                <form asp-action="ToggleAtivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@v.IdValor" />
+                                    <button type="submit" class="btn btn-sm @(v.Ativo ? "btn-outline-warning" : "btn-outline-success")" title="@(v.Ativo ? "Desativar" : "Ativar")">
+                                        <i class="bi @(v.Ativo ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                                @if (v.IdValor > 16)
+                                {
+                                    <form asp-action="Excluir" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@v.IdValor" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                                onclick="return confirm('Excluir \"@v.Nome\"?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </li>
+                    }
+                    @if (!categorias.Any())
+                    {
+                        <li class="list-group-item text-muted small fst-italic">Nenhum valor cadastrado.</li>
+                    }
+                </ul>
+            </div>
+            <div class="card-footer bg-white">
+                <form asp-action="Adicionar" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="tipo" value="@((int)TipoLookup.Categoria)" />
+                    <input type="text" name="nome" class="form-control form-control-sm"
+                           placeholder="Nova categoria..." maxlength="100" required />
+                    <button type="submit" class="btn btn-success btn-sm flex-shrink-0">
+                        <i class="bi bi-plus-lg me-1"></i> Adicionar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @* ── TIPO DE ARMAZENAMENTO ─────────────────────────────────── *@
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-boxes me-2 text-success"></i>Tipo de Armazenamento
+                <span class="badge bg-secondary ms-2">@tiposArmazenamento.Count</span>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var v in tiposArmazenamento)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(!v.Ativo ? "text-muted bg-light" : "")">
+                            <span>
+                                @v.Nome
+                                @if (!v.Ativo) { <span class="badge bg-secondary ms-1 small">inativo</span> }
+                                @if (v.IdValor <= 16) { <span class="badge bg-light text-secondary border ms-1 small">padrão</span> }
+                            </span>
+                            <div class="d-flex gap-1">
+                                <form asp-action="ToggleAtivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@v.IdValor" />
+                                    <button type="submit" class="btn btn-sm @(v.Ativo ? "btn-outline-warning" : "btn-outline-success")" title="@(v.Ativo ? "Desativar" : "Ativar")">
+                                        <i class="bi @(v.Ativo ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                                @if (v.IdValor > 16)
+                                {
+                                    <form asp-action="Excluir" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@v.IdValor" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                                onclick="return confirm('Excluir \"@v.Nome\"?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </li>
+                    }
+                    @if (!tiposArmazenamento.Any())
+                    {
+                        <li class="list-group-item text-muted small fst-italic">Nenhum valor cadastrado.</li>
+                    }
+                </ul>
+            </div>
+            <div class="card-footer bg-white">
+                <form asp-action="Adicionar" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="tipo" value="@((int)TipoLookup.TipoArmazenamento)" />
+                    <input type="text" name="nome" class="form-control form-control-sm"
+                           placeholder="Novo tipo de armazenamento..." maxlength="100" required />
+                    <button type="submit" class="btn btn-success btn-sm flex-shrink-0">
+                        <i class="bi bi-plus-lg me-1"></i> Adicionar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @* ── UNIDADE DE MEDIDA ─────────────────────────────────────── *@
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-rulers me-2 text-success"></i>Unidade de Medida
+                <span class="badge bg-secondary ms-2">@unidadesMedida.Count</span>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var v in unidadesMedida)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(!v.Ativo ? "text-muted bg-light" : "")">
+                            <span>
+                                @v.Nome
+                                @if (!v.Ativo) { <span class="badge bg-secondary ms-1 small">inativo</span> }
+                                @if (v.IdValor <= 16) { <span class="badge bg-light text-secondary border ms-1 small">padrão</span> }
+                            </span>
+                            <div class="d-flex gap-1">
+                                <form asp-action="ToggleAtivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@v.IdValor" />
+                                    <button type="submit" class="btn btn-sm @(v.Ativo ? "btn-outline-warning" : "btn-outline-success")" title="@(v.Ativo ? "Desativar" : "Ativar")">
+                                        <i class="bi @(v.Ativo ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                                @if (v.IdValor > 16)
+                                {
+                                    <form asp-action="Excluir" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@v.IdValor" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                                onclick="return confirm('Excluir \"@v.Nome\"?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </li>
+                    }
+                    @if (!unidadesMedida.Any())
+                    {
+                        <li class="list-group-item text-muted small fst-italic">Nenhum valor cadastrado.</li>
+                    }
+                </ul>
+            </div>
+            <div class="card-footer bg-white">
+                <form asp-action="Adicionar" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="tipo" value="@((int)TipoLookup.UnidadeMedida)" />
+                    <input type="text" name="nome" class="form-control form-control-sm"
+                           placeholder="Nova unidade de medida..." maxlength="100" required />
+                    <button type="submit" class="btn btn-success btn-sm flex-shrink-0">
+                        <i class="bi bi-plus-lg me-1"></i> Adicionar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

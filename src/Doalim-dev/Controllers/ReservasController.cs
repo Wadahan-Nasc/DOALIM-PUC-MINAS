@@ -1,4 +1,3 @@
-﻿using System.Security.Claims;
 using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -8,237 +7,164 @@ using Microsoft.EntityFrameworkCore;
 namespace Doalim_dev.Controllers
 {
     [Authorize]
-    public class ReservasController : Controller
+    public class ReservasController : BaseController
     {
-        private readonly AppDbContext _context;
+        public ReservasController(AppDbContext context) : base(context) { }
 
-        public ReservasController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: /Reservas/Reservar/5
-        public async Task<IActionResult> Reservar(int id)
-        {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
-                return RedirectToAction("Login", "Auth");
-
-            if (!await UsuarioPodeReservarAsync(usuarioId))
-            {
-                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdProduto == id);
-
-            if (produto == null || !produto.StatusProduto)
-                return NotFound();
-
-            if (produto.IdDoador == usuarioId)
-            {
-                TempData["Erro"] = "Você não pode reservar a própria doação.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            return View(CriarReservaViewModel(produto));
-        }
-
-        // POST: /Reservas/Confirmar
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Confirmar(ReservaViewModel viewModel)
-        {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
-                return RedirectToAction("Login", "Auth");
-
-            if (!await UsuarioPodeReservarAsync(usuarioId))
-            {
-                TempData["Erro"] = "Apenas beneficiários aprovados podem realizar reservas.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            if (!ModelState.IsValid)
-                return await RetornarViewReservaAsync(viewModel);
-
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .FirstOrDefaultAsync(p => p.IdProduto == viewModel.IdProduto);
-
-            if (produto == null || !produto.StatusProduto)
-                return NotFound();
-
-            if (produto.IdDoador == usuarioId)
-            {
-                TempData["Erro"] = "Você não pode reservar a própria doação.";
-                return RedirectToAction("Vitrine", "Produtos");
-            }
-
-            var hoje = DateTime.Today;
-            var quantidadeDisponivel = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje)
-                .Sum(l => l.Quantidade);
-
-            if (viewModel.QuantidadeReservada > quantidadeDisponivel)
-            {
-                ModelState.AddModelError("QuantidadeReservada",
-                    $"Quantidade indisponível. Máximo permitido: {quantidadeDisponivel}.");
-                return await RetornarViewReservaAsync(viewModel);
-            }
-
-            var reserva = new Reserva
-            {
-                IdProduto = viewModel.IdProduto,
-                IdBeneficiario = usuarioId,
-                QuantidadeReservada = viewModel.QuantidadeReservada,
-                Status = StatusReserva.Pendente,
-                DataReserva = DateTime.UtcNow
-            };
-
-            DeduzirQuantidadeLotes(produto, viewModel.QuantidadeReservada);
-
-            _context.Reservas.Add(reserva);
-            await _context.SaveChangesAsync();
-
-            TempData["Sucesso"] = $"Reserva realizada com sucesso! Seu código é #{reserva.IdReserva}.";
-            return RedirectToAction("Vitrine", "Produtos");
-        }
-
+        // -----------------------------------------------------------------------------------------
         // GET: /Reservas/MinhasReservas
-        public async Task<IActionResult> MinhasReservas()
+        // Exibe o histórico de reservas do beneficiário logado com filtros opcionais.
+        // -----------------------------------------------------------------------------------------
+        public async Task<IActionResult> MinhasReservas(MinhasReservasFiltroViewModel filtros)
         {
-            var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
 
-            var reservas = await _context.Reservas
-                .Include(r => r.Produto)
-                    .ThenInclude(p => p.Doador)
-                        .ThenInclude(d => d.Usuario)
-                .Include(r => r.Produto.Lotes)   // necessário para obter a menor validade
+            var query = _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                        .ThenInclude(p => p.Doador)
+                            .ThenInclude(d => d.Usuario)
                 .Where(r => r.IdBeneficiario == usuarioId)
-                .OrderByDescending(r => r.DataReserva)
-                .Select(r => new MinhasReservasViewModel
-                {
-                    IdReserva = r.IdReserva,
-                    DataReserva = r.DataReserva,
-                    StatusReserva = r.Status.ToString(),
-                    QuantidadeReservada = r.QuantidadeReservada,
-                    NomeProduto = r.Produto.NomeProduto,
-                    MarcaProduto = r.Produto.MarcaProduto,
-                    Categoria = r.Produto.CategoriaProduto,
-                    UnidadeMedida = r.Produto.UnidadeMedida,
-                    // Exibe a data de validade mais próxima entre os lotes ainda ativos
-                    DataValidade = r.Produto.Lotes
-                        .Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today && l.Quantidade > 0)
-                        .OrderBy(l => l.DataValidade)
-                        .Select(l => (DateTime?)l.DataValidade)
-                        .FirstOrDefault(),
-                    FotoProduto = r.Produto.FotoProduto == null
-                        ? null
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Produto.FotoProduto)}",
-                    NomeDoador = r.Produto.Doador.Usuario.Nome
-                })
+                .AsQueryable();
+
+            // Filtro por status
+            if (!string.IsNullOrWhiteSpace(filtros.Status) &&
+                Enum.TryParse<StatusReserva>(filtros.Status, out var statusEnum))
+                query = query.Where(r => r.Status == statusEnum);
+
+            // Filtro por categoria
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(r => r.Lote.Produto.CategoriaProduto == filtros.Categoria);
+
+            // Filtro por nome do produto
+            if (!string.IsNullOrWhiteSpace(filtros.NomeProduto))
+                query = query.Where(r => r.Lote.Produto.NomeProduto.Contains(filtros.NomeProduto));
+
+            // Filtro por nome do doador
+            if (!string.IsNullOrWhiteSpace(filtros.NomeDoador))
+                query = query.Where(r => r.Lote.Produto.Doador.Usuario.Nome.Contains(filtros.NomeDoador));
+
+            // Filtro por validade do lote
+            if (filtros.ValidadeInicio.HasValue)
+            {
+                var inicio = filtros.ValidadeInicio.Value.Date;
+                query = query.Where(r => r.Lote.DataValidade >= inicio);
+            }
+            if (filtros.ValidadeFim.HasValue)
+            {
+                var fim = filtros.ValidadeFim.Value.Date.AddDays(1); // inclui o dia final
+                query = query.Where(r => r.Lote.DataValidade < fim);
+            }
+
+            // Filtro por data de reserva
+            if (filtros.DataReservaInicio.HasValue)
+            {
+                var inicio = filtros.DataReservaInicio.Value.Date;
+                query = query.Where(r => r.DataReserva >= inicio);
+            }
+            if (filtros.DataReservaFim.HasValue)
+            {
+                var fim = filtros.DataReservaFim.Value.Date.AddDays(1); // inclui o dia final
+                query = query.Where(r => r.DataReserva < fim);
+            }
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
                 .ToListAsync();
 
-            return View(reservas);
+            // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
+            var reservasDb = await query
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
+
+            var reservas = reservasDb.Select(r => new MinhasReservasViewModel
+            {
+                IdReserva = r.IdReserva,
+                IdPedido = r.IdPedido ?? 0,
+                DataReserva = r.DataReserva,
+                StatusReserva = r.Status.ToString(),
+                QuantidadeReservada = r.QuantidadeReservada,
+                TokenConfirmacao = r.TokenConfirmacao,
+                DataRetiradaInicio = r.DataRetiradaInicio,
+                DataRetiradaFim = r.DataRetiradaFim,
+                NumeroLote = r.Lote.NumeroLote,
+                DataValidadeLote = r.Lote.DataValidade,
+                NomeProduto = r.Lote.Produto.NomeProduto,
+                MarcaProduto = r.Lote.Produto.MarcaProduto,
+                CategoriaProduto = r.Lote.Produto.CategoriaProduto,
+                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
+                FotoProduto = r.Lote.Produto.FotoProduto == null
+                    ? null
+                    : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
+                TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone,
+                MotivoRejeicao = r.MotivoRejeicao
+            }).ToList();
+
+            var viewModel = new MinhasReservasPageViewModel
+            {
+                Filtros = filtros,
+                Reservas = reservas
+            };
+
+            return View(viewModel);
         }
 
-        // --- Métodos auxiliares ---
-
-        private async Task<bool> UsuarioPodeReservarAsync(int usuarioId)
+        // -----------------------------------------------------------------------------------------
+        // POST: /Reservas/Cancelar
+        // Cancela uma reserva individual — disponível para status
+        // Pendente e Confirmada. Devolve o lote para a vitrine
+        // se ainda estiver dentro da validade.
+        // -----------------------------------------------------------------------------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancelar(int idReserva)
         {
-            var usuario = await _context.Usuarios
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
 
-            if (usuario == null || usuario.StatusVerificacao != StatusVerificacao.Aprovado)
-                return false;
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.IdBeneficiario == usuarioId);
 
-            return await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuarioId);
-        }
-
-        private async Task<IActionResult> RetornarViewReservaAsync(ReservaViewModel viewModel)
-        {
-            var produto = await _context.Produtos
-                .Include(p => p.Lotes)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdProduto == viewModel.IdProduto);
-
-            if (produto == null)
+            if (reserva == null)
                 return NotFound();
 
-            var preenchido = CriarReservaViewModel(produto);
-            preenchido.QuantidadeReservada = viewModel.QuantidadeReservada;
-            return View("Reservar", preenchido);
-        }
-
-        private ReservaViewModel CriarReservaViewModel(Produto produto)
-        {
-            var hoje = DateTime.Today;
-
-            var lotesAtivos = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
-                .OrderBy(l => l.DataValidade)
-                .ToList();
-
-            return new ReservaViewModel
+            // Valida se a reserva pode ser cancelada
+            if (reserva.Status != StatusReserva.Pendente
+             && reserva.Status != StatusReserva.Confirmada)
             {
-                IdProduto = produto.IdProduto,
-                NomeProduto = produto.NomeProduto,
-                MarcaProduto = produto.MarcaProduto,
-                Categoria = produto.CategoriaProduto,
-                UnidadeMedida = produto.UnidadeMedida,
-                QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
-                QuantidadePessoaFisica = produto.QuantidadePessoaFisica,
-                QuantidadePessoaJuridica = produto.QuantidadePessoaJuridica,
-                DataValidade = lotesAtivos.FirstOrDefault()?.DataValidade ?? DateTime.MinValue,
-                FotoProduto = produto.FotoProduto
-            };
-        }
-
-        /// <summary>
-        /// Deduz a quantidade reservada dos lotes ativos do produto,
-        /// começando pelos mais próximos do vencimento (FIFO).
-        /// Remove lotes que ficam zerados e atualiza StatusProduto se necessário.
-        /// </summary>
-        private void DeduzirQuantidadeLotes(Produto produto, int quantidade)
-        {
-            var hoje = DateTime.Today;
-            var lotes = produto.Lotes
-                .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
-                .OrderBy(l => l.DataValidade)
-                .ToList();
-
-            foreach (var lote in lotes)
-            {
-                if (quantidade <= 0)
-                    break;
-
-                if (lote.Quantidade <= quantidade)
-                {
-                    quantidade -= lote.Quantidade;
-                    lote.Quantidade = 0;
-                    lote.StatusLote = false;
-                    _context.Lotes.Remove(lote);
-                }
-                else
-                {
-                    lote.Quantidade -= quantidade;
-                    quantidade = 0;
-                }
+                TempData["Erro"] = "Esta reserva não pode ser cancelada.";
+                return RedirectToAction(nameof(MinhasReservas));
             }
 
-            // Se não restarem lotes ativos, desativa o produto
-            var aindaTemLotes = produto.Lotes
-                .Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0);
+            // Cancela a reserva
+            reserva.Status = StatusReserva.Cancelada;
+            reserva.DataEncerramento = DateTime.UtcNow;
 
-            if (!aindaTemLotes)
-                produto.StatusProduto = false;
+            // Devolve a quantidade ao lote se ainda estiver dentro da validade
+            if (reserva.Lote.DataValidade.Date >= DateTime.Today)
+            {
+                reserva.Lote.Quantidade += reserva.QuantidadeReservada;
+                reserva.Lote.StatusLote = StatusLote.Disponivel;
+                reserva.Lote.Produto.StatusProduto = true; // reativa o produto se estava inativo
+            }
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Reserva cancelada com sucesso.";
+            return RedirectToAction(nameof(MinhasReservas));
         }
     }
 }

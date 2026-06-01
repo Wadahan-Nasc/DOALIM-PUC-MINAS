@@ -39,6 +39,7 @@
   <ItemGroup>
     <Folder Include="Services\" />
     <Folder Include="Views\Auth\" />
+    <Folder Include="Views\Carrinho\" />
   </ItemGroup>
 
 </Project>

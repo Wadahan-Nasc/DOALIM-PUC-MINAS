@@ -1,0 +1,199 @@
+@model Doalim_dev.ViewModels.CarrinhoViewModel
+
+@{
+    ViewData["Title"] = "Meu Carrinho";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="mb-1">Meu Carrinho</h2>
+        <p class="text-muted mb-0">@Model.TotalItens de @Model.LimiteItens produtos adicionados</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        @if (Model.Itens.Any())
+        {
+            <span id="timer-badge" class="badge @(Model.EstaExpirando ? "bg-danger" : "bg-secondary") fs-6 px-3 py-2">
+                <i class="bi bi-clock me-1"></i> <span id="timer-display">--:--</span>
+            </span>
+        }
+        <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success">
+            <i class="bi bi-shop me-1"></i> Continuar comprando
+        </a>
+    </div>
+</div>
+
+@if (!Model.Itens.Any())
+{
+    <div class="alert alert-info">
+        Seu carrinho está vazio.
+        <a asp-controller="Produtos" asp-action="Vitrine" class="alert-link">Acesse a vitrine</a> para adicionar produtos.
+    </div>
+}
+else
+{
+    <div id="alerta-expiracao" class="alert alert-warning @(Model.EstaExpirando ? "" : "d-none")" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Atenção!</strong> Seu carrinho expira em menos de 5 minutos. Finalize o pedido logo!
+    </div>
+
+    <div id="alerta-expirado" class="alert alert-danger d-none" role="alert">
+        <i class="bi bi-x-circle-fill me-2"></i>
+        <strong>Carrinho expirado.</strong> Seus itens foram removidos. Redirecionando para a vitrine...
+    </div>
+
+    @if (Model.PossuiItensIndisponiveis)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Há itens indisponíveis no carrinho. Remova-os para poder finalizar o pedido.
+        </div>
+    }
+
+    <div class="table-responsive mb-4">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:60px;"></th>
+                    <th>Produto</th>
+                    <th>Lote</th>
+                    <th class="text-center">Quantidade</th>
+                    <th class="text-center">U.M.</th>
+                    <th>Validade</th>
+                    <th>Doador</th>
+                    <th style="width:50px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Itens)
+                {
+                    <tr class="@(!item.LoteDisponivel ? "table-warning" : "")">
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.FotoProduto))
+                            {
+                                <img src="@item.FotoProduto" alt="@item.NomeProduto"
+                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                     style="width:48px;height:48px;font-size:1.4rem;">🍱</div>
+                            }
+                        </td>
+                        <td>
+                            <strong>@item.NomeProduto</strong>
+                            <div class="text-muted small">@item.MarcaProduto &bull; @item.CategoriaProduto</div>
+                            @if (!string.IsNullOrEmpty(item.AvisoDisponibilidade))
+                            {
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i>@item.AvisoDisponibilidade
+                                </div>
+                            }
+                        </td>
+                        <td class="small text-muted">@item.NumeroLote</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary">@item.QuantidadeDesejada</span>
+                        </td>
+                        <td class="text-center small text-muted">@item.UnidadeMedidaProduto</td>
+                        <td class="small">@item.DataValidadeLote.ToString("dd/MM/yyyy")</td>
+                        <td class="small text-muted">@item.NomeDoador</td>
+                        <td>
+                            <form asp-controller="Carrinho" asp-action="Remover" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="idCarrinhoItem" value="@item.IdCarrinho" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Remover @item.NomeProduto do carrinho?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            @Model.ItensRestantes vaga(s) restante(s) &bull; O carrinho expira 30 minutos após o primeiro item adicionado
+        </span>
+        <form asp-controller="Carrinho" asp-action="Finalizar" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit"
+                    class="btn btn-success btn-lg"
+                    @(Model.PossuiItensIndisponiveis ? "disabled" : "")
+                    title="@(Model.PossuiItensIndisponiveis ? "Remova os itens indisponíveis para continuar" : "")">
+                <i class="bi bi-check-circle me-1"></i> Finalizar Pedido
+            </button>
+        </form>
+    </div>
+}
+
+@section Scripts {
+<script>
+    (function () {
+        var segundosRestantes = @(Model.Itens.Any() ? Model.SegundosRestantes : 0);
+        var INTERVALO_POLLING = 300;
+        var segundosAtePolling = INTERVALO_POLLING;
+        var intervalo = null;
+
+        function formatar(s) {
+            var m = Math.floor(s / 60).toString().padStart(2, '0');
+            var sec = (s % 60).toString().padStart(2, '0');
+            return m + ':' + sec;
+        }
+
+        function tick() {
+            var display = document.getElementById('timer-display');
+            var badge = document.getElementById('timer-badge');
+            var alertaExp = document.getElementById('alerta-expiracao');
+            var alertaOff = document.getElementById('alerta-expirado');
+
+            if (!display) { clearInterval(intervalo); return; }
+
+            if (segundosRestantes <= 0) {
+                display.textContent = '00:00';
+                if (badge) { badge.classList.remove('bg-secondary'); badge.classList.add('bg-danger'); }
+                if (alertaExp) alertaExp.classList.add('d-none');
+                if (alertaOff) alertaOff.classList.remove('d-none');
+                clearInterval(intervalo);
+                setTimeout(function () { window.location.href = '@Url.Action("Vitrine", "Produtos")'; }, 3000);
+                return;
+            }
+
+            display.textContent = formatar(segundosRestantes);
+
+            if (segundosRestantes <= 300) {
+                if (badge) { badge.classList.remove('bg-secondary'); badge.classList.add('bg-danger'); }
+                if (alertaExp) alertaExp.classList.remove('d-none');
+            }
+
+            segundosRestantes--;
+            segundosAtePolling--;
+
+            if (segundosAtePolling <= 0) {
+                segundosAtePolling = INTERVALO_POLLING;
+                sincronizar();
+            }
+        }
+
+        function sincronizar() {
+            fetch('@Url.Action("VerificarExpiracao", "Carrinho")')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.expirado) {
+                        segundosRestantes = 0;
+                    } else {
+                        segundosRestantes = data.segundosRestantes;
+                    }
+                })
+                .catch(function (e) { console.warn('Falha ao sincronizar carrinho.', e); });
+        }
+
+        @if (Model.Itens.Any())
+        {
+            <text>intervalo = setInterval(tick, 1000);</text>
+        }
+    })();
+</script>
+}

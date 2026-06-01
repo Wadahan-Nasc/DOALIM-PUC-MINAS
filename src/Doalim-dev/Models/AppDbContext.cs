@@ -13,9 +13,12 @@ namespace Doalim_dev.Models
         public DbSet<Endereco> Enderecos { get; set; }
         public DbSet<DocumentoVerificacao> DocumentosVerificacao { get; set; }
         public DbSet<Administrador> Administradores { get; set; }
-        public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Lote> Lotes { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<CarrinhoItem> CarrinhoItens { get; set; }
+        public DbSet<ValorLookup> ValoresLookup { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,26 +78,87 @@ namespace Doalim_dev.Models
                 .HasForeignKey(d => d.IdDoador)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relacionamento N:N entre Produto e Reserva
-            modelBuilder.Entity<Reserva>()
-                .HasOne(r => r.Produto)
-                .WithMany()
-                .HasForeignKey(r => r.IdProduto)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Relacionamento 1:N Beneficiário e Reserva
-            modelBuilder.Entity<Reserva>()
-                .HasOne(r => r.Beneficiario)
-                .WithMany()
-                .HasForeignKey(r => r.IdBeneficiario)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Relacionamento 1:N entre Produto e Lote
             modelBuilder.Entity<Lote>()
                 .HasOne(l => l.Produto)
                 .WithMany(p => p.Lotes)
                 .HasForeignKey(l => l.IdProduto)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento 1:N entre Lote e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Lote)
+                .WithMany()
+                .HasForeignKey(r => r.IdLote)
+                .OnDelete(DeleteBehavior.Restrict); // Evita exclusão de lote com reservas associadas
+
+            // Relacionamento 1:N entre Beneficiario e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Beneficiario)
+                .WithMany()
+                .HasForeignKey(r => r.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Restrict); // Mantém histórico mesmo se beneficiário for desativado
+
+            // Relacionamento 1:N entre Pedido e Reserva
+            modelBuilder.Entity<Reserva>()
+                .HasOne(r => r.Pedido)
+                .WithMany(p => p.Reservas)
+                .HasForeignKey(r => r.IdPedido)
+                .OnDelete(DeleteBehavior.Restrict); // Evita exclusão de pedido com reservas associadas
+
+            // Relacionamento 1:N entre Beneficiario e Pedido
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.Beneficiario)
+                .WithMany()
+                .HasForeignKey(p => p.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Restrict); // Mantém histórico de pedidos mesmo se beneficiário for desativado
+
+            // Relacionamento 1:N entre Beneficiario e CarrinhoItem
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasOne(c => c.Beneficiario)
+                .WithMany()
+                .HasForeignKey(c => c.IdBeneficiario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento 1:N entre Produto e CarrinhoItem
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasOne(c => c.Produto)
+                .WithMany()
+                .HasForeignKey(c => c.IdProduto)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Garante que um beneficiário não adicione o mesmo produto duas vezes no carrinho — controlado via índice único
+            modelBuilder.Entity<CarrinhoItem>()
+                .HasIndex(c => new { c.IdBeneficiario, c.IdProduto })
+                .IsUnique();
+
+            // Índice de unicidade: mesmo tipo não pode ter dois valores com o mesmo nome
+            modelBuilder.Entity<ValorLookup>()
+                .HasIndex(v => new { v.Tipo, v.Nome })
+                .IsUnique();
+
+            // Seed dos valores padrão de domínio
+            modelBuilder.Entity<ValorLookup>().HasData(
+                // Categorias
+                new ValorLookup { IdValor = 1,  Tipo = TipoLookup.Categoria,          Nome = "Grão",                Ativo = true },
+                new ValorLookup { IdValor = 2,  Tipo = TipoLookup.Categoria,          Nome = "Bebida",              Ativo = true },
+                new ValorLookup { IdValor = 3,  Tipo = TipoLookup.Categoria,          Nome = "Carne",               Ativo = true },
+                new ValorLookup { IdValor = 4,  Tipo = TipoLookup.Categoria,          Nome = "Produtos de Limpeza", Ativo = true },
+                new ValorLookup { IdValor = 5,  Tipo = TipoLookup.Categoria,          Nome = "Higiene Pessoal",     Ativo = true },
+                new ValorLookup { IdValor = 6,  Tipo = TipoLookup.Categoria,          Nome = "Laticínios",          Ativo = true },
+                new ValorLookup { IdValor = 7,  Tipo = TipoLookup.Categoria,          Nome = "Verdura",             Ativo = true },
+                new ValorLookup { IdValor = 8,  Tipo = TipoLookup.Categoria,          Nome = "Legume",              Ativo = true },
+                new ValorLookup { IdValor = 9,  Tipo = TipoLookup.Categoria,          Nome = "Fruta",               Ativo = true },
+                // Unidades de medida
+                new ValorLookup { IdValor = 10, Tipo = TipoLookup.UnidadeMedida,      Nome = "Kg",                  Ativo = true },
+                new ValorLookup { IdValor = 11, Tipo = TipoLookup.UnidadeMedida,      Nome = "mg",                  Ativo = true },
+                new ValorLookup { IdValor = 12, Tipo = TipoLookup.UnidadeMedida,      Nome = "L",                   Ativo = true },
+                new ValorLookup { IdValor = 13, Tipo = TipoLookup.UnidadeMedida,      Nome = "ml",                  Ativo = true },
+                // Tipos de armazenamento
+                new ValorLookup { IdValor = 14, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Ambiente",            Ativo = true },
+                new ValorLookup { IdValor = 15, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Congelado",           Ativo = true },
+                new ValorLookup { IdValor = 16, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Local fechado",       Ativo = true }
+            );
         }
     }
 }
