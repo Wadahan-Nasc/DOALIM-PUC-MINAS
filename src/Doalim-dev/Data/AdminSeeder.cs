@@ -42,7 +42,7 @@ namespace Doalim_dev.Data
                         Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000",
                         Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim",
                         TipoUsuario = TipoUsuario.Admin,
-                        StatusVerificacao = StatusVerificacao.Pendente,
+                        StatusVerificacao = StatusVerificacao.NaoAplicavel,
                         Ativo = true,
                         DataCadastro = DateTime.UtcNow
                     };
@@ -56,8 +56,7 @@ namespace Doalim_dev.Data
                 {
                     usuario.TipoUsuario = TipoUsuario.Admin;
                     usuario.Ativo = true;
-                    if (usuario.StatusVerificacao == StatusVerificacao.NaoAplicavel)
-                        usuario.StatusVerificacao = StatusVerificacao.Pendente;
+                    usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
 
                     if (string.IsNullOrWhiteSpace(usuario.Telefone))
                         usuario.Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000";
@@ -65,7 +64,7 @@ namespace Doalim_dev.Data
                     if (string.IsNullOrWhiteSpace(usuario.Endereco))
                         usuario.Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim";
 
-                    if (configuration.GetValue<bool>("AdminSeed:ResetPassword"))
+                    if (configuration.GetValue<bool>("AdminSeed:ResetPassword") || !PareceHashBCryptValido(usuario.SenhaHash))
                         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(senha);
 
                     await context.SaveChangesAsync();
@@ -88,6 +87,14 @@ namespace Doalim_dev.Data
             {
                 logger.LogError(ex, "Nao foi possivel criar ou atualizar o usuario administrador.");
             }
+        }
+        private static bool PareceHashBCryptValido(string hash)
+        {
+            return !string.IsNullOrWhiteSpace(hash)
+                && hash.Length == 60
+                && (hash.StartsWith("$2a$")
+                    || hash.StartsWith("$2b$")
+                    || hash.StartsWith("$2y$"));
         }
     }
 }

@@ -1,9 +1,4 @@
-ï»¿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Doalim_dev.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,10 +16,10 @@ namespace Doalim_dev.Controllers
             _context = context;
         }
 
-        // GET: Usuarios
         public async Task<IActionResult> Index(string? busca = null)
         {
             var usuarios = await _context.Usuarios
+                .AsNoTracking()
                 .OrderBy(u => u.StatusVerificacao == StatusVerificacao.Aprovado)
                 .ThenBy(u => u.Nome)
                 .ToListAsync();
@@ -32,54 +27,43 @@ namespace Doalim_dev.Controllers
             if (!string.IsNullOrWhiteSpace(busca))
             {
                 var termo = busca.Trim();
-                var termoDocumento = NormalizarDocumento(termo);
-
                 usuarios = usuarios
-                    .Where(u =>
-                        u.Nome.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
-                        (u.Cpf != null && (
-                            u.Cpf.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
-                            DocumentoContem(u.Cpf, termoDocumento))) ||
-                        (u.Cnpj != null && (
-                            u.Cnpj.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
-                            DocumentoContem(u.Cnpj, termoDocumento))))
+                    .Where(u => u.Nome.Contains(termo, StringComparison.OrdinalIgnoreCase)
+                             || u.Email.Contains(termo, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
 
+            await PopularPerfisViewBagAsync();
             ViewBag.Busca = busca;
 
             return View(usuarios);
         }
 
-        // GET: Usuarios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var usuario = await _context.Usuarios
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.IdUsuario == id);
-            if (usuario == null)
-            {
-                return NotFound();
-            }
 
+            if (usuario == null)
+                return NotFound();
+
+            await PopularPerfisViewBagAsync();
             return View(usuario);
         }
 
-        // GET: Usuarios/Create
         public IActionResult Create(TipoUsuario? tipoUsuario = null)
         {
             return View(new Usuario
             {
-                TipoUsuario = tipoUsuario ?? TipoUsuario.DoadorPF,
+                TipoUsuario = tipoUsuario ?? TipoUsuario.Admin,
                 Ativo = true
             });
         }
 
-        // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash,Ativo")] Usuario usuario)
@@ -87,14 +71,19 @@ namespace Doalim_dev.Controllers
             ModelState.Remove(nameof(usuario.TermosAceitados));
 
             if (await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email))
-                ModelState.AddModelError(nameof(usuario.Email), "Este e-mail jÃ¡ estÃ¡ cadastrado.");
+                ModelState.AddModelError(nameof(usuario.Email), "Este e-mail já está cadastrado.");
+
+            await ValidarIdentificadoresUnicosAsync(usuario);
 
             if (ModelState.IsValid)
             {
                 usuario.Ativo = true;
                 usuario.DataCadastro = DateTime.UtcNow;
-                usuario.StatusVerificacao = StatusInicialPorTipo(usuario.TipoUsuario);
+                usuario.StatusVerificacao = usuario.TipoUsuario == TipoUsuario.Admin
+                    ? StatusVerificacao.NaoAplicavel
+                    : StatusVerificacao.Pendente;
                 usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
+
                 _context.Add(usuario);
                 await _context.SaveChangesAsync();
 
@@ -102,89 +91,29 @@ namespace Doalim_dev.Controllers
 
                 TempData["Sucesso"] = usuario.TipoUsuario == TipoUsuario.Admin
                     ? "Administrador cadastrado com sucesso."
-                    : "UsuÃ¡rio cadastrado com sucesso.";
+                    : "Usuário cadastrado com sucesso.";
 
                 return RedirectToAction(nameof(Index));
             }
+
             return View(usuario);
         }
 
-        // GET: Usuarios/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-            return View(usuario);
+            TempData["Erro"] = "Dados pessoais só podem ser alterados pelo próprio usuário em Meu Perfil.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
-        // POST: Usuarios/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdUsuario,Cnpj,Cpf,Nome,Email,Telefone,Endereco,FotoPerfil,Arquivocomprovacao,TipoUsuario,SenhaHash,StatusVerificacao,Ativo")] Usuario usuario)
+        public async Task<IActionResult> Edit(int id, Usuario usuario)
         {
-            if (id != usuario.IdUsuario)
-            {
-                return NotFound();
-            }
-
-            ModelState.Remove(nameof(usuario.TermosAceitados));
-
-            var usuarioAtual = await _context.Usuarios.FindAsync(id);
-            if (usuarioAtual == null)
-                return NotFound();
-
-            if (string.IsNullOrWhiteSpace(usuario.SenhaHash))
-                ModelState.Remove(nameof(usuario.SenhaHash));
-
-            if (await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email && u.IdUsuario != id))
-                ModelState.AddModelError(nameof(usuario.Email), "Este e-mail jÃ¡ estÃ¡ cadastrado.");
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    usuarioAtual.Nome = usuario.Nome;
-                    usuarioAtual.Cpf = usuario.Cpf;
-                    usuarioAtual.Cnpj = usuario.Cnpj;
-                    usuarioAtual.Email = usuario.Email;
-                    usuarioAtual.Telefone = usuario.Telefone;
-                    usuarioAtual.Endereco = usuario.Endereco;
-                    usuarioAtual.FotoPerfil = usuario.FotoPerfil;
-                    usuarioAtual.Arquivocomprovacao = usuario.Arquivocomprovacao;
-                    usuarioAtual.TipoUsuario = usuario.TipoUsuario;
-                    usuarioAtual.Ativo = usuario.Ativo;
-                    usuarioAtual.StatusVerificacao = usuario.StatusVerificacao;
-
-                    if (!string.IsNullOrWhiteSpace(usuario.SenhaHash))
-                        usuarioAtual.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
-
-                    await _context.SaveChangesAsync();
-                    await CriarPerfilComplementarAsync(usuarioAtual);
-
-                    TempData["Sucesso"] = "UsuÃ¡rio atualizado com sucesso.";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UsuarioExists(usuario.IdUsuario))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(usuario);
+            TempData["Erro"] = "Dados pessoais só podem ser alterados pelo próprio usuário em Meu Perfil.";
+            return await Task.FromResult(RedirectToAction(nameof(Details), new { id }));
         }
 
         [HttpPost]
@@ -198,65 +127,256 @@ namespace Doalim_dev.Controllers
             if (usuario == null)
                 return NotFound();
 
+            if (usuario.TipoUsuario == TipoUsuario.Admin)
+            {
+                usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
+                await _context.SaveChangesAsync();
+
+                TempData["Sucesso"] = "Administrador não precisa de arquivo de comprovação.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (status == StatusVerificacao.Aprovado && string.IsNullOrWhiteSpace(usuario.Arquivocomprovacao))
+            {
+                TempData["Erro"] = "Não é possível aprovar um usuário sem arquivo de comprovação.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             usuario.StatusVerificacao = status;
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = $"DocumentaÃ§Ã£o de {usuario.Nome} atualizada para {status}.";
+            TempData["Sucesso"] = $"Documentação de {usuario.Nome} atualizada para {status}.";
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Usuarios/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var usuario = await _context.Usuarios
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.IdUsuario == id);
+
             if (usuario == null)
-            {
                 return NotFound();
-            }
 
             return View(usuario);
         }
 
-        // POST: Usuarios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario != null)
-            {
                 _context.Usuarios.Remove(usuario);
-            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UsuarioExists(int id)
+        [AllowAnonymous]
+        public async Task<IActionResult> MeuPerfil()
         {
-            return _context.Usuarios.Any(e => e.IdUsuario == id);
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login", "Auth");
+
+            var usuario = await ObterUsuarioLogadoAsync();
+            if (usuario == null)
+                return NotFound();
+
+            await PopularMeuPerfilViewBagAsync(usuario.IdUsuario);
+            return View(usuario);
         }
 
-        private static string NormalizarDocumento(string valor)
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MeuPerfil(Usuario model, IFormFile? arquivoComprovacao, IFormFile? arquivoFotoPerfil)
         {
-            return new string(valor.Where(char.IsDigit).ToArray());
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login", "Auth");
+
+            var usuario = await ObterUsuarioLogadoAsync();
+            if (usuario == null)
+                return NotFound();
+
+            ModelState.Remove("SenhaHash");
+            ModelState.Remove("Arquivocomprovacao");
+            ModelState.Remove("FotoPerfil");
+            ModelState.Remove("TermosAceitados");
+
+            await ValidarIdentificadoresUnicosAsync(model, usuario.IdUsuario);
+
+            if (!ModelState.IsValid)
+            {
+                await PopularMeuPerfilViewBagAsync(usuario.IdUsuario);
+                model.IdUsuario = usuario.IdUsuario;
+                model.TipoUsuario = usuario.TipoUsuario;
+                model.StatusVerificacao = usuario.StatusVerificacao;
+                model.Ativo = usuario.Ativo;
+                model.Arquivocomprovacao = usuario.Arquivocomprovacao;
+                model.FotoPerfil = usuario.FotoPerfil;
+                return View(model);
+            }
+
+            if (arquivoFotoPerfil != null && arquivoFotoPerfil.Length > 0)
+            {
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
+                var extensao = Path.GetExtension(arquivoFotoPerfil.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de foto inválido. Use PNG, JPG ou JPEG.";
+                    return RedirectToAction(nameof(MeuPerfil));
+                }
+
+                const long tamanhoMaximo = 2 * 1024 * 1024;
+                if (arquivoFotoPerfil.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "A foto excede o tamanho máximo permitido de 2MB.";
+                    return RedirectToAction(nameof(MeuPerfil));
+                }
+
+                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "fotos-perfil");
+                Directory.CreateDirectory(pastaUpload);
+
+                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
+                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
+
+                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                    await arquivoFotoPerfil.CopyToAsync(stream);
+
+                usuario.FotoPerfil = $"/uploads/fotos-perfil/{nomeArquivo}";
+            }
+
+            if (arquivoComprovacao != null && arquivoComprovacao.Length > 0)
+            {
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
+                var extensao = Path.GetExtension(arquivoComprovacao.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de arquivo inválido. Use PNG, JPG, JPEG ou PDF.";
+                    return RedirectToAction(nameof(MeuPerfil));
+                }
+
+                const long tamanhoMaximo = 5 * 1024 * 1024;
+                if (arquivoComprovacao.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "O arquivo excede o tamanho máximo permitido de 5MB.";
+                    return RedirectToAction(nameof(MeuPerfil));
+                }
+
+                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "comprovacoes");
+                Directory.CreateDirectory(pastaUpload);
+
+                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
+                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
+
+                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                    await arquivoComprovacao.CopyToAsync(stream);
+
+                usuario.Arquivocomprovacao = $"/uploads/comprovacoes/{nomeArquivo}";
+                usuario.StatusVerificacao = StatusVerificacao.Pendente;
+            }
+
+            usuario.Nome = model.Nome;
+            usuario.Email = model.Email;
+            usuario.Telefone = model.Telefone;
+            usuario.Endereco = model.Endereco;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Perfil atualizado com sucesso.";
+            return RedirectToAction(nameof(MeuPerfil));
         }
 
-        private static bool DocumentoContem(string documento, string termoDocumento)
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TornarDoador()
         {
-            return !string.IsNullOrWhiteSpace(termoDocumento)
-                && NormalizarDocumento(documento).Contains(termoDocumento);
+            return await AdicionarPerfilAsync("doador");
         }
 
-        private static StatusVerificacao StatusInicialPorTipo(TipoUsuario tipoUsuario)
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TornarBeneficiario()
         {
-            return StatusVerificacao.Pendente;
+            return await AdicionarPerfilAsync("beneficiario");
+        }
+
+        private async Task<IActionResult> AdicionarPerfilAsync(string perfil)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login", "Auth");
+
+            var usuario = await ObterUsuarioLogadoAsync();
+            if (usuario == null)
+                return NotFound();
+
+            if (usuario.TipoUsuario == TipoUsuario.Admin)
+            {
+                TempData["Erro"] = "Administradores não podem solicitar perfil operacional.";
+                return RedirectToAction(nameof(MeuPerfil));
+            }
+
+            if (perfil == "doador")
+            {
+                if (!await _context.Doadores.AnyAsync(d => d.IdUsuario == usuario.IdUsuario))
+                    _context.Doadores.Add(new Doador { IdUsuario = usuario.IdUsuario, QtdAlimentosDoados = "0" });
+
+                if (usuario.TipoUsuario == TipoUsuario.BeneficiarioPF || usuario.TipoUsuario == TipoUsuario.BeneficiarioPJ)
+                    usuario.TipoUsuario = UsuarioRegras.TipoDoadorCorrespondente(usuario);
+            }
+            else
+            {
+                if (!await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuario.IdUsuario))
+                    _context.Beneficiarios.Add(new Beneficiario { IdUsuario = usuario.IdUsuario });
+
+                if (usuario.TipoUsuario == TipoUsuario.DoadorPF || usuario.TipoUsuario == TipoUsuario.DoadorPJ)
+                    usuario.TipoUsuario = UsuarioRegras.TipoBeneficiarioCorrespondente(usuario);
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Perfil complementar ativado. As ações continuam liberadas apenas após comprovação aprovada.";
+            return RedirectToAction(nameof(MeuPerfil));
+        }
+
+        private async Task<Usuario?> ObterUsuarioLogadoAsync()
+        {
+            var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(usuarioId, out var id))
+                return await _context.Usuarios.FirstOrDefaultAsync(u => u.IdUsuario == id);
+
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        private async Task ValidarIdentificadoresUnicosAsync(Usuario usuario, int? ignorarId = null)
+        {
+            var cpf = UsuarioRegras.NormalizarDigitos(usuario.Cpf);
+            var cnpj = UsuarioRegras.NormalizarDigitos(usuario.Cnpj);
+            var telefone = UsuarioRegras.NormalizarDigitos(usuario.Telefone);
+
+            var usuarios = await _context.Usuarios
+                .AsNoTracking()
+                .Where(u => ignorarId == null || u.IdUsuario != ignorarId.Value)
+                .Select(u => new { u.Cpf, u.Cnpj, u.Telefone })
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(cpf) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cpf) == cpf))
+                ModelState.AddModelError(nameof(usuario.Cpf), "Este CPF já está cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(cnpj) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cnpj) == cnpj))
+                ModelState.AddModelError(nameof(usuario.Cnpj), "Este CNPJ já está cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(telefone) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Telefone) == telefone))
+                ModelState.AddModelError(nameof(usuario.Telefone), "Este telefone já está cadastrado.");
         }
 
         private async Task CriarPerfilComplementarAsync(Usuario usuario)
@@ -280,125 +400,16 @@ namespace Doalim_dev.Controllers
             await _context.SaveChangesAsync();
         }
 
-        // GET: /Usuarios/MeuPerfil
-        [AllowAnonymous]
-        public async Task<IActionResult> MeuPerfil()
+        private async Task PopularPerfisViewBagAsync()
         {
-            if (!User.Identity!.IsAuthenticated)
-                return RedirectToAction("Login", "Auth");
-
-            var email = User.FindFirstValue(ClaimTypes.Email)
-                     ?? User.Identity.Name;
-
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email);
-
-            if (usuario == null) return NotFound();
-
-            return View(usuario);
+            ViewBag.Doadores = (await _context.Doadores.AsNoTracking().Select(d => d.IdUsuario).ToListAsync()).ToHashSet();
+            ViewBag.Beneficiarios = (await _context.Beneficiarios.AsNoTracking().Select(b => b.IdUsuario).ToListAsync()).ToHashSet();
         }
 
-        // POST: /Usuarios/MeuPerfil
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MeuPerfil(Usuario model, IFormFile? arquivoComprovacao, IFormFile? arquivoFotoPerfil)
+        private async Task PopularMeuPerfilViewBagAsync(int usuarioId)
         {
-            if (!User.Identity!.IsAuthenticated)
-                return RedirectToAction("Login", "Auth");
-
-            ModelState.Remove("SenhaHash");
-            ModelState.Remove("Arquivocomprovacao");
-            ModelState.Remove("FotoPerfil");
-            ModelState.Remove("TermosAceitados");
-
-            if (!ModelState.IsValid) return View(model);
-
-            var email = User.FindFirstValue(ClaimTypes.Email)
-                     ?? User.Identity.Name;
-
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email);
-
-            if (usuario == null) return NotFound();
-
-            // Upload da foto de perfil
-            if (arquivoFotoPerfil != null && arquivoFotoPerfil.Length > 0)
-            {
-                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
-                var extensao = Path.GetExtension(arquivoFotoPerfil.FileName).ToLowerInvariant();
-
-                if (!extensoesPermitidas.Contains(extensao))
-                {
-                    TempData["Erro"] = "Formato de foto invÃ¡lido. Use PNG, JPG ou JPEG.";
-                    return View(model);
-                }
-
-                const long tamanhoMaximo = 2 * 1024 * 1024; // 2MB
-                if (arquivoFotoPerfil.Length > tamanhoMaximo)
-                {
-                    TempData["Erro"] = "A foto excede o tamanho mÃ¡ximo permitido de 2MB.";
-                    return View(model);
-                }
-
-                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "fotos-perfil");
-                Directory.CreateDirectory(pastaUpload);
-
-                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
-                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
-
-                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
-                {
-                    await arquivoFotoPerfil.CopyToAsync(stream);
-                }
-
-                usuario.FotoPerfil = $"/uploads/fotos-perfil/{nomeArquivo}";
-            }
-
-            // Upload do arquivo de comprovaÃ§Ã£o
-            if (arquivoComprovacao != null && arquivoComprovacao.Length > 0)
-            {
-                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
-                var extensao = Path.GetExtension(arquivoComprovacao.FileName).ToLowerInvariant();
-
-                if (!extensoesPermitidas.Contains(extensao))
-                {
-                    TempData["Erro"] = "Formato de arquivo invÃ¡lido. Use PNG, JPG, JPEG ou PDF.";
-                    return View(model);
-                }
-
-                const long tamanhoMaximo = 5 * 1024 * 1024; // 5MB
-                if (arquivoComprovacao.Length > tamanhoMaximo)
-                {
-                    TempData["Erro"] = "O arquivo excede o tamanho mÃ¡ximo permitido de 5MB.";
-                    return View(model);
-                }
-
-                var pastaUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "comprovacoes");
-                Directory.CreateDirectory(pastaUpload);
-
-                var nomeArquivo = $"{usuario.IdUsuario}_{DateTime.Now:yyyyMMddHHmmss}{extensao}";
-                var caminhoCompleto = Path.Combine(pastaUpload, nomeArquivo);
-
-                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
-                {
-                    await arquivoComprovacao.CopyToAsync(stream);
-                }
-
-                usuario.Arquivocomprovacao = $"/uploads/comprovacoes/{nomeArquivo}";
-            }
-
-            usuario.Nome = model.Nome;
-            usuario.Email = model.Email;
-            usuario.Telefone = model.Telefone;
-            usuario.Endereco = model.Endereco;
-            // FotoPerfil, Cpf e Cnpj sÃ£o tratados separadamente acima
-
-            _context.Update(usuario);
-            await _context.SaveChangesAsync();
-
-            TempData["Sucesso"] = "Perfil atualizado com sucesso!";
-            return RedirectToAction("MeuPerfil");
+            ViewBag.TemDoador = await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId);
+            ViewBag.TemBeneficiario = await _context.Beneficiarios.AsNoTracking().AnyAsync(b => b.IdUsuario == usuarioId);
         }
     }
 }

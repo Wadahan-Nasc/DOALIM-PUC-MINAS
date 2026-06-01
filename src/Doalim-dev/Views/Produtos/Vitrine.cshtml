@@ -1,150 +1,182 @@
-@model Doalim_dev.ViewModels.VitrineCompletaViewModel
+﻿@model Doalim_dev.ViewModels.VitrineCompletaViewModel
 
 @{
-    ViewData["Title"] = "Alimentos Disponíveis";
+    ViewData["Title"] = "Vitrine de Doações";
     var usuarioLogado = ViewBag.UsuarioLogado == true;
     var usuarioBeneficiario = ViewBag.UsuarioBeneficiario == true;
     var usuarioAprovado = ViewBag.UsuarioAprovado == true;
     var podeReservar = ViewBag.PodeReservar == true;
+    var produtos = Model.Produtos.ToList();
+    var totalItens = produtos.Sum(p => p.QuantidadeDisponivel);
+    var vencimentoProximo = produtos.Count(p => p.DataValidade.Date <= DateTime.Today.AddDays(3));
+    var categorias = produtos.Select(p => p.Categoria).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct().Count();
 }
 
-<h2 class="mb-4">🛒 Alimentos Disponíveis para Doação</h2>
-
-<form method="get" asp-controller="Produtos" asp-action="Vitrine" class="card p-3 mb-4 shadow-sm bg-light">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label fw-semibold">Buscar por nome</label>
-            <input type="text"
-                   name="NomeBusca"
-                   value="@Model.Filtros.NomeBusca"
-                   class="form-control"
-                   placeholder="Ex: Arroz, feijão, macarrão..." />
+<section class="vitrine-page vitrine-page-clean">
+    <header class="vitrine-clean-header">
+        <div class="vitrine-clean-copy">
+            <span class="vitrine-clean-kicker">Vitrine Doalim</span>
+            <h1>Alimentos disponíveis</h1>
+            <p>Encontre alimentos ativos, consulte validade e faça reservas com sua conta aprovada.</p>
         </div>
 
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Quantidade Mínima</label>
-            <input type="number"
-                   name="QuantidadeMinima"
-                   value="@Model.Filtros.QuantidadeMinima"
-                   class="form-control"
-                   placeholder="Ex: 10" />
+        <div class="vitrine-clean-stats" aria-label="Resumo da vitrine">
+            <span><strong>@produtos.Count</strong> produtos</span>
+            <span><strong>@totalItens</strong> unidades</span>
+            <span><strong>@categorias</strong> categorias</span>
+            <span class="is-alert"><strong>@vencimentoProximo</strong> vencendo</span>
         </div>
 
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Ordenar por validade</label>
-            <select name="OrdemValidade" class="form-select">
-                <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">
-                    Mais próxima de vencer
-                </option>
-                <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">
-                    Mais distante de vencer
-                </option>
-            </select>
+        <div class="vitrine-clean-action">
+            @if (!usuarioLogado)
+            {
+                <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")" class="btn btn-success">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Entrar para reservar
+                </a>
+            }
+            else if (!usuarioAprovado)
+            {
+                <a asp-controller="Usuarios" asp-action="MeuPerfil" class="btn btn-success">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    Enviar comprovação
+                </a>
+            }
+            else if (!usuarioBeneficiario)
+            {
+                <a asp-controller="Usuarios" asp-action="MeuPerfil" class="btn btn-success">
+                    <i class="bi bi-people"></i>
+                    Ativar beneficiário
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-success">
+                    <i class="bi bi-cart-check"></i>
+                    Minhas reservas
+                </a>
+            }
         </div>
+    </header>
 
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary w-100">Limpar</a>
+    <form method="get" asp-controller="Produtos" asp-action="Vitrine" class="vitrine-filter-panel vitrine-filter-clean">
+        <div class="vitrine-filter-title">
+            <i class="bi bi-sliders"></i>
+            <div>
+                <strong>Filtrar vitrine</strong>
+                <span>Busque por nome, quantidade e validade.</span>
+            </div>
         </div>
-    </div>
-</form>
-
-@if (!Model.Produtos.Any())
-{
-    <div class="alert alert-info">Nenhum alimento encontrado para os filtros aplicados.</div>
-}
-else
-{
-    <div class="container">
-        <div class="row fw-bold border-bottom pb-2 mb-2 text-muted d-none d-md-flex">
-            <div class="col-md-1"></div>
-            <div class="col-md-2">Alimento</div>
-            <div class="col-md-1">Marca</div>
-            <div class="col-md-2">Categoria</div>
-            <div class="col-md-2">Armazenamento</div>
-            <div class="col-md-1 text-center">Qtd.</div>
-            <div class="col-md-1 text-center">Validade</div>
-            <div class="col-md-1">Doador</div>
-            <div class="col-md-1"></div>
-        </div>
-
-        @foreach (var alimento in Model.Produtos)
-        {
-            <div class="row align-items-center border rounded mb-2 p-2 shadow-sm bg-white">
-                <div class="col-md-1 text-center">
-                    @if (!string.IsNullOrEmpty(alimento.FotoProduto))
-                    {
-                        <img src="@alimento.FotoProduto"
-                             alt="@alimento.Nome"
-                             class="rounded"
-                             style="width:56px; height:56px; object-fit:cover;" />
-                    }
-                    else
-                    {
-                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                             style="width:56px; height:56px; font-size:1.4rem;">
-                            🍱
-                        </div>
-                    }
-                </div>
-
-                <div class="col-md-2">
-                    <strong>@alimento.Nome</strong>
-                </div>
-
-                <div class="col-md-1 text-muted small">
-                    @alimento.MarcaProduto
-                </div>
-
-                <div class="col-md-2">
-                    <span class="badge bg-secondary">@alimento.Categoria</span>
-                </div>
-
-                <div class="col-md-2 text-muted small">
-                    @alimento.TipoArmazenamento
-                </div>
-
-                <div class="col-md-1 text-center">
-                    @alimento.QuantidadeDisponivel
-                </div>
-
-                <div class="col-md-1 text-center small">
-                    @alimento.DataValidade.ToString("dd/MM/yyyy")
-                </div>
-
-                <div class="col-md-1 small">
-                    @alimento.NomeDoador
-                </div>
-
-                <div class="col-md-1 text-end">
-                    @if (podeReservar)
-                    {
-                        <a asp-controller="Reservas"
-                           asp-action="Reservar"
-                           asp-route-id="@alimento.IdProduto"
-                           class="btn btn-success btn-sm">
-                            Reservar
-                        </a>
-                    }
-                    else if (!usuarioLogado)
-                    {
-                        <a asp-controller="Auth"
-                           asp-action="Login"
-                           asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")"
-                           class="btn btn-outline-success btn-sm">
-                            Entrar para reservar
-                        </a>
-                    }
-                    else if (!usuarioAprovado)
-                    {
-                        <button type="button" class="btn btn-outline-warning btn-sm" disabled>Aguardando aprovação</button>
-                    }
-                    else if (!usuarioBeneficiario)
-                    {
-                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Somente beneficiários</button>
-                    }
+        <div class="vitrine-filter-grid">
+            <div>
+                <label class="form-label" for="NomeBusca">Buscar por nome</label>
+                <div class="vitrine-input-icon">
+                    <i class="bi bi-search"></i>
+                    <input id="NomeBusca" type="text" name="NomeBusca" value="@Model.Filtros.NomeBusca" class="form-control" placeholder="Arroz, feijão, macarrão..." />
                 </div>
             </div>
-        }
-    </div>
-}
+            <div>
+                <label class="form-label" for="QuantidadeMinima">Quantidade mínima</label>
+                <input id="QuantidadeMinima" type="number" name="QuantidadeMinima" value="@Model.Filtros.QuantidadeMinima" class="form-control" min="0" placeholder="Ex: 10" />
+            </div>
+            <div>
+                <label class="form-label" for="OrdemValidade">Ordenar por validade</label>
+                <select id="OrdemValidade" name="OrdemValidade" class="form-select">
+                    <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">Mais próxima de vencer</option>
+                    <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">Mais distante de vencer</option>
+                </select>
+            </div>
+            <div class="vitrine-filter-actions">
+                <button type="submit" class="btn btn-success"><i class="bi bi-filter"></i> Filtrar</button>
+                <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i> Limpar</a>
+            </div>
+        </div>
+    </form>
+
+    @if (!produtos.Any())
+    {
+        <div class="vitrine-empty">
+            <i class="bi bi-basket2"></i>
+            <strong>Nenhum alimento encontrado.</strong>
+            <span>Ajuste os filtros ou volte mais tarde para conferir novas doações.</span>
+        </div>
+    }
+    else
+    {
+        <div class="vitrine-grid">
+            @foreach (var alimento in produtos)
+            {
+                var validadeProxima = alimento.DataValidade.Date <= DateTime.Today.AddDays(3);
+                <article class="vitrine-card @(validadeProxima ? "is-urgent" : string.Empty)">
+                    <div class="vitrine-card-media">
+                        @if (!string.IsNullOrEmpty(alimento.FotoProduto))
+                        {
+                            <img src="@alimento.FotoProduto" alt="@alimento.Nome" />
+                        }
+                        else
+                        {
+                            <div class="vitrine-card-placeholder"><i class="bi bi-basket2"></i></div>
+                        }
+                        <span class="vitrine-card-qty">@alimento.QuantidadeDisponivel un.</span>
+                    </div>
+
+                    <div class="vitrine-card-body">
+                        <div class="vitrine-card-topline">
+                            <span class="vitrine-category">@(string.IsNullOrWhiteSpace(alimento.Categoria) ? "Alimento" : alimento.Categoria)</span>
+                            <span class="vitrine-validity @(validadeProxima ? "is-alert" : string.Empty)">
+                                <i class="bi bi-calendar2-week"></i>
+                                @alimento.DataValidade.ToString("dd/MM/yyyy")
+                            </span>
+                        </div>
+                        <h2>@alimento.Nome</h2>
+                        <dl class="vitrine-card-facts">
+                            <div>
+                                <dt>Marca</dt>
+                                <dd>@(string.IsNullOrWhiteSpace(alimento.MarcaProduto) ? "Não informada" : alimento.MarcaProduto)</dd>
+                            </div>
+                            <div>
+                                <dt>Armazenamento</dt>
+                                <dd>@(string.IsNullOrWhiteSpace(alimento.TipoArmazenamento) ? "Não informado" : alimento.TipoArmazenamento)</dd>
+                            </div>
+                            <div>
+                                <dt>Doador</dt>
+                                <dd>@alimento.NomeDoador</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <div class="vitrine-card-footer">
+                        @if (podeReservar)
+                        {
+                            <a asp-controller="Reservas" asp-action="Reservar" asp-route-id="@alimento.IdProduto" class="btn btn-success w-100">
+                                <i class="bi bi-cart-plus"></i>
+                                Reservar
+                            </a>
+                        }
+                        else if (!usuarioLogado)
+                        {
+                            <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Url.Action("Vitrine", "Produtos")" class="btn btn-outline-success w-100">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                Entrar para reservar
+                            </a>
+                        }
+                        else if (!usuarioAprovado)
+                        {
+                            <button type="button" class="btn btn-outline-warning w-100" disabled>
+                                <i class="bi bi-hourglass-split"></i>
+                                Aguardando aprovação
+                            </button>
+                        }
+                        else if (!usuarioBeneficiario)
+                        {
+                            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                                <i class="bi bi-person-lock"></i>
+                                Somente beneficiários
+                            </button>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

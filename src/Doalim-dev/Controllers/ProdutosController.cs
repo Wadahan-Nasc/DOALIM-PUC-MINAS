@@ -33,11 +33,10 @@ namespace Doalim_dev.Controllers
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
 
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores possuem um painel de gerenciamento.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
             // Auto-InativaÃ§Ã£o
@@ -113,14 +112,17 @@ namespace Doalim_dev.Controllers
 
 
         // GET
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            int usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0) return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores podem cadastrar produtos.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para cadastrar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
+
             return View();
         }
 
@@ -133,6 +135,13 @@ namespace Doalim_dev.Controllers
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
 
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
+
+            // POST: bloquear doacao sem comprovacao
             produto.IdDoador = usuarioId;
 
             if (!string.IsNullOrWhiteSpace(produto.CodigoBarras))
@@ -211,7 +220,7 @@ namespace Doalim_dev.Controllers
         public async Task<IActionResult> Vitrine(VitrineFiltroViewModel filtros)
         {
             var usuarioLogado = User.Identity?.IsAuthenticated == true;
-            var usuarioBeneficiario = UsuarioEhBeneficiario();
+            var usuarioBeneficiario = false;
             var usuarioAprovado = false;
 
             if (usuarioLogado)
@@ -220,9 +229,11 @@ namespace Doalim_dev.Controllers
 
                 if (int.TryParse(usuarioIdClaim, out var usuarioId))
                 {
-                    usuarioAprovado = await _context.Usuarios
+                    usuarioBeneficiario = await _context.Beneficiarios
                         .AsNoTracking()
-                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                        .AnyAsync(b => b.IdUsuario == usuarioId);
+
+                    usuarioAprovado = await UsuarioComprovadoAsync(usuarioId);
                 }
             }
 
@@ -293,6 +304,11 @@ namespace Doalim_dev.Controllers
 
             var produto = await _context.Produtos.Include(p => p.Lotes).FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produto == null) return NotFound();
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para gerenciar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
 
             if (produto.IdDoador != usuarioId)
             {
@@ -313,15 +329,18 @@ namespace Doalim_dev.Controllers
 
             int usuarioId = ObterIdUsuarioLogado();
 
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para alterar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
             var produtoOriginal = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produtoOriginal == null || produtoOriginal.IdDoador != usuarioId)
             {
                 TempData["ErroSeguranca"] = "Tentativa de Fraude identificada. OperaÃ§Ã£o cancelada.";
                 return RedirectToAction(nameof(Index));
             }
-
             produto.IdDoador = usuarioId;
-
             ModelState.Remove(nameof(Produto.Doador));
             ModelState.Remove(nameof(Produto.IdDoador));
 
@@ -489,6 +508,22 @@ namespace Doalim_dev.Controllers
             }
 
             return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+        private async Task<bool> UsuarioPodeDoarAsync(int usuarioId)
+        {
+            if (!await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId))
+                return false;
+
+            return await UsuarioComprovadoAsync(usuarioId);
+        }
+
+        private async Task<bool> UsuarioComprovadoAsync(int usuarioId)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+
+            return usuario != null && UsuarioRegras.TemComprovacaoAprovada(usuario);
         }
     }
 }

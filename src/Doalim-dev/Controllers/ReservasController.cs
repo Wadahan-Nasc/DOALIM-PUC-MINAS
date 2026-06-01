@@ -1,4 +1,4 @@
-Ôªøusing System.Security.Claims;
+using System.Security.Claims;
 using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +26,7 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeReservarAsync(usuarioId))
             {
-                TempData["Erro"] = "Apenas benefici√°rios aprovados podem realizar reservas.";
+                TempData["Erro"] = "Para reservar, envie o arquivo de comprovaÁ„o no seu perfil e aguarde a aprovaÁ„o do administrador.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
@@ -40,7 +40,7 @@ namespace Doalim_dev.Controllers
 
             if (produto.IdDoador == usuarioId)
             {
-                TempData["Erro"] = "Voc√™ n√£o pode reservar a pr√≥pria doa√ß√£o.";
+                TempData["Erro"] = "VocÍ n„o pode reservar a prÛpria doaÁ„o.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
@@ -58,7 +58,7 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeReservarAsync(usuarioId))
             {
-                TempData["Erro"] = "Apenas benefici√°rios aprovados podem realizar reservas.";
+                TempData["Erro"] = "Para reservar, envie o arquivo de comprovaÁ„o no seu perfil e aguarde a aprovaÁ„o do administrador.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
@@ -74,7 +74,7 @@ namespace Doalim_dev.Controllers
 
             if (produto.IdDoador == usuarioId)
             {
-                TempData["Erro"] = "Voc√™ n√£o pode reservar a pr√≥pria doa√ß√£o.";
+                TempData["Erro"] = "VocÍ n„o pode reservar a prÛpria doaÁ„o.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 
@@ -86,7 +86,7 @@ namespace Doalim_dev.Controllers
             if (viewModel.QuantidadeReservada > quantidadeDisponivel)
             {
                 ModelState.AddModelError("QuantidadeReservada",
-                    $"Quantidade indispon√≠vel. M√°ximo permitido: {quantidadeDisponivel}.");
+                    $"Quantidade indisponÌvel. M·ximo permitido: {quantidadeDisponivel}.");
                 return await RetornarViewReservaAsync(viewModel);
             }
 
@@ -104,7 +104,7 @@ namespace Doalim_dev.Controllers
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = $"Reserva realizada com sucesso! Seu c√≥digo √© #{reserva.IdReserva}.";
+            TempData["Sucesso"] = $"Reserva realizada com sucesso! Seu cÛdigo È #{reserva.IdReserva}.";
             return RedirectToAction("Vitrine", "Produtos");
         }
 
@@ -119,7 +119,7 @@ namespace Doalim_dev.Controllers
                 .Include(r => r.Produto)
                     .ThenInclude(p => p.Doador)
                         .ThenInclude(d => d.Usuario)
-                .Include(r => r.Produto.Lotes)   // necess√°rio para obter a menor validade
+                .Include(r => r.Produto.Lotes)   // necess·rio para obter a menor validade
                 .Where(r => r.IdBeneficiario == usuarioId)
                 .OrderByDescending(r => r.DataReserva)
                 .Select(r => new MinhasReservasViewModel
@@ -132,7 +132,7 @@ namespace Doalim_dev.Controllers
                     MarcaProduto = r.Produto.MarcaProduto,
                     Categoria = r.Produto.CategoriaProduto,
                     UnidadeMedida = r.Produto.UnidadeMedida,
-                    // Exibe a data de validade mais pr√≥xima entre os lotes ainda ativos
+                    // Exibe a data de validade mais prÛxima entre os lotes ainda ativos
                     DataValidade = r.Produto.Lotes
                         .Where(l => l.StatusLote && l.DataValidade.Date >= DateTime.Today && l.Quantidade > 0)
                         .OrderBy(l => l.DataValidade)
@@ -148,7 +148,7 @@ namespace Doalim_dev.Controllers
             return View(reservas);
         }
 
-        // --- M√©todos auxiliares ---
+        // --- MÈtodos auxiliares ---
 
         private async Task<bool> UsuarioPodeReservarAsync(int usuarioId)
         {
@@ -156,7 +156,7 @@ namespace Doalim_dev.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
 
-            if (usuario == null || usuario.StatusVerificacao != StatusVerificacao.Aprovado)
+            if (usuario == null || !UsuarioRegras.TemComprovacaoAprovada(usuario))
                 return false;
 
             return await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuarioId);
@@ -203,8 +203,8 @@ namespace Doalim_dev.Controllers
 
         /// <summary>
         /// Deduz a quantidade reservada dos lotes ativos do produto,
-        /// come√ßando pelos mais pr√≥ximos do vencimento (FIFO).
-        /// Remove lotes que ficam zerados e atualiza StatusProduto se necess√°rio.
+        /// comeÁando pelos mais prÛximos do vencimento (FIFO).
+        /// Remove lotes que ficam zerados e atualiza StatusProduto se necess·rio.
         /// </summary>
         private void DeduzirQuantidadeLotes(Produto produto, int quantidade)
         {
@@ -233,7 +233,7 @@ namespace Doalim_dev.Controllers
                 }
             }
 
-            // Se n√£o restarem lotes ativos, desativa o produto
+            // Se n„o restarem lotes ativos, desativa o produto
             var aindaTemLotes = produto.Lotes
                 .Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0);
 

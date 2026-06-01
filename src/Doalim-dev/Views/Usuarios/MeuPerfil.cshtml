@@ -2,194 +2,164 @@
 
 @{
     ViewData["Title"] = "Meu Perfil";
+    var temDoador = ViewBag.TemDoador == true;
+    var temBeneficiario = ViewBag.TemBeneficiario == true;
+    var precisaComprovacao = UsuarioRegras.PrecisaComprovacao(Model);
+    var liberado = UsuarioRegras.TemComprovacaoAprovada(Model);
 }
 
-<div class="container mt-4" style="max-width: 640px;">
-    <h2 class="mb-4">Meu Perfil</h2>
-
-    @if (TempData["Sucesso"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Sucesso"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<section class="profile-shell">
+    <div class="profile-header-panel">
+        <div>
+            <span class="admin-eyebrow">Minha conta</span>
+            <h1>Meu Perfil</h1>
+            <p>Mantenha seus dados atualizados. Doações e reservas só são liberadas após aprovação administrativa quando o perfil exigir comprovação.</p>
         </div>
-    }
+        <span class="admin-status @(liberado ? "status-success" : "status-warning")">
+            @(!precisaComprovacao ? "Comprovação não aplicável" : liberado ? "Comprovação aprovada" : "Comprovação pendente")
+        </span>
+    </div>
 
-    @if (TempData["Erro"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Erro"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post"
-          enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-
-        <input type="hidden" asp-for="IdUsuario" />
-        <input type="hidden" asp-for="SenhaHash" />
-        <input type="hidden" asp-for="TipoUsuario" />
-        <input type="hidden" asp-for="StatusVerificacao" />
-        <input type="hidden" asp-for="Ativo" />
-        <input type="hidden" asp-for="DataCadastro" />
-        <input type="hidden" asp-for="Arquivocomprovacao" />
-
-        <div class="mb-3">
-            <label asp-for="Nome" class="form-label"></label>
-            <input asp-for="Nome" class="form-control" />
-            <span asp-validation-for="Nome" class="text-danger"></span>
-        </div>
-
-        @* Foto de Perfil *@
-        <div class="mb-3">
-            <label class="form-label">Foto de Perfil</label>
-
+    <div class="profile-grid">
+        <aside class="profile-side-panel">
             @if (!string.IsNullOrEmpty(Model.FotoPerfil))
             {
-                <div class="mb-2">
-                    <img src="@Model.FotoPerfil"
-                         alt="Foto de perfil atual"
-                         class="rounded-circle"
-                         style="width: 80px; height: 80px; object-fit: cover;" />
-                    <span class="ms-2 text-muted small">Foto atual</span>
-                </div>
+                <img src="@Model.FotoPerfil" alt="Foto de perfil" class="profile-photo-lg" />
             }
             else
             {
-                <div class="mb-2 d-flex align-items-center gap-2">
-                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
-                         style="width: 80px; height: 80px; font-size: 2rem;">
-                        <i class="bi bi-person text-secondary"></i>
+                <div class="profile-photo-lg profile-photo-empty"><i class="bi bi-person"></i></div>
+            }
+
+            <h2>@Model.Nome</h2>
+            <div class="profile-badges">
+                @if (Model.TipoUsuario == TipoUsuario.Admin) { <span class="admin-status status-neutral">Administrador</span> }
+                @if (temDoador) { <span class="admin-status status-success">Doador</span> }
+                @if (temBeneficiario) { <span class="admin-status status-success">Beneficiário</span> }
+                @if (!temDoador && !temBeneficiario && Model.TipoUsuario != TipoUsuario.Admin) { <span class="admin-status status-warning">Sem perfil operacional</span> }
+            </div>
+
+            <div class="profile-actions-stack">
+                @if (!temDoador && Model.TipoUsuario != TipoUsuario.Admin)
+                {
+                    <form asp-action="TornarDoador" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-success w-100"><i class="bi bi-basket2"></i> Ativar perfil de doador</button>
+                    </form>
+                }
+                @if (!temBeneficiario && Model.TipoUsuario != TipoUsuario.Admin)
+                {
+                    <form asp-action="TornarBeneficiario" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-people"></i> Ativar perfil de beneficiário</button>
+                    </form>
+                }
+            </div>
+        </aside>
+
+        <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post" enctype="multipart/form-data" class="profile-form-panel">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <input type="hidden" asp-for="IdUsuario" />
+            <input type="hidden" asp-for="SenhaHash" />
+            <input type="hidden" asp-for="TipoUsuario" />
+            <input type="hidden" asp-for="StatusVerificacao" />
+            <input type="hidden" asp-for="Ativo" />
+            <input type="hidden" asp-for="DataCadastro" />
+            <input type="hidden" asp-for="Arquivocomprovacao" />
+
+            <div class="profile-form-section">
+                <h2>Dados principais</h2>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label asp-for="Nome" class="form-label"></label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span asp-validation-for="Nome" class="text-danger"></span>
                     </div>
-                    <span class="text-muted small">Nenhuma foto cadastrada</span>
+                    <div class="col-md-5">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Telefone" class="form-label"></label>
+                        <input asp-for="Telefone" class="form-control" />
+                        <span asp-validation-for="Telefone" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Endereco" class="form-label"></label>
+                        <input asp-for="Endereco" class="form-control" />
+                        <span asp-validation-for="Endereco" class="text-danger"></span>
+                    </div>
                 </div>
-            }
-
-            <input type="file"
-                   name="arquivoFotoPerfil"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg" />
-            <div class="form-text">Formatos aceitos: PNG, JPG ou JPEG. Tamanho máximo: 2MB.</div>
-        </div>
-
-        @*O tipo de usuário será apresentado conforme o valor do enum "TipoUsuario"*@ 
-        <div class="mb-3">
-            <label class="form-label">Tipo de Usuário</label>
-            <input type="text" class="form-control bg-secondary-subtle text-muted" 
-                   readonly style="cursor: not-allowed;"
-                   value="@(Model.TipoUsuario switch {
-                       Doalim_dev.Models.TipoUsuario.DoadorPF       => "Doador PF",
-                       Doalim_dev.Models.TipoUsuario.DoadorPJ       => "Doador PJ",
-                       Doalim_dev.Models.TipoUsuario.BeneficiarioPF => "Beneficiário PF",
-                       Doalim_dev.Models.TipoUsuario.BeneficiarioPJ => "Beneficiário PJ",
-                       Doalim_dev.Models.TipoUsuario.Admin          => "Administrador",
-                       _                                            => "Não informado"
-                   })" />
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Telefone" class="form-label"></label>
-            <input asp-for="Telefone" class="form-control" />
-            <span asp-validation-for="Telefone" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Endereco" class="form-label"></label>
-            <input asp-for="Endereco" class="form-control" />
-            <span asp-validation-for="Endereco" class="text-danger"></span>
-        </div>
-
-
-        @*Se o usuário tiver um CPF cadastrado, não é necessário que apareça o campo CNPJ e vice-versa*@
-        @if (!string.IsNullOrEmpty(Model.Cpf))
-        {
-            <div class="mb-3">
-                <label asp-for="Cpf" class="form-label"></label>
-                <input asp-for="Cpf" class="form-control bg-secondary-subtle text-muted"
-                       readonly style="cursor: not-allowed;" />
-                <span asp-validation-for="Cpf" class="text-danger"></span>
             </div>
-        }
 
-        @if (!string.IsNullOrEmpty(Model.Cnpj))
-        {
-            <div class="mb-3">
-                <label asp-for="Cnpj" class="form-label"></label>
-                <input asp-for="Cnpj" class="form-control bg-secondary-subtle text-muted"
-                       readonly style="cursor: not-allowed;" />
-                <span asp-validation-for="Cnpj" class="text-danger"></span>
-            </div>
-        }
-
-        @* Campo de upload do documento de comprovação *@
-        <div class="mb-3">
-            <label class="form-label">Arquivo de Comprovação</label>
-
-            @if (!string.IsNullOrEmpty(Model.Arquivocomprovacao))
-            {
-                <div class="mb-2 d-flex align-items-center gap-2">
-                    <i class="bi bi-file-earmark-check text-success" style="font-size: 1.2rem;"></i>
-                    <a href="@Model.Arquivocomprovacao" target="_blank" class="text-decoration-none">
-                        Ver arquivo atual
-                    </a>
+            <div class="profile-form-section">
+                <h2>Identificação</h2>
+                <div class="row g-3">
+                    @if (!string.IsNullOrEmpty(Model.Cpf))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="Cpf" class="form-label"></label>
+                            <input asp-for="Cpf" class="form-control bg-secondary-subtle text-muted" readonly />
+                            <span asp-validation-for="Cpf" class="text-danger"></span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Cnpj))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="Cnpj" class="form-label"></label>
+                            <input asp-for="Cnpj" class="form-control bg-secondary-subtle text-muted" readonly />
+                            <span asp-validation-for="Cnpj" class="text-danger"></span>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
 
-            <input type="file"
-                   name="arquivoComprovacao"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg,.pdf" />
-            <div class="form-text">Formatos aceitos: PNG, JPG, JPEG ou PDF. Tamanho máximo: 5MB.</div>
-        </div>
+            <div class="profile-form-section">
+                <h2>Arquivos</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Foto de Perfil</label>
+                        <input type="file" name="arquivoFotoPerfil" class="form-control" accept=".png,.jpg,.jpeg" />
+                        <div class="form-text">PNG, JPG ou JPEG até 2MB.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Arquivo de Comprovação</label>
+                        @if (!precisaComprovacao)
+                        {
+                            <div class="profile-admin-proof-note"><i class="bi bi-shield-lock"></i> Administradores não precisam enviar comprovação.</div>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(Model.Arquivocomprovacao))
+                            {
+                                <div class="mb-2"><a href="@Model.Arquivocomprovacao" target="_blank" class="admin-doc-link"><i class="bi bi-paperclip"></i> Ver arquivo atual</a></div>
+                            }
+                            <input type="file" name="arquivoComprovacao" class="form-control" accept=".png,.jpg,.jpeg,.pdf" />
+                            <div class="form-text">Novo envio volta para análise do administrador.</div>
+                        }
+                    </div>
+                </div>
+            </div>
 
-        @* Aviso para Beneficiários levando em consideração o campo "StatusVerificacao" *@
-        @if (Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPF ||
-             Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPJ)
-        {
-            <div class="alert alert-warning d-flex align-items-start gap-2 mt-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+            <div class="profile-status-callout @(!precisaComprovacao || liberado ? "is-approved" : "is-pending")">
+                <i class="bi @(!precisaComprovacao || liberado ? "bi-check-circle" : "bi-hourglass-split")"></i>
                 <div>
-                    <strong>Atenção!</strong> Para reservar doações, é necessário que seu
-                    arquivo de comprovação seja enviado e aprovado pela administração.
-
-                    @if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Pendente)
-                    {
-                        <span class="d-block mt-1 text-warning-emphasis">
-                            <i class="bi bi-clock"></i> Seu arquivo está <strong>aguardando aprovação</strong>.
-                        </span>
-                    }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Aprovado)
-                    {
-                        <span class="d-block mt-1 text-success">
-                            <i class="bi bi-check-circle"></i> Seu cadastro está <strong>aprovado</strong>!
-                        </span>
-                    }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Rejeitado)
-                    {
-                        <span class="d-block mt-1 text-danger">
-                            <i class="bi bi-x-circle"></i> Seu arquivo foi <strong>rejeitado</strong>. Envie um novo documento.
-                        </span>
-                    }
+                    <strong>@(!precisaComprovacao ? "Conta administrativa sem exigência de comprovação." : liberado ? "Você já pode operar nos perfis ativos." : "Doações e reservas ainda estão bloqueadas.")</strong>
+                    <span>@(!precisaComprovacao ? "O arquivo de comprovação é exigido apenas para perfis operacionais." : "É necessário ter arquivo de comprovação enviado e aprovado pela administração.")</span>
                 </div>
             </div>
-        }
 
-        <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-success">Salvar alterações</button>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Salvar alterações</button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

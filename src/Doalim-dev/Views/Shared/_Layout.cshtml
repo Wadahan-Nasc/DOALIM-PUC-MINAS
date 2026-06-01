@@ -1,4 +1,4 @@
-ï»¿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 @using Microsoft.EntityFrameworkCore
 @inject Doalim_dev.Models.AppDbContext _context
 
@@ -7,12 +7,18 @@
         ? (User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity.Name)
         : null;
 
-    var fotoPerfil = emailLogado != null
+    var usuarioNav = emailLogado != null
         ? await _context.Usuarios
             .Where(u => u.Email == emailLogado)
-            .Select(u => u.FotoPerfil)
+            .Select(u => new { u.IdUsuario, u.FotoPerfil })
             .FirstOrDefaultAsync()
         : null;
+
+    var fotoPerfil = usuarioNav?.FotoPerfil;
+    var temPerfilBeneficiario = usuarioNav != null
+        && await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuarioNav.IdUsuario);
+    var temPerfilDoador = usuarioNav != null
+        && await _context.Doadores.AnyAsync(d => d.IdUsuario == usuarioNav.IdUsuario);
 }
 
 <!DOCTYPE html>
@@ -47,17 +53,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Produtos" asp-action="Vitrine">Vitrine</a>
                         </li>
+                        @if (temPerfilDoador)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Produtos" asp-action="Index">Minhas doações</a>
+                            </li>
+                        }
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Usuarios" asp-action="Index">UsuÃ¡rios</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Usuarios" asp-action="Index">Usuários</a>
                             </li>
                         }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            @if (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ"))
+                            @if (temPerfilBeneficiario)
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark"
@@ -68,7 +80,7 @@
                                 </li>
                             }
                             <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-dark">OlÃ¡, <strong>@User.Identity.Name</strong></span>
+                                <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
@@ -100,7 +112,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid app-main-container">
         <main role="main" class="pb-3">
             @if (TempData["Erro"] != null)
             {

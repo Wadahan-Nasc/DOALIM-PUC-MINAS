@@ -69,6 +69,9 @@ namespace Doalim_dev.Controllers
             }
 
             // Cria o usu√°rio com hash BCrypt da senha
+            await ValidarIdentificadoresUnicosAsync(vm);
+            if (!ModelState.IsValid)
+                return View(vm);
             var usuario = new Usuario
             {
                 Nome               = vm.Nome,
@@ -156,7 +159,7 @@ namespace Doalim_dev.Controllers
                 .FirstOrDefaultAsync(u => u.Email == vm.Email);
 
             // Verifica exist√™ncia e senha sem revelar qual est√° errado (seguran√ßa)
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(vm.Senha, usuario.SenhaHash))
+            if (usuario == null || !SenhaConfere(vm.Senha, usuario.SenhaHash))
             {
                 ModelState.AddModelError(string.Empty, "E-mail ou senha incorretos.");
                 return View(vm);
@@ -314,16 +317,22 @@ namespace Doalim_dev.Controllers
         
         private async Task RealizarLoginAsync(Usuario usuario, bool isPersistent)
         {
+            var roles = new HashSet<string> { usuario.TipoUsuario.ToString() };
+
+            if (await _context.Doadores.AnyAsync(d => d.IdUsuario == usuario.IdUsuario))
+                roles.Add(UsuarioRegras.TipoDoadorCorrespondente(usuario).ToString());
+
+            if (await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuario.IdUsuario))
+                roles.Add(UsuarioRegras.TipoBeneficiarioCorrespondente(usuario).ToString());
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Name,           usuario.Nome),
-                new Claim(ClaimTypes.Email,          usuario.Email),
-                // A Claim de Role permite que outros controllers usem
-                // [Authorize(Roles = "Admin")] ou [Authorize(Roles = "DoadorPJ")] etc.
-                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString())
+                new Claim(ClaimTypes.Email,          usuario.Email)
             };
 
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
             var identidade  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal   = new ClaimsPrincipal(identidade);
             var authProps   = new AuthenticationProperties { IsPersistent = isPersistent };
@@ -332,6 +341,40 @@ namespace Doalim_dev.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
                 authProps);
+        }
+        private static bool SenhaConfere(string senha, string senhaHash)
+        {
+            if (string.IsNullOrWhiteSpace(senhaHash))
+                return false;
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(senha, senhaHash);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private async Task ValidarIdentificadoresUnicosAsync(RegistroViewModel vm)
+        {
+            var cpf = UsuarioRegras.NormalizarDigitos(vm.Cpf);
+            var cnpj = UsuarioRegras.NormalizarDigitos(vm.Cnpj);
+            var telefone = UsuarioRegras.NormalizarDigitos(vm.Telefone);
+
+            var usuarios = await _context.Usuarios
+                .AsNoTracking()
+                .Select(u => new { u.Cpf, u.Cnpj, u.Telefone })
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(cpf) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cpf) == cpf))
+                ModelState.AddModelError(nameof(vm.Cpf), "Este CPF j· est· cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(cnpj) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cnpj) == cnpj))
+                ModelState.AddModelError(nameof(vm.Cnpj), "Este CNPJ j· est· cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(telefone) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Telefone) == telefone))
+                ModelState.AddModelError(nameof(vm.Telefone), "Este telefone j· est· cadastrado.");
         }
     }
 }

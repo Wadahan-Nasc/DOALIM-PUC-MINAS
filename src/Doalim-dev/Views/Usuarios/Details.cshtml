@@ -1,148 +1,154 @@
-@model Doalim_dev.Models.Usuario
+﻿@model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Detalhes do usuário";
-    var foto = FotoUrl(Model.FotoPerfil);
-    var documento = FotoUrl(Model.Arquivocomprovacao);
-    var documentoAprovado = Model.StatusVerificacao == StatusVerificacao.Aprovado;
+    ViewData["Title"] = "Resumo do usuário";
+    var doadores = ViewBag.Doadores as HashSet<int> ?? new HashSet<int>();
+    var beneficiarios = ViewBag.Beneficiarios as HashSet<int> ?? new HashSet<int>();
+    var documento = ArquivoUrl(Model.Arquivocomprovacao);
+    var precisaComprovacao = UsuarioRegras.PrecisaComprovacao(Model);
+    var podeAprovar = precisaComprovacao && !string.IsNullOrWhiteSpace(documento);
 }
 
 @functions {
     private static string Iniciais(string nome)
     {
-        if (string.IsNullOrWhiteSpace(nome))
-            return "US";
-
+        if (string.IsNullOrWhiteSpace(nome)) return "US";
         var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var primeira = partes[0][0].ToString();
-        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
-        return (primeira + segunda).ToUpperInvariant();
+        return ((partes[0][0].ToString()) + (partes.Length > 1 ? partes[^1][0].ToString() : string.Empty)).ToUpperInvariant();
     }
 
-    private string FotoUrl(string foto)
+    private string ArquivoUrl(string arquivo)
     {
-        if (string.IsNullOrWhiteSpace(foto))
-            return string.Empty;
-
-        if (foto.StartsWith("http", StringComparison.OrdinalIgnoreCase) || foto.StartsWith("/"))
-            return foto;
-
-        return Url.Content($"~/{foto.TrimStart('~', '/')}");
+        if (string.IsNullOrWhiteSpace(arquivo)) return string.Empty;
+        if (arquivo.StartsWith("http", StringComparison.OrdinalIgnoreCase) || arquivo.StartsWith("/")) return arquivo;
+        return Url.Content($"~/{arquivo.TrimStart('~', '/')}");
     }
 
-    private static string ClasseStatus(StatusVerificacao status)
+    private static string EmailPrivado(string email)
     {
-        return status switch
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@')) return "E-mail cadastrado";
+        var partes = email.Split('@');
+        var nome = partes[0].Length <= 2 ? partes[0][0] + "*" : partes[0][..2] + "***";
+        return $"{nome}@{partes[1]}";
+    }
+
+    private static string ClasseStatus(Usuario usuario)
+    {
+        if (!UsuarioRegras.PrecisaComprovacao(usuario)) return "status-neutral";
+
+        return usuario.StatusVerificacao switch
         {
-            StatusVerificacao.Pendente => "status-warning",
             StatusVerificacao.Aprovado => "status-success",
             StatusVerificacao.Rejeitado => "status-danger",
-            _ => "status-warning"
+            StatusVerificacao.Pendente => "status-warning",
+            _ => "status-neutral"
         };
+    }
+
+    private static string TextoValidacao(Usuario usuario)
+    {
+        if (!UsuarioRegras.PrecisaComprovacao(usuario)) return "Não aplicável";
+        return usuario.StatusVerificacao.ToString();
+    }
+
+    private static string TextoPerfis(int id, HashSet<int> doadores, HashSet<int> beneficiarios, Usuario usuario)
+    {
+        if (usuario.TipoUsuario == TipoUsuario.Admin) return "Administrador";
+        var perfis = new List<string>();
+        if (doadores.Contains(id)) perfis.Add("Doador");
+        if (beneficiarios.Contains(id)) perfis.Add("Beneficiário");
+        return perfis.Any() ? string.Join(" + ", perfis) : "Sem perfil operacional";
     }
 }
 
-<section class="admin-dashboard">
-    <div class="admin-page-header">
+<section class="admin-dashboard admin-dashboard-pro">
+    <div class="admin-hero-panel compact">
         <div>
-            <span class="admin-eyebrow">Perfil do usuário</span>
+            <span class="admin-eyebrow">Resumo protegido</span>
             <h1>@Model.Nome</h1>
-            <p>@Model.Email</p>
+            <p>@EmailPrivado(Model.Email)</p>
         </div>
         <div class="admin-header-actions">
-            <a asp-action="Edit" asp-route-id="@Model.IdUsuario" class="btn btn-warning">
-                <i class="bi bi-pencil"></i>
-                Editar
-            </a>
-            <a asp-action="Index" class="btn btn-outline-success">
-                <i class="bi bi-arrow-left"></i>
-                Voltar
-            </a>
+            <a asp-action="Index" class="btn btn-outline-success"><i class="bi bi-arrow-left"></i> Voltar</a>
         </div>
     </div>
 
-    <div class="admin-profile">
-        <div class="admin-profile-card">
-            @if (!string.IsNullOrWhiteSpace(foto))
-            {
-                <img class="admin-profile-photo" src="@foto" alt="Foto de @Model.Nome" />
-            }
-            else
-            {
-                <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
-            }
+    <div class="admin-profile admin-profile-private">
+        <div class="admin-profile-card admin-profile-card-pro">
+            <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
             <h2>@Model.Nome</h2>
-            <span class="admin-pill">@Model.TipoUsuario</span>
-            <span class="admin-status @(Model.Ativo ? "status-success" : "status-danger")">
-                @(Model.Ativo ? "Ativo" : "Suspenso")
-            </span>
+            <span class="admin-pill">@TextoPerfis(Model.IdUsuario, doadores, beneficiarios, Model)</span>
+            <span class="admin-status @(Model.Ativo ? "status-success" : "status-danger")">@(Model.Ativo ? "Conta ativa" : "Conta suspensa")</span>
         </div>
 
-        <div class="admin-details-grid">
-            <div class="admin-detail-section">
-                <h2>Contato</h2>
+        <div class="admin-details-grid admin-details-grid-private">
+            <div class="admin-detail-section admin-detail-section-pro">
+                <h2>Validação</h2>
                 <dl>
-                    <dt>E-mail</dt>
-                    <dd><a href="mailto:@Model.Email" class="admin-link">@Model.Email</a></dd>
-                    <dt>Telefone</dt>
-                    <dd>@Model.Telefone</dd>
-                    <dt>Endereço</dt>
-                    <dd>@Model.Endereco</dd>
-                </dl>
-            </div>
-
-            <div class="admin-detail-section">
-                <h2>Documentos</h2>
-                <dl>
-                    <dt>CPF</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(Model.Cpf) ? "Não informado" : Model.Cpf)</dd>
-                    <dt>CNPJ</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(Model.Cnpj) ? "Não informado" : Model.Cnpj)</dd>
-                    <dt>Status de verificação</dt>
+                    <dt>Status</dt>
+                    <dd><span class="admin-status @ClasseStatus(Model)">@TextoValidacao(Model)</span></dd>
+                    <dt>Arquivo de comprovação</dt>
                     <dd>
-                        <span class="admin-status @ClasseStatus(Model.StatusVerificacao)">
-                            @Model.StatusVerificacao
-                        </span>
-                    </dd>
-                    <dt>Comprovação</dt>
-                    <dd>
-                        @if (!string.IsNullOrWhiteSpace(documento))
+                        @if (!precisaComprovacao)
+                        {
+                            <span class="admin-status status-neutral">Administrador não precisa enviar arquivo</span>
+                        }
+                        else if (podeAprovar)
                         {
                             <a href="@documento" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-paperclip"></i>
-                                Abrir documento
+                                Abrir arquivo
                             </a>
                         }
                         else
                         {
-                            <span class="admin-status status-warning">Aguardando envio</span>
+                            <span class="admin-status status-warning">Não enviado</span>
+                        }
+                    </dd>
+                    <dt>Operação</dt>
+                    <dd>
+                        @if (!precisaComprovacao)
+                        {
+                            <span class="admin-status status-neutral">Conta administrativa interna</span>
+                        }
+                        else if (UsuarioRegras.TemComprovacaoAprovada(Model))
+                        {
+                            <span class="admin-status status-success">Liberado para doar/reservar conforme perfil</span>
+                        }
+                        else
+                        {
+                            <span class="admin-status status-danger">Bloqueado para doar e reservar</span>
                         }
                     </dd>
                 </dl>
 
-                @if (!documentoAprovado)
+                @if (precisaComprovacao)
                 {
                     <div class="admin-detail-actions">
                         <form asp-action="AtualizarStatusVerificacao" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.IdUsuario" />
                             <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check2"></i>
-                                Aprovar
-                            </button>
+                            <button type="submit" class="btn btn-success" disabled="@(!podeAprovar)"><i class="bi bi-check2"></i> Aprovar</button>
                         </form>
                         <form asp-action="AtualizarStatusVerificacao" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.IdUsuario" />
                             <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
-                            <button type="submit" class="btn btn-outline-danger">
-                                <i class="bi bi-x-lg"></i>
-                                Rejeitar
-                            </button>
+                            <button type="submit" class="btn btn-outline-danger" disabled="@(!podeAprovar)"><i class="bi bi-x-lg"></i> Rejeitar</button>
                         </form>
                     </div>
                 }
+            </div>
+
+            <div class="admin-detail-section admin-detail-section-pro privacy-note-panel">
+                <h2>Privacidade</h2>
+                <p>CPF, CNPJ, telefone, endereço e senha não são exibidos nem editados pela administração. Alterações cadastrais ficam restritas ao próprio usuário em Meu Perfil.</p>
+                <div class="privacy-lock-list">
+                    <span><i class="bi bi-lock"></i> Documento pessoal oculto</span>
+                    <span><i class="bi bi-lock"></i> Contato completo oculto</span>
+                    <span><i class="bi bi-lock"></i> Senha nunca exibida</span>
+                </div>
             </div>
         </div>
     </div>

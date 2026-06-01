@@ -1,0 +1,161 @@
+﻿@model IEnumerable<Doalim_dev.Models.Usuario>
+
+@{
+    var usuarios = Model.ToList();
+    var doadores = ViewData["Doadores"] as HashSet<int> ?? new HashSet<int>();
+    var beneficiarios = ViewData["Beneficiarios"] as HashSet<int> ?? new HashSet<int>();
+    var mostrarAcoes = ViewData["MostrarAcoes"] as bool? ?? false;
+}
+
+@functions {
+    private static string Iniciais(string nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome)) return "US";
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return ((partes[0][0].ToString()) + (partes.Length > 1 ? partes[^1][0].ToString() : string.Empty)).ToUpperInvariant();
+    }
+
+    private string ArquivoUrl(string arquivo)
+    {
+        if (string.IsNullOrWhiteSpace(arquivo)) return string.Empty;
+        if (arquivo.StartsWith("http", StringComparison.OrdinalIgnoreCase) || arquivo.StartsWith("/")) return arquivo;
+        return Url.Content($"~/{arquivo.TrimStart('~', '/')}");
+    }
+
+    private static string EmailPrivado(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@')) return "E-mail cadastrado";
+        var partes = email.Split('@');
+        var nome = partes[0].Length <= 2 ? partes[0][0] + "*" : partes[0][..2] + "***";
+        return $"{nome}@{partes[1]}";
+    }
+
+    private static string ClasseStatus(Usuario usuario)
+    {
+        if (!UsuarioRegras.PrecisaComprovacao(usuario)) return "status-neutral";
+
+        return usuario.StatusVerificacao switch
+        {
+            StatusVerificacao.Aprovado => "status-success",
+            StatusVerificacao.Rejeitado => "status-danger",
+            StatusVerificacao.Pendente => "status-warning",
+            _ => "status-neutral"
+        };
+    }
+
+    private static string TextoDocumento(Usuario usuario)
+    {
+        if (!UsuarioRegras.PrecisaComprovacao(usuario)) return "Não aplicável";
+        if (string.IsNullOrWhiteSpace(usuario.Arquivocomprovacao)) return "Sem arquivo";
+        return usuario.StatusVerificacao switch
+        {
+            StatusVerificacao.Aprovado => "Aprovado",
+            StatusVerificacao.Rejeitado => "Rejeitado",
+            _ => "Aguardando análise"
+        };
+    }
+
+    private static string TextoPerfis(int id, HashSet<int> doadores, HashSet<int> beneficiarios, Usuario usuario)
+    {
+        if (usuario.TipoUsuario == TipoUsuario.Admin) return "Admin";
+        var perfis = new List<string>();
+        if (doadores.Contains(id)) perfis.Add("Doador");
+        if (beneficiarios.Contains(id)) perfis.Add("Beneficiário");
+        return perfis.Any() ? string.Join(" + ", perfis) : "Sem perfil";
+    }
+}
+
+@if (!usuarios.Any())
+{
+    <div class="admin-empty-state">
+        <i class="bi bi-check2-circle"></i>
+        <span>Nenhum usuário nesta categoria.</span>
+    </div>
+}
+else
+{
+    <div class="admin-table-wrap admin-table-wrap-pro">
+        <table class="table admin-users-table admin-users-table-private align-middle">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Perfis</th>
+                    <th>Comprovação</th>
+                    <th>Conta</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in usuarios)
+                {
+                    var documentoUrl = ArquivoUrl(item.Arquivocomprovacao);
+                    var precisaComprovacao = UsuarioRegras.PrecisaComprovacao(item);
+                    var podeAprovar = precisaComprovacao && !string.IsNullOrWhiteSpace(documentoUrl);
+                    var linhaPendente = precisaComprovacao && !UsuarioRegras.TemComprovacaoAprovada(item);
+
+                    <tr class="@(linhaPendente ? "row-needs-doc" : string.Empty)">
+                        <td>
+                            <div class="admin-user-cell">
+                                <span class="admin-avatar">@Iniciais(item.Nome)</span>
+                                <div>
+                                    <strong>@item.Nome</strong>
+                                    <small>@EmailPrivado(item.Email)</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="admin-account account-neutral">
+                                <i class="bi bi-person-badge"></i>
+                                <span>
+                                    <strong>@TextoPerfis(item.IdUsuario, doadores, beneficiarios, item)</strong>
+                                    <small>perfil operacional</small>
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="admin-status @ClasseStatus(item)">@TextoDocumento(item)</span>
+                            @if (podeAprovar)
+                            {
+                                <a class="admin-doc-link" href="@documentoUrl" target="_blank" rel="noopener">
+                                    <i class="bi bi-paperclip"></i>
+                                    Abrir comprovação
+                                </a>
+                            }
+                        </td>
+                        <td>
+                            <span class="admin-status @(item.Ativo ? "status-success" : "status-danger")">
+                                @(item.Ativo ? "Ativo" : "Suspenso")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="admin-row-actions">
+                                @if (mostrarAcoes && precisaComprovacao)
+                                {
+                                    <form asp-action="AtualizarStatusVerificacao" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.IdUsuario" />
+                                        <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Aprovar comprovação" disabled="@(!podeAprovar)">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="AtualizarStatusVerificacao" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.IdUsuario" />
+                                        <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Rejeitar comprovação" disabled="@(!podeAprovar)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                }
+                                <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-primary" title="Ver resumo">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
