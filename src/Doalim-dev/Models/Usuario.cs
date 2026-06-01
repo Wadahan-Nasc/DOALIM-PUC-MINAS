@@ -36,6 +36,10 @@ namespace Doalim_dev.Models
         [Display(Name = "Foto do Perfil")]
         public byte[]? FotoPerfil { get; set; }
 
+        [Display(Name = "Bio")]
+        [MaxLength(300)]
+        public string? Bio { get; set; }
+
         [Display(Name = "Arquivo de Comprovação")]
         public byte[]? Arquivocomprovacao { get; set; }
 

@@ -12,7 +12,7 @@
         .Where(u => u.Email == emailLogado)
         .Select(u => u.FotoPerfil)
         .FirstOrDefaultAsync()
-    : null; // retorno já é byte[]? — sem alteração na query, só no uso abaixo
+    : null;
 }
 
 <!DOCTYPE html>
@@ -32,7 +32,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center gap-2"
-                       asp-controller="Home" asp-action="Index">
+                   asp-controller="Home" asp-action="Index">
                     <img src="~/images/logo.png" alt="Doalim" height="60" />
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -61,19 +61,27 @@
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark"
-                                           asp-controller="Reservas" asp-action="MinhasReservas"
-                                           title="Minhas Reservas">
+                                       asp-controller="Reservas" asp-action="MinhasReservas"
+                                       title="Minhas Reservas">
                                         <i class="bi bi-cart-check" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
                             }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Usuarios" asp-action="PerfilPublico"
+                                   asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
+                                   title="Meu Perfil Público">
+                                    <i class="bi bi-person-badge" style="font-size: 1.4rem;"></i>
+                                </a>
+                            </li>
                             <li class="nav-item d-flex align-items-center">
                                 <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
-                                       asp-controller="Usuarios" asp-action="MeuPerfil"
-                                       title="Meu Perfil">
+                                   asp-controller="Usuarios" asp-action="MeuPerfil"
+                                   title="Meu Perfil">
                                     @if (fotoPerfil != null && fotoPerfil.Length > 0)
                                     {
                                         var base64 = Convert.ToBase64String(fotoPerfil);
@@ -82,12 +90,16 @@
                                              class="rounded-circle"
                                              style="width: 30px; height: 30px; object-fit: cover;" />
                                     }
+                                    else
+                                    {
+                                        <i class="bi bi-person-circle" style="font-size: 1.4rem;"></i>
+                                    }
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
-                                       asp-controller="Auth" asp-action="Logout"
-                                       title="Sair">
+                                   asp-controller="Auth" asp-action="Logout"
+                                   title="Sair">
                                     <i class="bi bi-box-arrow-right" style="font-size: 1.4rem;"></i>
                                 </a>
                             </li>

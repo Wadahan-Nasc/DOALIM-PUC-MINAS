@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Doalim_dev.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Doalim_dev.Models.ViewModels;
 
 namespace Doalim_dev.Controllers
 {
@@ -381,14 +382,46 @@ namespace Doalim_dev.Controllers
                 usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Request.Form["NovaSenha"]!);
             usuario.Email = model.Email;
             usuario.Telefone = model.Telefone;
-            
+            usuario.Bio = model.Bio;
+
             // FotoPerfil, Cpf e Cnpj são tratados separadamente acima
 
             _context.Update(usuario);
             await _context.SaveChangesAsync();
 
             TempData["Sucesso"] = "Perfil atualizado com sucesso!";
-            return RedirectToAction("MeuPerfil");
+            return RedirectToAction("MeuPerfil");                      
+            }
+        
+    // GET: /Usuarios/PerfilPublico/5
+            [AllowAnonymous]
+        public async Task<IActionResult> PerfilPublico(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.IdUsuario == id && u.Ativo);
+
+            if (usuario == null)
+                return NotFound();
+
+            // Dados públicos — nunca expor Email, Cpf, Cnpj, Telefone, Endereco, SenhaHash
+            var vm = new PerfilPublicoViewModel
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nome = usuario.Nome,
+                FotoPerfil = usuario.FotoPerfil,
+                Bio = usuario.Bio,
+                TipoUsuario = usuario.TipoUsuario,
+                Verificado = usuario.StatusVerificacao == StatusVerificacao.Aprovado,
+                MembroDesde = usuario.DataCadastro,
+                // Avaliações ficam para quando RF-014 estiver pronto
+                NotaMedia = null,
+                TotalAvaliacoes = 0
+            };
+
+            return View(vm);
         }
     }
 }

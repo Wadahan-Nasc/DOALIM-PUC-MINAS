@@ -63,6 +63,14 @@
             <div class="form-text">Formatos aceitos: PNG, JPG ou JPEG. Tamanho máximo: 2MB.</div>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label">Bio <span class="text-muted small">(opcional)</span></label>
+            <textarea asp-for="Bio" class="form-control" rows="3"
+                      maxlength="300" placeholder="Conte um pouco sobre você..."></textarea>
+            <div class="form-text">Máximo 300 caracteres.</div>
+            <span asp-validation-for="Bio" class="text-danger"></span>
+        </div>
+
         @*O tipo de usuário será apresentado conforme o valor do enum "TipoUsuario"*@ 
         <div class="mb-3">
             <label class="form-label">Tipo de Usuário</label>
