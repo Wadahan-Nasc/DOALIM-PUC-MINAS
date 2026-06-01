@@ -1,14 +1,15 @@
 @model Doalim_dev.Models.Usuario
+@using Doalim_dev.Models
 
 @{
-    ViewData["Title"] = "Detalhes do usuário";
+    ViewData["Title"] = "Detalhes do usuario";
     var foto = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
-    ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
-    : string.Empty;
+        ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
+        : string.Empty;
     var documento = Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0
         ? $"data:application/octet-stream;base64,{Convert.ToBase64String(Model.Arquivocomprovacao)}"
         : string.Empty;
-    var documentoAprovado = Model.StatusVerificacao == StatusVerificacao.Aprovado;
+    var ehAdmin = Model.TipoUsuario == TipoUsuario.Admin;
 }
 
 @functions {
@@ -18,19 +19,27 @@
             return "US";
 
         var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var primeira = partes[0][0].ToString();
-        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
-        return (primeira + segunda).ToUpperInvariant();
+        return ((partes[0][0].ToString()) + (partes.Length > 1 ? partes[^1][0].ToString() : string.Empty)).ToUpperInvariant();
     }
 
-        private static string ClasseStatus(StatusVerificacao status)
+    private static string MascaraEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+            return "Nao informado";
+
+        var partes = email.Split('@', 2);
+        var nome = partes[0].Length <= 2 ? partes[0][0] + "*" : partes[0][..2] + "***";
+        return $"{nome}@{partes[1]}";
+    }
+
+    private static string ClasseStatus(StatusVerificacao status)
     {
         return status switch
         {
-            StatusVerificacao.Pendente => "status-warning",
             StatusVerificacao.Aprovado => "status-success",
             StatusVerificacao.Rejeitado => "status-danger",
-            _ => "status-warning"
+            StatusVerificacao.Pendente => "status-warning",
+            _ => "status-neutral"
         };
     }
 }
@@ -38,27 +47,21 @@
 <section class="admin-dashboard">
     <div class="admin-page-header">
         <div>
-            <span class="admin-eyebrow">Perfil do usuário</span>
+            <span class="admin-eyebrow">Analise de cadastro</span>
             <h1>@Model.Nome</h1>
-            <p>@Model.Email</p>
+            <p>Dados sensiveis permanecem privados. O admin avalia apenas status e comprovacao.</p>
         </div>
-        <div class="admin-header-actions">
-            <a asp-action="Edit" asp-route-id="@Model.IdUsuario" class="btn btn-warning">
-                <i class="bi bi-pencil"></i>
-                Editar
-            </a>
-            <a asp-action="Index" class="btn btn-outline-success">
-                <i class="bi bi-arrow-left"></i>
-                Voltar
-            </a>
-        </div>
+        <a asp-action="Index" class="btn btn-outline-success">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
     </div>
 
     <div class="admin-profile">
         <div class="admin-profile-card">
             @if (!string.IsNullOrWhiteSpace(foto))
             {
-                <img class="admin-profile-photo" src="@foto" alt="Foto de @Model.Nome" />
+                <img class="admin-profile-photo" src="@foto" alt="" />
             }
             else
             {
@@ -73,37 +76,37 @@
 
         <div class="admin-details-grid">
             <div class="admin-detail-section">
-                <h2>Contato</h2>
+                <h2>Resumo publico</h2>
                 <dl>
                     <dt>E-mail</dt>
-                    <dd><a href="mailto:@Model.Email" class="admin-link">@Model.Email</a></dd>
-                    <dt>Telefone</dt>
-                    <dd>@Model.Telefone</dd>
-                    <dt>Endereço</dt>
-                    <dd>@Model.Endereco</dd>
+                    <dd>@MascaraEmail(Model.Email)</dd>
+                    <dt>Membro desde</dt>
+                    <dd>@Model.DataCadastro.ToString("dd/MM/yyyy")</dd>
+                    <dt>Bio</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "Nao informada" : Model.Bio)</dd>
                 </dl>
             </div>
 
             <div class="admin-detail-section">
-                <h2>Documentos</h2>
+                <h2>Comprovacao</h2>
                 <dl>
-                    <dt>CPF</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(Model.Cpf) ? "Não informado" : Model.Cpf)</dd>
-                    <dt>CNPJ</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(Model.Cnpj) ? "Não informado" : Model.Cnpj)</dd>
-                    <dt>Status de verificação</dt>
+                    <dt>Status</dt>
                     <dd>
-                        <span class="admin-status @ClasseStatus(Model.StatusVerificacao)">
-                            @Model.StatusVerificacao
+                        <span class="admin-status @(ehAdmin ? "status-neutral" : ClasseStatus(Model.StatusVerificacao))">
+                            @(ehAdmin ? "Nao aplicavel" : Model.StatusVerificacao)
                         </span>
                     </dd>
-                    <dt>Comprovação</dt>
+                    <dt>Arquivo</dt>
                     <dd>
-                        @if (!string.IsNullOrWhiteSpace(documento))
+                        @if (ehAdmin)
+                        {
+                            <span class="admin-status status-neutral">Admin dispensado</span>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(documento))
                         {
                             <a href="@documento" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-paperclip"></i>
-                                Abrir documento
+                                Abrir comprovacao
                             </a>
                         }
                         else
@@ -113,7 +116,7 @@
                     </dd>
                 </dl>
 
-                @if (!documentoAprovado)
+                @if (!ehAdmin && !string.IsNullOrWhiteSpace(documento))
                 {
                     <div class="admin-detail-actions">
                         <form asp-action="AtualizarStatusVerificacao" method="post">

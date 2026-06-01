@@ -23,8 +23,6 @@ namespace Doalim_dev.Controllers
             _logger = logger;
         }
 
-        // REGISTRO - RF-001 + RF-002
-
         [HttpGet]
         public IActionResult Registro()
         {
@@ -35,64 +33,49 @@ namespace Doalim_dev.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registro(RegistroViewModel vm)
         {
-            // Validações contextuais (dependem do TipoUsuario)
-            bool ehDoador = vm.TipoUsuario == TipoUsuario.DoadorPF || vm.TipoUsuario == TipoUsuario.DoadorPJ;
-            bool ehPJ = vm.TipoUsuario == TipoUsuario.DoadorPJ || vm.TipoUsuario == TipoUsuario.BeneficiarioPJ;
-            bool ehPF = vm.TipoUsuario == TipoUsuario.DoadorPF || vm.TipoUsuario == TipoUsuario.BeneficiarioPF;
+            var ehDoador = vm.TipoUsuario == TipoUsuario.DoadorPF || vm.TipoUsuario == TipoUsuario.DoadorPJ;
+            var ehPJ = vm.TipoUsuario == TipoUsuario.DoadorPJ || vm.TipoUsuario == TipoUsuario.BeneficiarioPJ;
+            var ehPF = vm.TipoUsuario == TipoUsuario.DoadorPF || vm.TipoUsuario == TipoUsuario.BeneficiarioPF;
 
             if (vm.TipoUsuario == TipoUsuario.Admin)
                 ModelState.AddModelError(nameof(vm.TipoUsuario),
                     "Cadastro de administrador deve ser feito apenas pelo seed do sistema ou por outro administrador.");
 
-            // RF-002: Doador precisa aceitar o Termo
             if (ehDoador && !vm.AceitouTermo)
                 ModelState.AddModelError(nameof(vm.AceitouTermo),
                     "O aceite do Termo de Responsabilidade é obrigatório para doadores.");
 
-            // CPF obrigatório para PF
             if (ehPF && string.IsNullOrWhiteSpace(vm.Cpf))
-                ModelState.AddModelError(nameof(vm.Cpf), "CPF  para pessoa fisíca.");
+                ModelState.AddModelError(nameof(vm.Cpf), "CPF é obrigatório para pessoa física.");
 
-            // CNPJ obrigatório para PJ
             if (ehPJ && string.IsNullOrWhiteSpace(vm.Cnpj))
-                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ  para pessoa jurídica.");
+                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ é obrigatório para pessoa jurídica.");
+
+            if (await _context.Usuarios.AnyAsync(u => u.Email == vm.Email))
+                ModelState.AddModelError(nameof(vm.Email), "Este e-mail já está cadastrado.");
+
+            await ValidarIdentificadoresUnicosAsync(vm);
 
             if (!ModelState.IsValid)
                 return View(vm);
 
-            // Verifica se e-mail já está cadastrado
-            bool emailJaExiste = await _context.Usuarios
-                .AnyAsync(u => u.Email == vm.Email);
-
-            if (emailJaExiste)
-            {
-                ModelState.AddModelError(nameof(vm.Email), "Este e-mail já está cadastrado.");
-                return View(vm);
-            }
-
-            // Cria o usuário com hash BCrypt da senha
             var usuario = new Usuario
             {
-                Nome               = vm.Nome,
-                Email              = vm.Email,
-                SenhaHash          = BCrypt.Net.BCrypt.HashPassword(vm.Senha),
-                TipoUsuario        = vm.TipoUsuario,
-                Cpf                = vm.Cpf,
-                Cnpj               = vm.Cnpj,
-                Telefone           = vm.Telefone,
-                
-                Ativo              = true,
-                DataCadastro       = DateTime.UtcNow,
-                // Todo usuário começa pendente até o administrador validar a documentação.
-                StatusVerificacao  = StatusVerificacao.Pendente
+                Nome = vm.Nome,
+                Email = vm.Email,
+                SenhaHash = BCrypt.Net.BCrypt.HashPassword(vm.Senha),
+                TipoUsuario = vm.TipoUsuario,
+                Cpf = vm.Cpf,
+                Cnpj = vm.Cnpj,
+                Telefone = vm.Telefone,
+                Ativo = true,
+                DataCadastro = DateTime.UtcNow,
+                StatusVerificacao = StatusVerificacao.Pendente
             };
 
-            //_context.Usuarios.Add(usuario);
-
             _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync(); // Gera o IdUsuario
+            await _context.SaveChangesAsync();
 
-            // Cria o endereço vinculado ao usuário
             var endereco = new Endereco
             {
                 IdUsuario = usuario.IdUsuario,
@@ -106,7 +89,6 @@ namespace Doalim_dev.Controllers
             };
             _context.Enderecos.Add(endereco);
 
-            // Foto de perfil — opcional
             if (vm.FotoPerfilUpload != null && vm.FotoPerfilUpload.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -114,7 +96,6 @@ namespace Doalim_dev.Controllers
                 usuario.FotoPerfil = ms.ToArray();
             }
 
-            // Arquivo de comprovação — opcional
             if (vm.ArquivoComprovacaoUpload != null && vm.ArquivoComprovacaoUpload.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -122,18 +103,13 @@ namespace Doalim_dev.Controllers
                 usuario.Arquivocomprovacao = ms.ToArray();
             }
 
-            await _context.SaveChangesAsync();
-
-            //await _context.SaveChangesAsync(); // Gera o IdUsuario
-
             if (ehDoador)
             {
                 _context.Doadores.Add(new Doador
                 {
                     IdUsuario = usuario.IdUsuario,
-                    QtdAlimentosDoados = "0"
+                    QtdAlimentosDoados = 0
                 });
-                await _context.SaveChangesAsync();
             }
             else if (vm.TipoUsuario == TipoUsuario.BeneficiarioPF || vm.TipoUsuario == TipoUsuario.BeneficiarioPJ)
             {
@@ -141,52 +117,34 @@ namespace Doalim_dev.Controllers
                 {
                     IdUsuario = usuario.IdUsuario
                 });
-                await _context.SaveChangesAsync();
-            }
-            else if (vm.TipoUsuario == TipoUsuario.Admin)
-            {
-                _context.Administradores.Add(new Administrador
-                {
-                    IdUsuario = usuario.IdUsuario
-                });
-                await _context.SaveChangesAsync();
             }
 
-            // RF-002: Registra o aceite do termo para doadores
             if (ehDoador && vm.AceitouTermo)
             {
-                var ipOrigem = HttpContext.Connection.RemoteIpAddress?.ToString();
-                var termo = new TermoAceitacao
+                _context.TermosAceitacao.Add(new TermoAceitacao
                 {
-                    UsuarioId    = usuario.IdUsuario,
-                    DataAceite   = DateTime.UtcNow,
-                    VersaoTermo  = "v1.0-2026",
-                    IpOrigem     = ipOrigem
-                };
-                _context.TermosAceitacao.Add(termo);
-                await _context.SaveChangesAsync();
+                    UsuarioId = usuario.IdUsuario,
+                    DataAceite = DateTime.UtcNow,
+                    VersaoTermo = "v1.0-2026",
+                    IpOrigem = HttpContext.Connection.RemoteIpAddress?.ToString()
+                });
             }
 
-            // Faz login automático após o cadastro
+            await _context.SaveChangesAsync();
+
             await RealizarLoginAsync(usuario, isPersistent: false);
 
-            // E-mail de boas-vindas — RF-001
             await _emailService.EnviarEmailAsync(
                 usuario.Email,
-                "Doalim — Cadastro realizado com sucesso!",
+                "Doalim - Cadastro realizado com sucesso!",
                 $@"<p>Olá, <strong>{usuario.Nome}</strong>!</p>
                    <p>Seu cadastro na plataforma <strong>Doalim</strong> foi realizado com sucesso.</p>
-                   <p>Para completar seu perfil e habilitar todas as funcionalidades,
-                    acesse <strong>Meu Perfil</strong> e envie seu arquivo de comprovação.</p>
-                   <p style='color:#888;font-size:12px;'>
-                    Se você não realizou este cadastro, ignore este e-mail.
-                   </p>");
+                   <p>Para habilitar todas as funcionalidades, acesse <strong>Meu Perfil</strong> e envie seu arquivo de comprovação.</p>
+                   <p style='color:#888;font-size:12px;'>Se você não realizou este cadastro, ignore este e-mail.</p>");
 
             TempData["Sucesso"] = $"Bem-vindo(a), {usuario.Nome}! Cadastro realizado com sucesso.";
             return RedirectToAction("Index", "Home");
         }
-
-        // LOGIN - RF-001     
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -205,8 +163,7 @@ namespace Doalim_dev.Controllers
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == vm.Email);
 
-            // Verifica existÃªncia e senha sem revelar qual estÃ¡ errado (seguranÃ§a)
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(vm.Senha, usuario.SenhaHash))
+            if (usuario == null || !SenhaConfere(vm.Senha, usuario.SenhaHash))
             {
                 ModelState.AddModelError(string.Empty, "E-mail ou senha incorretos.");
                 return View(vm);
@@ -221,7 +178,6 @@ namespace Doalim_dev.Controllers
 
             await RealizarLoginAsync(usuario, vm.LembrarMe);
 
-            // Redireciona para a URL de origem ou Dashboard
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
@@ -231,8 +187,6 @@ namespace Doalim_dev.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // LOGOUT - RF-001
-        
         [Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -240,8 +194,6 @@ namespace Doalim_dev.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        // RECUPERAÃ‡ÃƒO DE SENHA - RF-001
-        
         [HttpGet]
         public IActionResult RecuperarSenha()
         {
@@ -258,12 +210,10 @@ namespace Doalim_dev.Controllers
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == vm.Email);
 
-            // Sempre exibe a mesma mensagem, independente de o e-mail existir ou nÃ£o
-            // Isso evita enumeration attack
             if (usuario != null && usuario.Ativo)
             {
                 usuario.TokenRecuperacao = Guid.NewGuid().ToString("N");
-                usuario.TokenExpiracao   = DateTime.UtcNow.AddHours(1);
+                usuario.TokenExpiracao = DateTime.UtcNow.AddHours(1);
                 await _context.SaveChangesAsync();
 
                 var link = Url.Action(
@@ -274,23 +224,17 @@ namespace Doalim_dev.Controllers
                 var corpo = $@"
                     <p>Olá, <strong>{usuario.Nome}</strong>!</p>
                     <p>Recebemos uma solicitação para redefinir a senha da sua conta no Doalim.</p>
-                    <p>Clique no botão abaixo para criar uma nova senha. 
-                       Este link é válido por <strong>1 hora</strong>.</p>
+                    <p>Clique no botão abaixo para criar uma nova senha. Este link é válido por <strong>1 hora</strong>.</p>
                     <p style='margin: 24px 0;'>
-                        <a href='{link}' 
-                           style='background:#1D9E75;color:#fff;padding:12px 24px;
-                                  border-radius:8px;text-decoration:none;font-weight:bold;'>
+                        <a href='{link}' style='background:#1D9E75;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;'>
                             Redefinir Senha
                         </a>
                     </p>
-                    <p style='color:#888;font-size:12px;'>
-                        Se você não solicitou a redefinição, ignore este e-mail.
-                        Sua senha permanece a mesma.
-                    </p>";
+                    <p style='color:#888;font-size:12px;'>Se você não solicitou a redefinição, ignore este e-mail.</p>";
 
                 await _emailService.EnviarEmailAsync(
                     usuario.Email,
-                    "Doalim - redefinição de Senha",
+                    "Doalim - Redefinição de Senha",
                     corpo);
             }
 
@@ -303,7 +247,6 @@ namespace Doalim_dev.Controllers
         [HttpGet]
         public async Task<IActionResult> ResetSenha(string token, string email)
         {
-            // Valida o token antes de exibir o formulário
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u =>
                     u.Email == email &&
@@ -340,10 +283,9 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction(nameof(RecuperarSenha));
             }
 
-            // Atualiza a senha e invalida o token
-            usuario.SenhaHash        = BCrypt.Net.BCrypt.HashPassword(vm.NovaSenha);
+            usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(vm.NovaSenha);
             usuario.TokenRecuperacao = null;
-            usuario.TokenExpiracao   = null;
+            usuario.TokenExpiracao = null;
             await _context.SaveChangesAsync();
 
             TempData["Sucesso"] =
@@ -352,36 +294,75 @@ namespace Doalim_dev.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        // TERMO DE RESPONSABILIDADE - RF-002
-        
         [HttpGet]
         public IActionResult Termo()
         {
             return View();
         }
 
-        // MÉTODO PRIVADO: centraliza a criação do cookie
-        
         private async Task RealizarLoginAsync(Usuario usuario, bool isPersistent)
         {
+            var roles = new HashSet<string> { usuario.TipoUsuario.ToString() };
+
+            if (await _context.Doadores.AnyAsync(d => d.IdUsuario == usuario.IdUsuario))
+                roles.Add(UsuarioRegras.TipoDoadorCorrespondente(usuario).ToString());
+
+            if (await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuario.IdUsuario))
+                roles.Add(UsuarioRegras.TipoBeneficiarioCorrespondente(usuario).ToString());
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Name,           usuario.Nome),
-                new Claim(ClaimTypes.Email,          usuario.Email),
-                // A Claim de Role permite que outros controllers usem
-                // [Authorize(Roles = "Admin")] ou [Authorize(Roles = "DoadorPJ")] etc.
-                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString())
+                new Claim(ClaimTypes.Name, usuario.Nome),
+                new Claim(ClaimTypes.Email, usuario.Email)
             };
 
-            var identidade  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal   = new ClaimsPrincipal(identidade);
-            var authProps   = new AuthenticationProperties { IsPersistent = isPersistent };
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var identidade = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identidade);
+            var authProps = new AuthenticationProperties { IsPersistent = isPersistent };
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
                 authProps);
+        }
+
+        private static bool SenhaConfere(string senha, string senhaHash)
+        {
+            if (string.IsNullOrWhiteSpace(senhaHash))
+                return false;
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(senha, senhaHash);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private async Task ValidarIdentificadoresUnicosAsync(RegistroViewModel vm)
+        {
+            var cpf = UsuarioRegras.NormalizarDigitos(vm.Cpf);
+            var cnpj = UsuarioRegras.NormalizarDigitos(vm.Cnpj);
+            var telefone = UsuarioRegras.NormalizarDigitos(vm.Telefone);
+
+            var usuarios = await _context.Usuarios
+                .AsNoTracking()
+                .Select(u => new { u.Cpf, u.Cnpj, u.Telefone })
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(cpf) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cpf) == cpf))
+                ModelState.AddModelError(nameof(vm.Cpf), "Este CPF já está cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(cnpj) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Cnpj) == cnpj))
+                ModelState.AddModelError(nameof(vm.Cnpj), "Este CNPJ já está cadastrado.");
+
+            if (!string.IsNullOrWhiteSpace(telefone) && usuarios.Any(u => UsuarioRegras.NormalizarDigitos(u.Telefone) == telefone))
+                ModelState.AddModelError(nameof(vm.Telefone), "Este telefone já está cadastrado.");
         }
     }
 }

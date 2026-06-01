@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Doalim_dev.Models
@@ -8,7 +8,8 @@ namespace Doalim_dev.Models
         Pendente = 0,
         Confirmada = 1,
         Retirada = 2,
-        Cancelada = 3
+        Cancelada = 3,
+        Rejeitada = 4
     }
 
     [Table("Reservas")]
@@ -26,12 +27,35 @@ namespace Doalim_dev.Models
         [Required]
         public int QuantidadeReservada { get; set; }
 
-        // FK para o Produto reservado
-        [Required]
-        public int IdProduto { get; set; }
+        // Token gerado pelo sistema quando o doador aprova a reserva.
+        // Informado presencialmente pelo beneficiário ao retirar o produto.
+        public string? TokenConfirmacao { get; set; }
 
-        [ForeignKey(nameof(IdProduto))]
-        public Produto Produto { get; set; } = null!;
+        // Intervalo de retirada definido pelo doador ao aprovar a reserva.
+        // Ambas as datas devem ser anteriores ao vencimento do lote.
+        public DateTime? DataRetiradaInicio { get; set; }
+
+        public DateTime? DataRetiradaFim { get; set; }
+
+        // Preenchido quando a reserva é encerrada (cancelada, rejeitada ou entregue).
+        public DateTime? DataEncerramento { get; set; }
+
+        // Motivo informado pelo doador ao rejeitar a reserva.
+        public string? MotivoRejeicao { get; set; }
+
+        // FK para o Pedido agrupador desta reserva
+        public int? IdPedido { get; set; }
+
+        [ForeignKey(nameof(IdPedido))]
+        public Pedido? Pedido { get; set; }
+
+        // FK para o Lote reservado
+        // Produto fica implícito através do Lote.IdProduto
+        [Required]
+        public int IdLote { get; set; }
+
+        [ForeignKey(nameof(IdLote))]
+        public Lote Lote { get; set; } = null!;
 
         // FK para o Beneficiario que fez a reserva
         [Required]

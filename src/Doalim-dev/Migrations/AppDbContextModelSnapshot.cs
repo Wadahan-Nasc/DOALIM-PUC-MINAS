@@ -51,13 +51,46 @@ namespace Doalim_dev.Migrations
                     b.ToTable("Beneficiarios");
                 });
 
+            modelBuilder.Entity("Doalim_dev.Models.CarrinhoItem", b =>
+                {
+                    b.Property<int>("IdCarrinhoItem")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCarrinhoItem"));
+
+                    b.Property<DateTime>("DataAdicao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataExpiracao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdBeneficiario")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdProduto")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantidadeDesejada")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdCarrinhoItem");
+
+                    b.HasIndex("IdProduto");
+
+                    b.HasIndex("IdBeneficiario", "IdProduto")
+                        .IsUnique();
+
+                    b.ToTable("CarrinhoItens");
+                });
+
             modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
                 {
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
-                    b.Property<string>("QtdAlimentosDoados")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("QtdAlimentosDoados")
+                        .HasColumnType("int");
 
                     b.HasKey("IdUsuario");
 
@@ -168,14 +201,38 @@ namespace Doalim_dev.Migrations
                     b.Property<int>("Quantidade")
                         .HasColumnType("int");
 
-                    b.Property<bool>("StatusLote")
-                        .HasColumnType("bit");
+                    b.Property<int>("StatusLote")
+                        .HasColumnType("int");
 
                     b.HasKey("IdLote");
 
                     b.HasIndex("IdProduto");
 
                     b.ToTable("Lotes");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Pedido", b =>
+                {
+                    b.Property<int>("IdPedido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPedido"));
+
+                    b.Property<DateTime>("DataPedido")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdBeneficiario")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusPedido")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPedido");
+
+                    b.HasIndex("IdBeneficiario");
+
+                    b.ToTable("Pedidos");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Produto", b =>
@@ -191,7 +248,6 @@ namespace Doalim_dev.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CodigoBarras")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DataCadastro")
@@ -242,14 +298,32 @@ namespace Doalim_dev.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdReserva"));
 
+                    b.Property<DateTime?>("DataEncerramento")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("DataReserva")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataRetiradaFim")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataRetiradaInicio")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("IdBeneficiario")
                         .HasColumnType("int");
 
-                    b.Property<int>("IdProduto")
+                    b.Property<int>("IdLote")
                         .HasColumnType("int");
+
+                    b.Property<int?>("IdPedido")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LoteIdLote")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MotivoRejeicao")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("QuantidadeReservada")
                         .HasColumnType("int");
@@ -257,11 +331,18 @@ namespace Doalim_dev.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("TokenConfirmacao")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("IdReserva");
 
                     b.HasIndex("IdBeneficiario");
 
-                    b.HasIndex("IdProduto");
+                    b.HasIndex("IdLote");
+
+                    b.HasIndex("IdPedido");
+
+                    b.HasIndex("LoteIdLote");
 
                     b.ToTable("Reservas");
                 });
@@ -368,6 +449,147 @@ namespace Doalim_dev.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("Doalim_dev.Models.ValorLookup", b =>
+                {
+                    b.Property<int>("IdValor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdValor"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdValor");
+
+                    b.HasIndex("Tipo", "Nome")
+                        .IsUnique();
+
+                    b.ToTable("ValoresLookup");
+
+                    b.HasData(
+                        new
+                        {
+                            IdValor = 1,
+                            Ativo = true,
+                            Nome = "Grão",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 2,
+                            Ativo = true,
+                            Nome = "Bebida",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 3,
+                            Ativo = true,
+                            Nome = "Carne",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 4,
+                            Ativo = true,
+                            Nome = "Produtos de Limpeza",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 5,
+                            Ativo = true,
+                            Nome = "Higiene Pessoal",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 6,
+                            Ativo = true,
+                            Nome = "Laticínios",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 7,
+                            Ativo = true,
+                            Nome = "Verdura",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 8,
+                            Ativo = true,
+                            Nome = "Legume",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 9,
+                            Ativo = true,
+                            Nome = "Fruta",
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            IdValor = 10,
+                            Ativo = true,
+                            Nome = "Kg",
+                            Tipo = 2
+                        },
+                        new
+                        {
+                            IdValor = 11,
+                            Ativo = true,
+                            Nome = "mg",
+                            Tipo = 2
+                        },
+                        new
+                        {
+                            IdValor = 12,
+                            Ativo = true,
+                            Nome = "L",
+                            Tipo = 2
+                        },
+                        new
+                        {
+                            IdValor = 13,
+                            Ativo = true,
+                            Nome = "ml",
+                            Tipo = 2
+                        },
+                        new
+                        {
+                            IdValor = 14,
+                            Ativo = true,
+                            Nome = "Ambiente",
+                            Tipo = 1
+                        },
+                        new
+                        {
+                            IdValor = 15,
+                            Ativo = true,
+                            Nome = "Congelado",
+                            Tipo = 1
+                        },
+                        new
+                        {
+                            IdValor = 16,
+                            Ativo = true,
+                            Nome = "Local fechado",
+                            Tipo = 1
+                        });
+                });
+
             modelBuilder.Entity("Doalim_dev.Models.Administrador", b =>
                 {
                     b.HasOne("Doalim_dev.Models.Usuario", "Usuario")
@@ -388,6 +610,25 @@ namespace Doalim_dev.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.CarrinhoItem", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Beneficiario", "Beneficiario")
+                        .WithMany()
+                        .HasForeignKey("IdBeneficiario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Doalim_dev.Models.Produto", "Produto")
+                        .WithMany()
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Beneficiario");
+
+                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
@@ -434,6 +675,17 @@ namespace Doalim_dev.Migrations
                     b.Navigation("Produto");
                 });
 
+            modelBuilder.Entity("Doalim_dev.Models.Pedido", b =>
+                {
+                    b.HasOne("Doalim_dev.Models.Beneficiario", "Beneficiario")
+                        .WithMany()
+                        .HasForeignKey("IdBeneficiario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Beneficiario");
+                });
+
             modelBuilder.Entity("Doalim_dev.Models.Produto", b =>
                 {
                     b.HasOne("Doalim_dev.Models.Doador", "Doador")
@@ -453,15 +705,26 @@ namespace Doalim_dev.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Doalim_dev.Models.Produto", "Produto")
+                    b.HasOne("Doalim_dev.Models.Lote", "Lote")
                         .WithMany()
-                        .HasForeignKey("IdProduto")
+                        .HasForeignKey("IdLote")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Doalim_dev.Models.Pedido", "Pedido")
+                        .WithMany("Reservas")
+                        .HasForeignKey("IdPedido")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Doalim_dev.Models.Lote", null)
+                        .WithMany("Reservas")
+                        .HasForeignKey("LoteIdLote");
+
                     b.Navigation("Beneficiario");
 
-                    b.Navigation("Produto");
+                    b.Navigation("Lote");
+
+                    b.Navigation("Pedido");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.TermoAceitacao", b =>
@@ -478,6 +741,16 @@ namespace Doalim_dev.Migrations
             modelBuilder.Entity("Doalim_dev.Models.Doador", b =>
                 {
                     b.Navigation("Produtos");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Lote", b =>
+                {
+                    b.Navigation("Reservas");
+                });
+
+            modelBuilder.Entity("Doalim_dev.Models.Pedido", b =>
+                {
+                    b.Navigation("Reservas");
                 });
 
             modelBuilder.Entity("Doalim_dev.Models.Produto", b =>

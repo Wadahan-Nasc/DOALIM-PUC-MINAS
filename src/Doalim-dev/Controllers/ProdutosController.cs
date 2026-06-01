@@ -1,4 +1,4 @@
-using Doalim_dev.Models;
+﻿using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,36 +8,19 @@ using System.Security.Claims;
 namespace Doalim_dev.Controllers
 {
     [Authorize]
-    public class ProdutosController : Controller
+    public class ProdutosController : BaseController
     {
-
-        private readonly AppDbContext _context;
-
-        public ProdutosController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        private int ObterIdUsuarioLogado()
-        {
-
-            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-
-            if (int.TryParse(claim, out int id)) return id;
-            return 0;
-        }
+        public ProdutosController(AppDbContext context) : base(context) { }
 
         public async Task<IActionResult> Index(string busca, string categoria, string marca, string numeroLote, DateTime? dataInicio, DateTime? dataFim, bool apenasAlertas, string statusFiltro = "ativos")
         {
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
 
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores possuem um painel de gerenciamento.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
             // Auto-Inativação
@@ -52,13 +35,13 @@ namespace Doalim_dev.Controllers
                 {
                     foreach (var lote in p.Lotes)
                     {
-                        if (lote.DataValidade.Date < DateTime.Today && lote.StatusLote == true)
+                        if (lote.DataValidade.Date < DateTime.Today && lote.StatusLote == StatusLote.Disponivel)
                         {
-                            lote.StatusLote = false;
+                            lote.StatusLote = StatusLote.Inativo;
                             precisaSalvarDB = true;
                         }
 
-                        if (lote.StatusLote == true && lote.DataValidade.Date >= DateTime.Today)
+                        if (lote.StatusLote == StatusLote.Disponivel && lote.DataValidade.Date >= DateTime.Today)
                         {
                             produtoTemLoteValidoEAtivo = true;
                         }
@@ -91,7 +74,7 @@ namespace Doalim_dev.Controllers
             if (apenasAlertas)
             {
                 var limiteAlerta = DateTime.Today.AddDays(1);
-                query = query.Where(p => p.Lotes.Any(l => l.StatusLote == true && l.DataValidade.Date <= limiteAlerta));
+                query = query.Where(p => p.Lotes.Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date <= limiteAlerta));
             }
 
             // Ordenação: ativos para cima e inativos para baixo e depois organiza em ordem alfabética
@@ -108,30 +91,46 @@ namespace Doalim_dev.Controllers
             ViewBag.ApenasAlertas = apenasAlertas;
             ViewBag.StatusFiltro = statusFiltro;
 
+            // Categorias disponíveis para o filtro — carregadas do domínio extensível
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
+
             return View(produtos);
         }
 
 
         // GET
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            int usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0) return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores podem cadastrar produtos.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para cadastrar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
+            await CarregarLookupsAsync();
             return View();
         }
 
         // POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Produto produto, IFormFile arquivoFoto, string[] NumeroLote, DateTime[] DataValidadeLote, int[] QuantidadeLote, bool[] StatusLote)
+        public async Task<IActionResult> Create(Produto produto, IFormFile arquivoFoto, string[] NumeroLote, DateTime[] DataValidadeLote, int[] QuantidadeLote, bool[] statusLoteForm)
         {
 
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
 
             produto.IdDoador = usuarioId;
 
@@ -151,7 +150,7 @@ namespace Doalim_dev.Controllers
             if (arquivoFoto != null && arquivoFoto.Length > 0)
             {
                 using var ms = new MemoryStream();
-                await arquivoFoto.CopyToAsync(ms); 
+                await arquivoFoto.CopyToAsync(ms);
                 produto.FotoProduto = ms.ToArray();
             }
 
@@ -168,18 +167,18 @@ namespace Doalim_dev.Controllers
                     {
                         if (!string.IsNullOrWhiteSpace(NumeroLote[i]))
                         {
-                            bool statusAtualLote = (StatusLote != null && StatusLote.Length > i) ? StatusLote[i] : true;
+                            bool ativo = (statusLoteForm != null && statusLoteForm.Length > i) ? statusLoteForm[i] : true;
 
-                            if (DataValidadeLote[i].Date < DateTime.Today) statusAtualLote = false;
+                            if (DataValidadeLote[i].Date < DateTime.Today) ativo = false;
 
-                            if (statusAtualLote) produtoTemLoteValido = true;
+                            if (ativo) produtoTemLoteValido = true;
 
                             var lote = new Lote
                             {
                                 NumeroLote = NumeroLote[i],
                                 DataValidade = DataValidadeLote[i],
                                 Quantidade = QuantidadeLote[i],
-                                StatusLote = statusAtualLote,
+                                StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo,
                                 IdProduto = produto.IdProduto
                             };
                             _context.Add(lote);
@@ -188,7 +187,7 @@ namespace Doalim_dev.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Regra de négocio
+                // Regra de negócio
                 if (!produtoTemLoteValido && produto.StatusProduto)
                 {
                     produto.StatusProduto = false;
@@ -199,6 +198,7 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -220,9 +220,7 @@ namespace Doalim_dev.Controllers
 
                 if (int.TryParse(usuarioIdClaim, out var usuarioId))
                 {
-                    usuarioAprovado = await _context.Usuarios
-                        .AsNoTracking()
-                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                    usuarioAprovado = await UsuarioComprovadoAsync(usuarioId);
                 }
             }
 
@@ -230,15 +228,26 @@ namespace Doalim_dev.Controllers
             ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
             ViewBag.UsuarioAprovado = usuarioAprovado;
             ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+            ViewBag.EhBeneficiarioPF = User.IsInRole("BeneficiarioPF");
 
             var hoje = DateTime.Today;
             var query = _context.Produtos
                 .Include(p => p.Lotes)
                 .Where(p => p.StatusProduto
-                    && p.Lotes.Any(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0));
+                    && p.Lotes.Any(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0));
 
             if (!string.IsNullOrWhiteSpace(filtros.NomeBusca))
                 query = query.Where(p => p.NomeProduto.Contains(filtros.NomeBusca));
+
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(p => p.CategoriaProduto == filtros.Categoria);
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasVitrine = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
 
             var produtos = await query.ToListAsync();
             var idsDoadores = produtos.Select(p => p.IdDoador).Distinct().ToList();
@@ -253,7 +262,7 @@ namespace Doalim_dev.Controllers
                     nomesDoadores.TryGetValue(p.IdDoador, out var nomeDoador);
 
                     var lotesAtivos = p.Lotes
-                        .Where(l => l.StatusLote && l.DataValidade.Date >= hoje && l.Quantidade > 0)
+                        .Where(l => l.StatusLote == StatusLote.Disponivel && l.DataValidade.Date >= hoje && l.Quantidade > 0)
                         .OrderBy(l => l.DataValidade)
                         .ToList();
 
@@ -267,7 +276,9 @@ namespace Doalim_dev.Controllers
                         TipoArmazenamento = p.TipoArmazenamento ?? "",
                         FotoProduto = ObterFotoProdutoDataUrl(p.FotoProduto),
                         QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
-                        NomeDoador = nomeDoador ?? "Doador"
+                        NomeDoador = nomeDoador ?? "Doador",
+                        LimitePF = p.QuantidadePessoaFisica,
+                        LimitePJ = p.QuantidadePessoaJuridica
                     };
                 })
                 .Where(p => !filtros.QuantidadeMinima.HasValue || p.QuantidadeDisponivel >= filtros.QuantidadeMinima.Value);
@@ -294,12 +305,19 @@ namespace Doalim_dev.Controllers
             var produto = await _context.Produtos.Include(p => p.Lotes).FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produto == null) return NotFound();
 
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para gerenciar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
+
             if (produto.IdDoador != usuarioId)
             {
                 TempData["ErroSeguranca"] = "Acesso Negado: Este produto não pertence à sua conta.";
                 return RedirectToAction(nameof(Index));
             }
 
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -307,11 +325,17 @@ namespace Doalim_dev.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Produto produto, IFormFile arquivoFoto,
-            int[] IdLote, string[] NumeroLote, DateTime[] DataValidade, int[] Quantidade, bool[] StatusLote, int[] LotesExcluidos)
+            int[] IdLote, string[] NumeroLote, DateTime[] DataValidade, int[] Quantidade, bool[] statusLoteForm, int[] LotesExcluidos)
         {
             if (id != produto.IdProduto) return NotFound();
 
             int usuarioId = ObterIdUsuarioLogado();
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para alterar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
 
             var produtoOriginal = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produtoOriginal == null || produtoOriginal.IdDoador != usuarioId)
@@ -387,10 +411,10 @@ namespace Doalim_dev.Controllers
                         {
                             if (string.IsNullOrWhiteSpace(NumeroLote[i])) continue;
 
-                            bool statusAtualLote = (StatusLote != null && StatusLote.Length > i) ? StatusLote[i] : true;
-                            if (DataValidade[i].Date < DateTime.Today) statusAtualLote = false;
+                            bool ativo = (statusLoteForm != null && statusLoteForm.Length > i) ? statusLoteForm[i] : true;
+                            if (DataValidade[i].Date < DateTime.Today) ativo = false;
 
-                            if (statusAtualLote) produtoTemLoteValido = true;
+                            if (ativo) produtoTemLoteValido = true;
 
                             if (IdLote != null && i < IdLote.Length && IdLote[i] > 0)
                             {
@@ -400,7 +424,7 @@ namespace Doalim_dev.Controllers
                                     loteExist.NumeroLote = NumeroLote[i];
                                     loteExist.DataValidade = DataValidade[i];
                                     loteExist.Quantidade = Quantidade[i];
-                                    loteExist.StatusLote = statusAtualLote;
+                                    loteExist.StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo;
                                     _context.Update(loteExist);
                                 }
                             }
@@ -412,7 +436,7 @@ namespace Doalim_dev.Controllers
                                     NumeroLote = NumeroLote[i],
                                     DataValidade = DataValidade[i],
                                     Quantidade = Quantidade[i],
-                                    StatusLote = statusAtualLote,
+                                    StatusLote = ativo ? StatusLote.Disponivel : StatusLote.Inativo,
                                     IdProduto = produto.IdProduto
                                 };
                                 _context.Add(novoLote);
@@ -437,6 +461,7 @@ namespace Doalim_dev.Controllers
             }
 
             produto.Lotes = await _context.Lotes.Where(l => l.IdProduto == id).ToListAsync();
+            await CarregarLookupsAsync();
             return View(produto);
         }
 
@@ -456,6 +481,124 @@ namespace Doalim_dev.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // =======================================================================================
+        // GET: /Produtos/HistoricoDoacoes
+        // Relatório de doações concluídas (Retirada) e rejeitadas do doador logado.
+        // =======================================================================================
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        public async Task<IActionResult> HistoricoDoacoes(HistoricoDoadorFiltroViewModel filtros)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var query = _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .Include(r => r.Beneficiario)
+                    .ThenInclude(b => b.Usuario)
+                .Where(r => r.Lote.Produto.IdDoador == usuarioId
+                         && (r.Status == StatusReserva.Retirada || r.Status == StatusReserva.Rejeitada))
+                .AsQueryable();
+
+            // Filtro por status
+            if (!string.IsNullOrWhiteSpace(filtros.Status) &&
+                Enum.TryParse<StatusReserva>(filtros.Status, out var statusEnum))
+                query = query.Where(r => r.Status == statusEnum);
+
+            // Filtro por categoria
+            if (!string.IsNullOrWhiteSpace(filtros.Categoria))
+                query = query.Where(r => r.Lote.Produto.CategoriaProduto == filtros.Categoria);
+
+            // Filtro por nome do produto
+            if (!string.IsNullOrWhiteSpace(filtros.NomeProduto))
+                query = query.Where(r => r.Lote.Produto.NomeProduto.Contains(filtros.NomeProduto));
+
+            // Filtro por nome do beneficiário
+            if (!string.IsNullOrWhiteSpace(filtros.NomeBeneficiario))
+                query = query.Where(r => r.Beneficiario.Usuario.Nome.Contains(filtros.NomeBeneficiario));
+
+            // Filtro por validade do lote
+            if (filtros.ValidadeInicio.HasValue)
+            {
+                var inicio = filtros.ValidadeInicio.Value.Date;
+                query = query.Where(r => r.Lote.DataValidade >= inicio);
+            }
+            if (filtros.ValidadeFim.HasValue)
+            {
+                var fim = filtros.ValidadeFim.Value.Date.AddDays(1);
+                query = query.Where(r => r.Lote.DataValidade < fim);
+            }
+
+            // Filtro por data de reserva
+            if (filtros.DataReservaInicio.HasValue)
+            {
+                var inicio = filtros.DataReservaInicio.Value.Date;
+                query = query.Where(r => r.DataReserva >= inicio);
+            }
+            if (filtros.DataReservaFim.HasValue)
+            {
+                var fim = filtros.DataReservaFim.Value.Date.AddDays(1);
+                query = query.Where(r => r.DataReserva < fim);
+            }
+
+            // Categorias disponíveis para o select do filtro
+            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
+                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                .OrderBy(v => v.Nome)
+                .Select(v => v.Nome)
+                .ToListAsync();
+
+            // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
+            var reservasDb = await query
+                .OrderByDescending(r => r.DataEncerramento ?? r.DataReserva)
+                .ToListAsync();
+
+            var itens = reservasDb.Select(r => new HistoricoDoadorViewModel
+            {
+                IdReserva = r.IdReserva,
+                IdPedido = r.IdPedido ?? 0,
+                NomeProduto = r.Lote.Produto.NomeProduto,
+                MarcaProduto = r.Lote.Produto.MarcaProduto ?? "",
+                CategoriaProduto = r.Lote.Produto.CategoriaProduto ?? "",
+                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida ?? "",
+                FotoProduto = ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
+                NumeroLote = r.Lote.NumeroLote,
+                DataValidadeLote = r.Lote.DataValidade,
+                QuantidadeReservada = r.QuantidadeReservada,
+                StatusReserva = r.Status.ToString(),
+                DataReserva = r.DataReserva,
+                DataEncerramento = r.DataEncerramento,
+                MotivoRejeicao = r.MotivoRejeicao,
+                NomeBeneficiario = r.Beneficiario.Usuario.Nome,
+                EhOng = r.Beneficiario.Eong
+            }).ToList();
+
+            var viewModel = new HistoricoDoadorPageViewModel
+            {
+                Filtros = filtros,
+                Itens = itens
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Carrega os valores ativos de domínio (Categoria, TipoArmazenamento, UnidadeMedida)
+        /// e os disponibiliza via ViewBag para os formulários de Create e Edit.
+        /// </summary>
+        private async Task CarregarLookupsAsync()
+        {
+            var todos = await _context.ValoresLookup
+                .Where(v => v.Ativo)
+                .OrderBy(v => v.Nome)
+                .ToListAsync();
+
+            ViewBag.Categorias          = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
+            ViewBag.TiposArmazenamento  = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
+            ViewBag.UnidadesMedida      = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
         }
 
         private bool ProdutoExists(int id) => _context.Produtos.Any(e => e.IdProduto == id);
@@ -489,6 +632,247 @@ namespace Doalim_dev.Controllers
             }
 
             return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+
+        // =======================================================================================
+        // GET: /Produtos/GerenciarReservas
+        // Exibe todas as reservas pendentes e confirmadas dos produtos do doador logado.
+        // =======================================================================================
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        public async Task<IActionResult> GerenciarReservas()
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var reservas = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                        .ThenInclude(p => p.Doador)
+                .Include(r => r.Beneficiario)
+                    .ThenInclude(b => b.Usuario)
+                .Where(r => r.Lote.Produto.IdDoador == usuarioId
+                            && (r.Status == StatusReserva.Pendente
+                                   || r.Status == StatusReserva.Confirmada))
+                .OrderByDescending(r => r.DataReserva)
+                .Select(r => new GerenciarReservaDoadorViewModel
+                {
+                    IdReserva = r.IdReserva,
+                    IdPedido = r.IdPedido ?? 0,
+                    DataReserva = r.DataReserva,
+                    StatusReserva = r.Status.ToString(),
+                    QuantidadeReservada = r.QuantidadeReservada,
+                    NumeroLote = r.Lote.NumeroLote,
+                    DataValidadeLote = r.Lote.DataValidade,
+                    IdProduto = r.Lote.Produto.IdProduto,
+                    NomeProduto = r.Lote.Produto.NomeProduto,
+                    MarcaProduto = r.Lote.Produto.MarcaProduto,
+                    CategoriaProduto = r.Lote.Produto.CategoriaProduto,
+                    UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
+                    FotoProduto = r.Lote.Produto.FotoProduto == null
+                        ? null
+                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                    NomeBeneficiario = r.Beneficiario.Usuario.Nome,
+                    TelefoneBeneficiario = r.Beneficiario.Usuario.Telefone,
+                    EhOng = r.Beneficiario.Eong,
+                    DataRetiradaInicio = r.DataRetiradaInicio,
+                    DataRetiradaFim = r.DataRetiradaFim,
+                    TokenConfirmacao = r.TokenConfirmacao
+                })
+                .ToListAsync();
+
+            return View(reservas);
+        }
+
+        // =========================================================================================
+        // POST: /Produtos/AprovarReserva
+        // Doador aprova a reserva, define o intervalo de retirada e gera o token de confirmação.
+        // A quantidade já foi deduzida do lote em Finalizar — não alteramos StatusLote aqui.
+        // =========================================================================================
+
+        [HttpPost]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AprovarReserva(AprovarReservaViewModel viewModel)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Erro"] = "Informe o intervalo de retirada corretamente.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            var reserva = await _context.Reservas
+                   .Include(r => r.Lote)
+                       .ThenInclude(l => l.Produto)
+                   .FirstOrDefaultAsync(r => r.IdReserva == viewModel.IdReserva
+                                          && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            // Valida se status da reserva é diferente de pendente
+            if (reserva.Status != StatusReserva.Pendente)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser aprovada.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida se o intervalo de retirada é anterior ao vencimento do lote
+            if (viewModel.DataRetiradaFim.Date > reserva.Lote.DataValidade.Date)
+            {
+                TempData["Erro"] = $"A data fim de retirada deve ser anterior ao " +
+                                   $"vencimento do lote ({reserva.Lote.DataValidade:dd/MM/yyyy}).";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida que a data início é anterior ou igual à data fim
+            if (viewModel.DataRetiradaInicio.Date > viewModel.DataRetiradaFim.Date)
+            {
+                TempData["Erro"] = "A data de início deve ser anterior à data fim.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Gera o token de confirmação — 8 caracteres alfanuméricos em maiúsculo
+            reserva.TokenConfirmacao = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            reserva.DataRetiradaInicio = viewModel.DataRetiradaInicio;
+            reserva.DataRetiradaFim = viewModel.DataRetiradaFim;
+            reserva.Status = StatusReserva.Confirmada;
+
+            // NOTA: O StatusLote NÃO é alterado aqui.
+            // A quantidade já foi deduzida do lote em Finalizar.
+            // O lote permanece Disponivel para eventuais quantidades restantes,
+            // ou Inativo se foi totalmente consumido.
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Reserva #{reserva.IdReserva} aprovada com sucesso!";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
+        // =====================================================================
+        // POST: /Produtos/RejeitarReserva
+        // Doador rejeita a reserva. O lote volta para a vitrine
+        // se ainda estiver dentro da validade.
+        // =====================================================================
+        [HttpPost]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejeitarReserva(int idReserva, string? motivoRejeicao)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            if (string.IsNullOrWhiteSpace(motivoRejeicao))
+            {
+                TempData["Erro"] = "Informe o motivo da rejeição.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            if (reserva.Status != StatusReserva.Pendente)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser rejeitada.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Rejeita a reserva com o motivo informado
+            reserva.Status = StatusReserva.Rejeitada;
+            reserva.MotivoRejeicao = motivoRejeicao.Trim();
+            reserva.DataEncerramento = DateTime.UtcNow;
+
+            // Devolve o lote para a vitrine se ainda estiver dentro da validade
+            if (reserva.Lote.DataValidade.Date >= DateTime.Today)
+            {
+                reserva.Lote.Quantidade += reserva.QuantidadeReservada;
+
+                // Garante que o lote volte a Disponivel (pode estar Inativo se foi zerado)
+                if (reserva.Lote.StatusLote == StatusLote.Inativo)
+                    reserva.Lote.StatusLote = StatusLote.Disponivel;
+
+                reserva.Lote.Produto.StatusProduto = true;
+            }
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Reserva #{reserva.IdReserva} rejeitada.";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
+        // =====================================================================
+        // POST: /Produtos/ConfirmarEntrega
+        // Doador insere o token informado pelo beneficiário.
+        // Se válido, marca a reserva como Retirada.
+        // O lote só é marcado como Entregue se a quantidade for zero.
+        // =====================================================================
+        [HttpPost]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmarEntrega(int idReserva, string tokenInformado)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva
+                                       && r.Lote.Produto.IdDoador == usuarioId);
+
+            if (reserva == null)
+                return NotFound();
+
+            // Valida se o status da reserva encontra-se como confirmada
+            if (reserva.Status != StatusReserva.Confirmada)
+            {
+                TempData["Erro"] = "Esta reserva não pode ser confirmada como entregue.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Valida o token — comparação case-insensitive
+            if (!string.Equals(reserva.TokenConfirmacao, tokenInformado?.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Erro"] = "Token inválido. Verifique o código informado pelo beneficiário.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            // Marca a reserva como retirada
+            reserva.Status = StatusReserva.Retirada;
+            reserva.DataEncerramento = DateTime.UtcNow;
+
+            // Marca o lote como Entregue apenas se não houver mais estoque.
+            // Se ainda houver quantidade disponível, o lote permanece como está
+            // para não bloquear outras reservas em andamento.
+            if (reserva.Lote.Quantidade == 0)
+                reserva.Lote.StatusLote = StatusLote.Entregue;
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(reserva.IdPedido);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = $"Entrega da reserva #{reserva.IdReserva} confirmada com sucesso!";
+            return RedirectToAction(nameof(GerenciarReservas));
         }
     }
 }

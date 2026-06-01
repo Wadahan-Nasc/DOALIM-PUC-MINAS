@@ -1,263 +1,218 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
+@using Doalim_dev.Models
 
 @{
     ViewData["Title"] = "Meu Perfil";
+    var ehAdmin = Model.TipoUsuario == TipoUsuario.Admin;
+    var ehDoador = ViewBag.EhDoador == true;
+    var ehBeneficiario = ViewBag.EhBeneficiario == true;
+    var temComprovacao = Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0;
+    var foto = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
+        ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
+        : string.Empty;
 }
 
-<div class="container mt-4" style="max-width: 640px;">
-    <h2 class="mb-4">Meu Perfil</h2>
-
-    @if (TempData["Sucesso"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Sucesso"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<section class="profile-shell">
+    <div class="profile-header">
+        <div>
+            <span class="admin-eyebrow">Conta</span>
+            <h1>Meu Perfil</h1>
+            <p>Atualize seus dados, envie sua comprovacao e ative os perfis que deseja usar.</p>
         </div>
-    }
-
-    @if (TempData["Erro"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Erro"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="profile-badges">
+            <span class="admin-pill">@Model.TipoUsuario</span>
+            <span class="admin-status @(ehAdmin ? "status-neutral" : Model.StatusVerificacao == StatusVerificacao.Aprovado ? "status-success" : Model.StatusVerificacao == StatusVerificacao.Rejeitado ? "status-danger" : "status-warning")">
+                @(ehAdmin ? "Comprovacao dispensada" : Model.StatusVerificacao)
+            </span>
         </div>
-    }
+    </div>
 
-    <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post"
-          enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-
-        <input type="hidden" asp-for="IdUsuario" />
-        <input type="hidden" asp-for="SenhaHash" />
-        <input type="hidden" asp-for="TipoUsuario" />
-        <input type="hidden" asp-for="StatusVerificacao" />
-        <input type="hidden" asp-for="Ativo" />
-        <input type="hidden" asp-for="DataCadastro" />
-       
-
-        <div class="mb-3">
-            <label asp-for="Nome" class="form-label"></label>
-            <input asp-for="Nome" class="form-control" />
-            <span asp-validation-for="Nome" class="text-danger"></span>
-        </div>
-
-        @* Foto de Perfil *@
-        <div class="mb-3">
-            <label class="form-label">Foto de Perfil</label>
-
-            @if (Model.FotoPerfil != null && Model.FotoPerfil.Length > 0)
+    <div class="profile-grid">
+        <aside class="profile-side">
+            @if (!string.IsNullOrWhiteSpace(foto))
             {
-                <div class="mb-2">
-                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.FotoPerfil)"
-                         alt="Foto de perfil atual"
-                         class="rounded-circle"
-                         style="width: 80px; height: 80px; object-fit: cover;" />
-                    <span class="ms-2 text-muted small">Foto atual</span>
+                <img src="@foto" alt="Foto de perfil atual" class="profile-photo" />
+            }
+            else
+            {
+                <div class="profile-photo profile-photo-empty">
+                    <i class="bi bi-person"></i>
                 </div>
             }
 
-            <input type="file"
-                   name="arquivoFotoPerfil"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg" />
-            <div class="form-text">Formatos aceitos: PNG, JPG ou JPEG. Tamanho máximo: 2MB.</div>
-        </div>
+            @if (!ehAdmin)
+            {
+                <div class="profile-actions-card">
+                    <h2>Perfis</h2>
+                    <p>Voce pode doar e tambem reservar alimentos usando a mesma conta.</p>
 
-        <div class="mb-3">
-            <label asp-for="Bio" class="form-label">Bio <span class="text-muted small">(opcional)</span></label>
-            <textarea asp-for="Bio" class="form-control" rows="3"
-                      maxlength="300" placeholder="Conte um pouco sobre você..."></textarea>
-            <div class="form-text">Máximo 300 caracteres.</div>
-            <span asp-validation-for="Bio" class="text-danger"></span>
-        </div>
+                    <form asp-action="TornarDoador" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn @(ehDoador ? "btn-success" : "btn-outline-success") w-100" disabled="@ehDoador">
+                            <i class="bi bi-box-seam"></i>
+                            @(ehDoador ? "Doador ativo" : "Ativar doador")
+                        </button>
+                    </form>
 
-        @*O tipo de usuário será apresentado conforme o valor do enum "TipoUsuario"*@ 
-        <div class="mb-3">
-            <label class="form-label">Tipo de Usuário</label>
-            <input type="text" class="form-control bg-secondary-subtle text-muted" 
-                   readonly style="cursor: not-allowed;"
-                   value="@(Model.TipoUsuario switch {
-                       Doalim_dev.Models.TipoUsuario.DoadorPF       => "Doador PF",
-                       Doalim_dev.Models.TipoUsuario.DoadorPJ       => "Doador PJ",
-                       Doalim_dev.Models.TipoUsuario.BeneficiarioPF => "Beneficiário PF",
-                       Doalim_dev.Models.TipoUsuario.BeneficiarioPJ => "Beneficiário PJ",
-                       Doalim_dev.Models.TipoUsuario.Admin          => "Administrador",
-                       _                                            => "Não informado"
-                   })" />
-        </div>
+                    <form asp-action="TornarBeneficiario" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn @(ehBeneficiario ? "btn-success" : "btn-outline-success") w-100" disabled="@ehBeneficiario">
+                            <i class="bi bi-basket"></i>
+                            @(ehBeneficiario ? "Beneficiario ativo" : "Ativar beneficiario")
+                        </button>
+                    </form>
+                </div>
+            }
+        </aside>
 
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
+        <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post" enctype="multipart/form-data" class="profile-form">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        <div class="mb-3">
-            <label asp-for="Telefone" class="form-label"></label>
-            <input asp-for="Telefone" class="form-control" />
-            <span asp-validation-for="Telefone" class="text-danger"></span>
-        </div>
+            <input type="hidden" asp-for="IdUsuario" />
+            <input type="hidden" asp-for="SenhaHash" />
+            <input type="hidden" asp-for="TipoUsuario" />
+            <input type="hidden" asp-for="StatusVerificacao" />
+            <input type="hidden" asp-for="Ativo" />
+            <input type="hidden" asp-for="DataCadastro" />
 
-        @* Campo opcional para alteração de senha *@
-        <div class="mb-3">
-            <label class="form-label">Nova Senha <span class="text-muted small">(opcional)</span></label>
-            <div class="input-group">
-                <input type="password" name="NovaSenha" id="campoNovaSenha" class="form-control"
-                       placeholder="Deixe em branco para manter a senha atual" autocomplete="new-password" />
-                <button type="button" class="btn btn-outline-secondary"
-                        onclick="alternarSenha('campoNovaSenha', this)" tabindex="-1">
-                    <i class="bi bi-eye"></i>
+            <div class="admin-form-section">
+                <h2>Dados principais</h2>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label asp-for="Nome" class="form-label"></label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span asp-validation-for="Nome" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Telefone" class="form-label"></label>
+                        <input asp-for="Telefone" class="form-control" />
+                        <span asp-validation-for="Telefone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Nova senha</label>
+                        <input type="password" name="NovaSenha" class="form-control" autocomplete="new-password" placeholder="Opcional" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Bio" class="form-label">Bio</label>
+                        <textarea asp-for="Bio" class="form-control" rows="3" maxlength="300"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-form-section">
+                <h2>Documentos privados</h2>
+                <div class="row g-3">
+                    @if (!string.IsNullOrEmpty(Model.Cpf))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="Cpf" class="form-label"></label>
+                            <input asp-for="Cpf" class="form-control bg-secondary-subtle" readonly />
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Cnpj))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="Cnpj" class="form-label"></label>
+                            <input asp-for="Cnpj" class="form-control bg-secondary-subtle" readonly />
+                        </div>
+                    }
+                    <div class="col-md-6">
+                        <label class="form-label">Foto de perfil</label>
+                        <input type="file" name="arquivoFotoPerfil" class="form-control" accept=".png,.jpg,.jpeg" />
+                        <div class="form-text">PNG, JPG ou JPEG ate 2MB.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Arquivo de comprovacao</label>
+                        @if (ehAdmin)
+                        {
+                            <div class="form-control bg-secondary-subtle">Admin nao precisa de comprovacao</div>
+                        }
+                        else
+                        {
+                            <input type="file" name="arquivoComprovacao" class="form-control" accept=".png,.jpg,.jpeg,.pdf" />
+                            <div class="form-text">PNG, JPG, JPEG ou PDF ate 5MB.</div>
+                        }
+                    </div>
+                    @if (!ehAdmin && temComprovacao)
+                    {
+                        <div class="col-12">
+                            <a href="data:application/octet-stream;base64,@Convert.ToBase64String(Model.Arquivocomprovacao!)" download="comprovacao" class="admin-doc-link">
+                                <i class="bi bi-paperclip"></i>
+                                Ver comprovacao enviada
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="admin-form-section">
+                <h2>Endereco</h2>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input name="Endereco.Cep" class="form-control" placeholder="CEP" id="cep" value="@Model.Endereco?.Cep" maxlength="9" />
+                    </div>
+                    <div class="col-md-8">
+                        <input name="Endereco.Logradouro" class="form-control" placeholder="Logradouro" id="logradouro" value="@Model.Endereco?.Logradouro" />
+                    </div>
+                    <div class="col-md-3">
+                        <input name="Endereco.Numero" class="form-control" placeholder="Numero" value="@Model.Endereco?.Numero" />
+                    </div>
+                    <div class="col-md-5">
+                        <input name="Endereco.Complemento" class="form-control" placeholder="Complemento" value="@Model.Endereco?.Complemento" />
+                    </div>
+                    <div class="col-md-4">
+                        <input name="Endereco.Bairro" class="form-control" placeholder="Bairro" id="bairro" value="@Model.Endereco?.Bairro" />
+                    </div>
+                    <div class="col-md-8">
+                        <input name="Endereco.Cidade" class="form-control" placeholder="Cidade" id="cidade" value="@Model.Endereco?.Cidade" />
+                    </div>
+                    <div class="col-md-4">
+                        <input name="Endereco.Estado" class="form-control" placeholder="UF" id="estado" value="@Model.Endereco?.Estado" maxlength="2" />
+                    </div>
+                </div>
+            </div>
+
+            @if (!ehAdmin)
+            {
+                <div class="alert alert-warning d-flex align-items-start gap-2">
+                    <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                    <div>
+                        Para doar ou reservar, envie a comprovacao e aguarde aprovacao do admin.
+                    </div>
+                </div>
+            }
+
+            <div class="profile-submit">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check2-circle"></i>
+                    Salvar alteracoes
                 </button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
             </div>
-            <small class="text-muted">Preencha apenas se quiser trocar a senha.</small>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Endereço</label>
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input name="Endereco.Cep" class="form-control" placeholder="CEP" id="cep"
-                           value="@Model.Endereco?.Cep" maxlength="9" />
-                </div>
-                <div class="col-md-8">
-                    <input name="Endereco.Logradouro" class="form-control" placeholder="Logradouro"
-                           id="logradouro" value="@Model.Endereco?.Logradouro" />
-                </div>
-                <div class="col-md-3">
-                    <input name="Endereco.Numero" class="form-control" placeholder="Número"
-                           value="@Model.Endereco?.Numero" />
-                </div>
-                <div class="col-md-5">
-                    <input name="Endereco.Complemento" class="form-control" placeholder="Complemento"
-                           value="@Model.Endereco?.Complemento" />
-                </div>
-                <div class="col-md-4">
-                    <input name="Endereco.Bairro" class="form-control" placeholder="Bairro"
-                           id="bairro" value="@Model.Endereco?.Bairro" />
-                </div>
-                <div class="col-md-8">
-                    <input name="Endereco.Cidade" class="form-control" placeholder="Cidade"
-                           id="cidade" value="@Model.Endereco?.Cidade" />
-                </div>
-                <div class="col-md-4">
-                    <input name="Endereco.Estado" class="form-control" placeholder="UF"
-                           id="estado" value="@Model.Endereco?.Estado" maxlength="2" />
-                </div>
-            </div>
-        </div>
-
-
-        @*Se o usuário tiver um CPF cadastrado, não é necessário que apareça o campo CNPJ e vice-versa*@
-        @if (!string.IsNullOrEmpty(Model.Cpf))
-        {
-            <div class="mb-3">
-                <label asp-for="Cpf" class="form-label"></label>
-                <input asp-for="Cpf" class="form-control bg-secondary-subtle text-muted"
-                       readonly style="cursor: not-allowed;" />
-                <span asp-validation-for="Cpf" class="text-danger"></span>
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(Model.Cnpj))
-        {
-            <div class="mb-3">
-                <label asp-for="Cnpj" class="form-label"></label>
-                <input asp-for="Cnpj" class="form-control bg-secondary-subtle text-muted"
-                       readonly style="cursor: not-allowed;" />
-                <span asp-validation-for="Cnpj" class="text-danger"></span>
-            </div>
-        }
-
-        @* Campo de upload do documento de comprovação *@
-        <div class="mb-3">
-            <label class="form-label">Arquivo de Comprovação</label>
-
-            @if (Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0)
-            {
-                <div class="mb-2 d-flex align-items-center gap-2">
-                    <i class="bi bi-file-earmark-check text-success" style="font-size: 1.2rem;"></i>
-                    <a href="data:application/octet-stream;base64,@Convert.ToBase64String(Model.Arquivocomprovacao)"
-                       download="comprovacao" class="text-decoration-none">
-                        Ver arquivo atual
-                    </a>
-                </div>
-            }
-
-            <input type="file"
-                   name="arquivoComprovacao"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg,.pdf" />
-            <div class="form-text">Formatos aceitos: PNG, JPG, JPEG ou PDF. Tamanho máximo: 5MB.</div>
-        </div>
-
-        @* Aviso para Beneficiários levando em consideração o campo "StatusVerificacao" *@
-        @if (Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPF ||
-             Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPJ)
-        {
-            <div class="alert alert-warning d-flex align-items-start gap-2 mt-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
-                <div>
-                    <strong>Atenção!</strong> Para reservar doações, é necessário que seu
-                    arquivo de comprovação seja enviado e aprovado pela administração.
-
-                    @if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Pendente)
-                    {
-                        <span class="d-block mt-1 text-warning-emphasis">
-                            <i class="bi bi-clock"></i> Seu arquivo está <strong>aguardando aprovação</strong>.
-                        </span>
-                    }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Aprovado)
-                    {
-                        <span class="d-block mt-1 text-success">
-                            <i class="bi bi-check-circle"></i> Seu cadastro está <strong>aprovado</strong>!
-                        </span>
-                    }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Rejeitado)
-                    {
-                        <span class="d-block mt-1 text-danger">
-                            <i class="bi bi-x-circle"></i> Seu arquivo foi <strong>rejeitado</strong>. Envie um novo documento.
-                        </span>
-                    }
-                </div>
-            </div>
-        }
-
-        <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-success">Salvar alterações</button>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
+</section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
-        function alternarSenha(id, btn) {
-            const input = document.getElementById(id);
-            const icon  = btn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('bi-eye', 'bi-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('bi-eye-slash', 'bi-eye');
-            }
-        }
-
-        // Busca automática pelo CEP (ViaCEP)
         document.getElementById('cep')?.addEventListener('blur', async function () {
             const cep = this.value.replace(/\D/g, '');
             if (cep.length !== 8) return;
-            const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await res.json();
             if (data.erro) return;
             document.getElementById('logradouro').value = data.logradouro;
-            document.getElementById('bairro').value     = data.bairro;
-            document.getElementById('cidade').value     = data.localidade;
-            document.getElementById('estado').value     = data.uf;
+            document.getElementById('bairro').value = data.bairro;
+            document.getElementById('cidade').value = data.localidade;
+            document.getElementById('estado').value = data.uf;
         });
     </script>
 }
