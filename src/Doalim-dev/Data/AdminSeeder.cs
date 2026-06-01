@@ -40,7 +40,7 @@ namespace Doalim_dev.Data
                         Email = email,
                         SenhaHash = BCrypt.Net.BCrypt.HashPassword(senha),
                         Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000",
-                        Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim",
+                        //Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim",
                         TipoUsuario = TipoUsuario.Admin,
                         StatusVerificacao = StatusVerificacao.Pendente,
                         Ativo = true,
@@ -62,8 +62,8 @@ namespace Doalim_dev.Data
                     if (string.IsNullOrWhiteSpace(usuario.Telefone))
                         usuario.Telefone = configuration["AdminSeed:Telefone"] ?? "(31) 99999-0000";
 
-                    if (string.IsNullOrWhiteSpace(usuario.Endereco))
-                        usuario.Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim";
+                    //if (string.IsNullOrWhiteSpace(usuario.Endereco))
+                        //usuario.Endereco = configuration["AdminSeed:Endereco"] ?? "Sede administrativa Doalim";
 
                     if (configuration.GetValue<bool>("AdminSeed:ResetPassword"))
                         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(senha);

@@ -1,9 +1,14 @@
 @{
-    // FotoPerfil armazenada como claim no cookie — populada em AuthController.RealizarLoginAsync
-    // Nota: atualiza apenas no próximo login se o usuário trocar a foto
-    var fotoPerfil = User.Identity?.IsAuthenticated == true
-        ? User.FindFirst("FotoPerfil")?.Value
+    var emailLogado = User.Identity?.IsAuthenticated == true
+        ? (User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity.Name)
         : null;
+
+    var fotoPerfil = emailLogado != null
+    ? await _context.Usuarios
+        .Where(u => u.Email == emailLogado)
+        .Select(u => u.FotoPerfil)
+        .FirstOrDefaultAsync()
+    : null;
 }
 
 <!DOCTYPE html>
@@ -23,7 +28,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center gap-2"
-                       asp-controller="Home" asp-action="Index">
+                   asp-controller="Home" asp-action="Index">
                     <img src="~/images/logo.png" alt="Doalim" height="60" />
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -92,16 +97,25 @@
                                     </a>
                                 </li>
                             }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Usuarios" asp-action="PerfilPublico"
+                                   asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
+                                   title="Meu Perfil Público">
+                                    <i class="bi bi-person-badge" style="font-size: 1.4rem;"></i>
+                                </a>
+                            </li>
                             <li class="nav-item d-flex align-items-center">
                                 <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
-                                       asp-controller="Usuarios" asp-action="MeuPerfil"
-                                       title="Meu Perfil">
-                                    @if (!string.IsNullOrEmpty(fotoPerfil))
+                                   asp-controller="Usuarios" asp-action="MeuPerfil"
+                                   title="Meu Perfil">
+                                    @if (fotoPerfil != null && fotoPerfil.Length > 0)
                                     {
-                                        <img src="@fotoPerfil"
+                                        var base64 = Convert.ToBase64String(fotoPerfil);
+                                        <img src="data:image/jpeg;base64,@base64"
                                              alt="Foto de perfil"
                                              class="rounded-circle"
                                              style="width: 30px; height: 30px; object-fit: cover;" />
@@ -114,8 +128,8 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
-                                       asp-controller="Auth" asp-action="Logout"
-                                       title="Sair">
+                                   asp-controller="Auth" asp-action="Logout"
+                                   title="Sair">
                                     <i class="bi bi-box-arrow-right" style="font-size: 1.4rem;"></i>
                                 </a>
                             </li>

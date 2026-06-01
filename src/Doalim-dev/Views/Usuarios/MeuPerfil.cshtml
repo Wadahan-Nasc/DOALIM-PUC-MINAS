@@ -33,7 +33,7 @@
         <input type="hidden" asp-for="StatusVerificacao" />
         <input type="hidden" asp-for="Ativo" />
         <input type="hidden" asp-for="DataCadastro" />
-        <input type="hidden" asp-for="Arquivocomprovacao" />
+       
 
         <div class="mb-3">
             <label asp-for="Nome" class="form-label"></label>
@@ -45,24 +45,14 @@
         <div class="mb-3">
             <label class="form-label">Foto de Perfil</label>
 
-            @if (!string.IsNullOrEmpty(Model.FotoPerfil))
+            @if (Model.FotoPerfil != null && Model.FotoPerfil.Length > 0)
             {
                 <div class="mb-2">
-                    <img src="@Model.FotoPerfil"
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.FotoPerfil)"
                          alt="Foto de perfil atual"
                          class="rounded-circle"
                          style="width: 80px; height: 80px; object-fit: cover;" />
                     <span class="ms-2 text-muted small">Foto atual</span>
-                </div>
-            }
-            else
-            {
-                <div class="mb-2 d-flex align-items-center gap-2">
-                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
-                         style="width: 80px; height: 80px; font-size: 2rem;">
-                        <i class="bi bi-person text-secondary"></i>
-                    </div>
-                    <span class="text-muted small">Nenhuma foto cadastrada</span>
                 </div>
             }
 
@@ -71,6 +61,14 @@
                    class="form-control"
                    accept=".png,.jpg,.jpeg" />
             <div class="form-text">Formatos aceitos: PNG, JPG ou JPEG. Tamanho máximo: 2MB.</div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label">Bio <span class="text-muted small">(opcional)</span></label>
+            <textarea asp-for="Bio" class="form-control" rows="3"
+                      maxlength="300" placeholder="Conte um pouco sobre você..."></textarea>
+            <div class="form-text">Máximo 300 caracteres.</div>
+            <span asp-validation-for="Bio" class="text-danger"></span>
         </div>
 
         @*O tipo de usuário será apresentado conforme o valor do enum "TipoUsuario"*@ 
@@ -100,10 +98,52 @@
             <span asp-validation-for="Telefone" class="text-danger"></span>
         </div>
 
+        @* Campo opcional para alteração de senha *@
         <div class="mb-3">
-            <label asp-for="Endereco" class="form-label"></label>
-            <input asp-for="Endereco" class="form-control" />
-            <span asp-validation-for="Endereco" class="text-danger"></span>
+            <label class="form-label">Nova Senha <span class="text-muted small">(opcional)</span></label>
+            <div class="input-group">
+                <input type="password" name="NovaSenha" id="campoNovaSenha" class="form-control"
+                       placeholder="Deixe em branco para manter a senha atual" autocomplete="new-password" />
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="alternarSenha('campoNovaSenha', this)" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <small class="text-muted">Preencha apenas se quiser trocar a senha.</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Endereço</label>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input name="Endereco.Cep" class="form-control" placeholder="CEP" id="cep"
+                           value="@Model.Endereco?.Cep" maxlength="9" />
+                </div>
+                <div class="col-md-8">
+                    <input name="Endereco.Logradouro" class="form-control" placeholder="Logradouro"
+                           id="logradouro" value="@Model.Endereco?.Logradouro" />
+                </div>
+                <div class="col-md-3">
+                    <input name="Endereco.Numero" class="form-control" placeholder="Número"
+                           value="@Model.Endereco?.Numero" />
+                </div>
+                <div class="col-md-5">
+                    <input name="Endereco.Complemento" class="form-control" placeholder="Complemento"
+                           value="@Model.Endereco?.Complemento" />
+                </div>
+                <div class="col-md-4">
+                    <input name="Endereco.Bairro" class="form-control" placeholder="Bairro"
+                           id="bairro" value="@Model.Endereco?.Bairro" />
+                </div>
+                <div class="col-md-8">
+                    <input name="Endereco.Cidade" class="form-control" placeholder="Cidade"
+                           id="cidade" value="@Model.Endereco?.Cidade" />
+                </div>
+                <div class="col-md-4">
+                    <input name="Endereco.Estado" class="form-control" placeholder="UF"
+                           id="estado" value="@Model.Endereco?.Estado" maxlength="2" />
+                </div>
+            </div>
         </div>
 
 
@@ -132,11 +172,12 @@
         <div class="mb-3">
             <label class="form-label">Arquivo de Comprovação</label>
 
-            @if (!string.IsNullOrEmpty(Model.Arquivocomprovacao))
+            @if (Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0)
             {
                 <div class="mb-2 d-flex align-items-center gap-2">
                     <i class="bi bi-file-earmark-check text-success" style="font-size: 1.2rem;"></i>
-                    <a href="@Model.Arquivocomprovacao" target="_blank" class="text-decoration-none">
+                    <a href="data:application/octet-stream;base64,@Convert.ToBase64String(Model.Arquivocomprovacao)"
+                       download="comprovacao" class="text-decoration-none">
                         Ver arquivo atual
                     </a>
                 </div>
@@ -192,4 +233,31 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function alternarSenha(id, btn) {
+            const input = document.getElementById(id);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+
+        // Busca automática pelo CEP (ViaCEP)
+        document.getElementById('cep')?.addEventListener('blur', async function () {
+            const cep = this.value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+            const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+            if (data.erro) return;
+            document.getElementById('logradouro').value = data.logradouro;
+            document.getElementById('bairro').value     = data.bairro;
+            document.getElementById('cidade').value     = data.localidade;
+            document.getElementById('estado').value     = data.uf;
+        });
+    </script>
 }

@@ -10,6 +10,8 @@ namespace Doalim_dev.Models
         public DbSet<TermoAceitacao> TermosAceitacao { get; set; }
         public DbSet<Doador> Doadores { get; set; }
         public DbSet<Beneficiario> Beneficiarios { get; set; }
+        public DbSet<Endereco> Enderecos { get; set; }
+        public DbSet<DocumentoVerificacao> DocumentosVerificacao { get; set; }
         public DbSet<Administrador> Administradores { get; set; }
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Lote> Lotes { get; set; }
@@ -53,6 +55,20 @@ namespace Doalim_dev.Models
                 .HasOne(a => a.Usuario)
                 .WithOne()
                 .HasForeignKey<Administrador>(a => a.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Endereço é 1:1 com Usuario
+            modelBuilder.Entity<Endereco>()
+                .HasOne(e => e.Usuario)
+                .WithOne(u => u.Endereco)
+                .HasForeignKey<Endereco>(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DocumentoVerificacao é N:1 com Usuario
+            modelBuilder.Entity<DocumentoVerificacao>()
+                .HasOne(d => d.Usuario)
+                .WithMany()
+                .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Relacionamento 1:N entre Doador e Produto

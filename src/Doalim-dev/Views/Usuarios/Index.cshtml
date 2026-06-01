@@ -13,7 +13,7 @@
         .Where(DocumentoAprovado)
         .OrderBy(u => u.Nome)
         .ToList();
-    var aguardandoEnvio = usuarios.Count(u => string.IsNullOrWhiteSpace(u.Arquivocomprovacao));
+    var aguardandoEnvio = usuarios.Count(u => u.Arquivocomprovacao == null || u.Arquivocomprovacao.Length == 0);
     var administradores = usuarios.Count(u => u.TipoUsuario == TipoUsuario.Admin);
     var ativos = usuarios.Count(u => u.Ativo);
     var busca = ViewBag.Busca as string;
@@ -62,16 +62,7 @@
         return (primeira + segunda).ToUpperInvariant();
     }
 
-    private string ArquivoUrl(string arquivo)
-    {
-        if (string.IsNullOrWhiteSpace(arquivo))
-            return string.Empty;
-
-        if (arquivo.StartsWith("http", StringComparison.OrdinalIgnoreCase) || arquivo.StartsWith("/"))
-            return arquivo;
-
-        return Url.Content($"~/{arquivo.TrimStart('~', '/')}");
-    }
+    
 
     private static string ClasseStatus(StatusVerificacao status)
     {
@@ -86,7 +77,7 @@
 
     private static string TextoDocumento(Usuario usuario)
     {
-        if (string.IsNullOrWhiteSpace(usuario.Arquivocomprovacao))
+        if (usuario.Arquivocomprovacao == null || usuario.Arquivocomprovacao.Length == 0)
             return "Aguardando envio";
 
         return usuario.StatusVerificacao switch
@@ -245,8 +236,12 @@
                             <tbody>
                                 @foreach (var item in grupo.Lista)
                                 {
-                                    var foto = ArquivoUrl(item.FotoPerfil);
-                                    var documentoUrl = ArquivoUrl(item.Arquivocomprovacao);
+                                    var foto = item.FotoPerfil != null && item.FotoPerfil.Length > 0
+                                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.FotoPerfil)}"
+                                        : string.Empty;
+                                    var documentoUrl = item.Arquivocomprovacao != null && item.Arquivocomprovacao.Length > 0
+                                        ? $"data:application/octet-stream;base64,{Convert.ToBase64String(item.Arquivocomprovacao)}"
+                                        : string.Empty;
 
                                     <tr class="@(PrecisaDocumento(item) ? "row-needs-doc" : string.Empty)">
                                         <td>

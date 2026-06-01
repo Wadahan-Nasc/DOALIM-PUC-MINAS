@@ -21,12 +21,33 @@ A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando 
 
 |ID    | Descrição do Requisito  | Artefatos produzidos | Aluno(a) responsável |
 |------|-----------------------------------------|----|----|
-|RF-001| A aplicação deve permitir que o usuário avalie uma agência de intercâmbio com base na sua experiência| |  |
-|RF-002| A aplicação deve permitir que o usuário inclua comentários ao fazer uma avaliação de uma agência de intercâmbio     |  |  |
-|RF-003| A aplicação deve permitir que o usuário consulte todas as agências de intercâmbio cadastradas ordenando-as com base em suas notas |  |  |
-
+|RF-001| A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha.|AuthController.cs, UsuariosController.cs, Models\Usuario, Models\Enum, Models\AppDbContext, Views\Usuarios, ViewsModels, Services\EmailService.cs, Services\IEmailService.cs  | Paulo |
+|RF-002| A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador.|Models\TermoAceitacao | Paulo |
+|RF-003| A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador.| |Gabriel  |
+|RF-004| A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos.| | Victor |
+|RF-005| A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros.| |Wadahan  |
+|RF-006| A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento| |  |
+|RF-007| A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada.| |  |
+|RF-008| A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários.| |Deivid  |
+|RF-009| A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas.| |Gabriel  |
+|RF-010| A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte.| |  |
+|RF-011| A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos.| |  |
+|RF-012| A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item.| |Victor  |
+|RF-013| A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos.| |  |
+|RF-014| A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada.| |  |
+|RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.| |  |
 
 # Instruções de acesso
+
+URL de acesso
+Link: https://doalim.azurewebsites.net/
+
+Usuários com acessos restritos
+Administrador:
+Email: Admim@doalim.com 
+Senha: Admin@123
+
+
 
 Não deixe de informar o link onde a aplicação estiver disponível para acesso (por exemplo: https://adota-pet.herokuapp.com/src/index.html).
 

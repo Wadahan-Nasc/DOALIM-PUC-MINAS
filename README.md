@@ -29,8 +29,8 @@ O objetivo primordial deste projeto é estabelecer um ecossistema digital que mi
 * Ambiente: produção / homologação
 
 **Usuário(s) de teste (se houver):**
-* Login: usuario_teste
-* Senha: senha_teste
+* Login: admin@doalim.com
+* Senha: Admin@123
 
 # Documentação
 

@@ -21,19 +21,31 @@
             <input asp-for="Token" type="hidden" />
             <input asp-for="Email" type="hidden" />
 
-            <div class="mb-3">
-                <label asp-for="NovaSenha" class="form-label"></label>
-                <input asp-for="NovaSenha" class="form-control"
-                       placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
-                <span asp-validation-for="NovaSenha" class="text-danger small"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="NovaSenha" class="form-label"></label>
+                    <div class="input-group">
+                        <input asp-for="NovaSenha" type="password" class="form-control" id="campoNovaSenha"
+                               placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                        <button type="button" class="btn btn-outline-secondary"
+                                onclick="alternarSenha('campoNovaSenha', this)" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="NovaSenha" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="ConfirmaSenha" class="form-label"></label>
-                <input asp-for="ConfirmaSenha" class="form-control"
-                       placeholder="Repita a nova senha" autocomplete="new-password" />
-                <span asp-validation-for="ConfirmaSenha" class="text-danger small"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="ConfirmaSenha" class="form-label"></label>
+                    <div class="input-group">
+                        <input asp-for="ConfirmaSenha" type="password" class="form-control" id="campoConfirmaSenha"
+                               placeholder="Repita a nova senha" autocomplete="new-password" />
+                        <button type="button" class="btn btn-outline-secondary"
+                                onclick="alternarSenha('campoConfirmaSenha', this)" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmaSenha" class="text-danger small"></span>
+                </div>
 
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-success btn-lg">Redefinir Senha</button>
@@ -44,4 +56,17 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+        <script>
+            function alternarSenha(id, btn) {
+                const input = document.getElementById(id);
+                const icon  = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            }
+        </script>
 }
