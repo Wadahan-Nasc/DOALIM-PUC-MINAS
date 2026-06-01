@@ -2,6 +2,7 @@
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -92,11 +93,7 @@ namespace Doalim_dev.Controllers
             ViewBag.StatusFiltro = statusFiltro;
 
             // Categorias disponíveis para o filtro — carregadas do domínio extensível
-            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasDisponiveis = await ObterCategoriasVitrineAsync();
 
             return View(produtos);
         }
@@ -243,11 +240,7 @@ namespace Doalim_dev.Controllers
                 query = query.Where(p => p.CategoriaProduto == filtros.Categoria);
 
             // Categorias disponíveis para o select do filtro
-            ViewBag.CategoriasVitrine = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasVitrine = await ObterCategoriasVitrineAsync();
 
             var produtos = await query.ToListAsync();
             var idsDoadores = produtos.Select(p => p.IdDoador).Distinct().ToList();
@@ -545,11 +538,7 @@ namespace Doalim_dev.Controllers
             }
 
             // Categorias disponíveis para o select do filtro
-            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasDisponiveis = await ObterCategoriasVitrineAsync();
 
             // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
             var reservasDb = await query
@@ -591,14 +580,19 @@ namespace Doalim_dev.Controllers
         /// </summary>
         private async Task CarregarLookupsAsync()
         {
-            var todos = await _context.ValoresLookup
-                .Where(v => v.Ativo)
-                .OrderBy(v => v.Nome)
-                .ToListAsync();
+            var todos = await ObterLookupsSegurosAsync();
 
-            ViewBag.Categorias          = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
-            ViewBag.TiposArmazenamento  = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
-            ViewBag.UnidadesMedida      = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
+            if (todos.Any())
+            {
+                ViewBag.Categorias = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
+                ViewBag.TiposArmazenamento = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
+                ViewBag.UnidadesMedida = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
+                return;
+            }
+
+            ViewBag.Categorias = await ObterCategoriasVitrineAsync();
+            ViewBag.TiposArmazenamento = new List<string> { "Ambiente", "Congelado", "Local fechado" };
+            ViewBag.UnidadesMedida = new List<string> { "Kg", "mg", "L", "ml" };
         }
 
         private bool ProdutoExists(int id) => _context.Produtos.Any(e => e.IdProduto == id);
@@ -632,6 +626,42 @@ namespace Doalim_dev.Controllers
             }
 
             return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+
+        private async Task<List<string>> ObterCategoriasVitrineAsync()
+        {
+            try
+            {
+                return await _context.ValoresLookup
+                    .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                    .OrderBy(v => v.Nome)
+                    .Select(v => v.Nome)
+                    .ToListAsync();
+            }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                return await _context.Produtos
+                    .Where(p => p.CategoriaProduto != null && p.CategoriaProduto != "")
+                    .Select(p => p.CategoriaProduto)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToListAsync();
+            }
+        }
+
+        private async Task<List<ValorLookup>> ObterLookupsSegurosAsync()
+        {
+            try
+            {
+                return await _context.ValoresLookup
+                    .Where(v => v.Ativo)
+                    .OrderBy(v => v.Nome)
+                    .ToListAsync();
+            }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                return new List<ValorLookup>();
+            }
         }
 
         // =======================================================================================
