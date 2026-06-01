@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Doalim_dev.Models;
 using Doalim_dev.Services;
 using Doalim_dev.ViewModels;
@@ -14,15 +14,17 @@ namespace Doalim_dev.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(AppDbContext context, IEmailService emailService)
+        public AuthController(AppDbContext context, IEmailService emailService, ILogger<AuthController> logger)
         {
             _context = context;
             _emailService = emailService;
+            _logger = logger;
         }
 
-       // REGISTRO — RF-001 + RF-002
-       
+        // REGISTRO - RF-001 + RF-002
+
         [HttpGet]
         public IActionResult Registro()
         {
@@ -49,11 +51,11 @@ namespace Doalim_dev.Controllers
 
             // CPF obrigatório para PF
             if (ehPF && string.IsNullOrWhiteSpace(vm.Cpf))
-                ModelState.AddModelError(nameof(vm.Cpf), "CPF é obrigatório para pessoa física.");
+                ModelState.AddModelError(nameof(vm.Cpf), "CPF  para pessoa fisíca.");
 
             // CNPJ obrigatório para PJ
             if (ehPJ && string.IsNullOrWhiteSpace(vm.Cnpj))
-                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ é obrigatório para pessoa jurídica.");
+                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ  para pessoa jurídica.");
 
             if (!ModelState.IsValid)
                 return View(vm);
@@ -78,15 +80,51 @@ namespace Doalim_dev.Controllers
                 Cpf                = vm.Cpf,
                 Cnpj               = vm.Cnpj,
                 Telefone           = vm.Telefone,
-                Endereco           = vm.Endereco,
+                
                 Ativo              = true,
                 DataCadastro       = DateTime.UtcNow,
-                // Todo usu�rio come�a pendente at� o administrador validar a documenta��o.
+                // Todo usuário começa pendente até o administrador validar a documentação.
                 StatusVerificacao  = StatusVerificacao.Pendente
             };
 
+            //_context.Usuarios.Add(usuario);
+
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync(); // Gera o IdUsuario
+
+            // Cria o endereço vinculado ao usuário
+            var endereco = new Endereco
+            {
+                IdUsuario = usuario.IdUsuario,
+                Cep = vm.Cep,
+                Logradouro = vm.Logradouro,
+                Numero = vm.Numero,
+                Complemento = vm.Complemento,
+                Bairro = vm.Bairro,
+                Cidade = vm.Cidade,
+                Estado = vm.Estado
+            };
+            _context.Enderecos.Add(endereco);
+
+            // Foto de perfil — opcional
+            if (vm.FotoPerfilUpload != null && vm.FotoPerfilUpload.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await vm.FotoPerfilUpload.CopyToAsync(ms);
+                usuario.FotoPerfil = ms.ToArray();
+            }
+
+            // Arquivo de comprovação — opcional
+            if (vm.ArquivoComprovacaoUpload != null && vm.ArquivoComprovacaoUpload.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await vm.ArquivoComprovacaoUpload.CopyToAsync(ms);
+                usuario.Arquivocomprovacao = ms.ToArray();
+            }
+
+            await _context.SaveChangesAsync();
+
+            //await _context.SaveChangesAsync(); // Gera o IdUsuario
 
             if (ehDoador)
             {
@@ -132,11 +170,23 @@ namespace Doalim_dev.Controllers
             // Faz login automático após o cadastro
             await RealizarLoginAsync(usuario, isPersistent: false);
 
+            // E-mail de boas-vindas — RF-001
+            await _emailService.EnviarEmailAsync(
+                usuario.Email,
+                "Doalim — Cadastro realizado com sucesso!",
+                $@"<p>Olá, <strong>{usuario.Nome}</strong>!</p>
+                   <p>Seu cadastro na plataforma <strong>Doalim</strong> foi realizado com sucesso.</p>
+                   <p>Para completar seu perfil e habilitar todas as funcionalidades,
+                    acesse <strong>Meu Perfil</strong> e envie seu arquivo de comprovação.</p>
+                   <p style='color:#888;font-size:12px;'>
+                    Se você não realizou este cadastro, ignore este e-mail.
+                   </p>");
+
             TempData["Sucesso"] = $"Bem-vindo(a), {usuario.Nome}! Cadastro realizado com sucesso.";
             return RedirectToAction("Index", "Home");
         }
 
-        // LOGIN — RF-001     
+        // LOGIN - RF-001     
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -155,7 +205,7 @@ namespace Doalim_dev.Controllers
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == vm.Email);
 
-            // Verifica existência e senha sem revelar qual está errado (segurança)
+            // Verifica existÃªncia e senha sem revelar qual estÃ¡ errado (seguranÃ§a)
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(vm.Senha, usuario.SenhaHash))
             {
                 ModelState.AddModelError(string.Empty, "E-mail ou senha incorretos.");
@@ -181,7 +231,7 @@ namespace Doalim_dev.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // LOGOUT — RF-001
+        // LOGOUT - RF-001
         
         [Authorize]
         public async Task<IActionResult> Logout()
@@ -190,7 +240,7 @@ namespace Doalim_dev.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        // RECUPERAÇÃO DE SENHA — RF-001
+        // RECUPERAÃ‡ÃƒO DE SENHA - RF-001
         
         [HttpGet]
         public IActionResult RecuperarSenha()
@@ -208,7 +258,7 @@ namespace Doalim_dev.Controllers
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == vm.Email);
 
-            // Sempre exibe a mesma mensagem, independente de o e-mail existir ou não
+            // Sempre exibe a mesma mensagem, independente de o e-mail existir ou nÃ£o
             // Isso evita enumeration attack
             if (usuario != null && usuario.Ativo)
             {
@@ -240,7 +290,7 @@ namespace Doalim_dev.Controllers
 
                 await _emailService.EnviarEmailAsync(
                     usuario.Email,
-                    "Doalim — Redefinição de Senha",
+                    "Doalim - redefinição de Senha",
                     corpo);
             }
 
@@ -302,7 +352,7 @@ namespace Doalim_dev.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        // TERMO DE RESPONSABILIDADE — RF-002
+        // TERMO DE RESPONSABILIDADE - RF-002
         
         [HttpGet]
         public IActionResult Termo()

@@ -1,0 +1,130 @@
+﻿@model Doalim_dev.Models.ViewModels.PerfilPublicoViewModel
+@{
+    ViewData["Title"] = $"Perfil de {Model.Nome}";
+
+    var iniciais = string.Concat(Model.Nome.Split(' ')
+        .Where(p => p.Length > 0)
+        .Take(2)
+        .Select(p => p[0].ToString().ToUpper()));
+
+    var tipoLabel = Model.TipoUsuario switch
+    {
+        TipoUsuario.DoadorPF => "Doador PF",
+        TipoUsuario.DoadorPJ => "Doador PJ",
+        TipoUsuario.BeneficiarioPF => "Beneficiário PF",
+        TipoUsuario.BeneficiarioPJ => "Beneficiário PJ",
+        _ => "Usuário"
+    };
+}
+
+<div class="container py-4" style="max-width: 640px;">
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+
+        <div class="d-flex gap-3 align-items-start">
+
+            @if (Model.FotoPerfil != null && Model.FotoPerfil.Length > 0)
+            {
+                var base64 = Convert.ToBase64String(Model.FotoPerfil);
+                <img src="data:image/jpeg;base64,@base64"
+                     alt="Foto de @Model.Nome"
+                     class="rounded-circle object-fit-cover flex-shrink-0"
+                     style="width:72px; height:72px;" />
+            }
+            else
+            {
+                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center
+                    justify-content-center flex-shrink-0 fw-500 text-primary fs-4"
+                     style="width:72px; height:72px;">
+                    @iniciais
+                </div>
+            }
+
+            <div class="flex-grow-1">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h1 class="h5 mb-0">@Model.Nome</h1>
+
+                    @if (Model.Verificado)
+                    {
+                        <span class="badge rounded-pill text-success bg-success bg-opacity-10">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verificado
+                        </span>
+                    }
+
+                    <span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">
+                        @tipoLabel
+                    </span>
+                </div>
+
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Membro desde @Model.MembroDesde.ToString("MMMM \\de yyyy",
+                                            new System.Globalization.CultureInfo("pt-BR"))
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                {
+                    <p class="mt-2 mb-0 text-secondary" style="font-size: 14px; line-height: 1.6;">
+                        @Model.Bio
+                    </p>
+                }
+                else
+                {
+                    <p class="mt-2 mb-0 text-muted fst-italic" style="font-size: 14px;">
+                        Sem bio cadastrada.
+                    </p>
+                }
+            </div>
+        </div>
+
+        <hr class="my-3" />
+
+        @if (Model.NotaMedia.HasValue && Model.TotalAvaliacoes > 0)
+        {
+            <div class="row g-2 text-center">
+                <div class="col">
+                    <div class="bg-light rounded-3 p-3">
+                        <div class="text-muted small">avaliação</div>
+                        <div class="fw-500 fs-4">@Model.NotaMedia.Value.ToString("0.0")</div>
+                        <div class="text-warning small">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Floor(Model.NotaMedia.Value))
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else if (i - Model.NotaMedia.Value < 1)
+                                {
+                                    <i class="bi bi-star-half"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-light rounded-3 p-3">
+                        <div class="text-muted small">avaliações</div>
+                        <div class="fw-500 fs-4">@Model.TotalAvaliacoes</div>
+                        <div class="text-muted small">recebidas</div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="border rounded-3 p-3 text-center text-muted small">
+                <i class="bi bi-star me-1"></i>
+                Avaliações disponíveis em breve
+            </div>
+        }
+    </div>
+
+    <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+
+</div>
