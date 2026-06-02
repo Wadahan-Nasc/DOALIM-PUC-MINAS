@@ -20,7 +20,7 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                TempData["Erro"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
@@ -107,7 +107,7 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Para cadastrar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                TempData["Erro"] = "Para cadastrar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("MeuPerfil", "Usuarios");
             }
             await CarregarLookupsAsync();
@@ -125,7 +125,7 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                TempData["Erro"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
@@ -300,13 +300,13 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Para gerenciar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                TempData["Erro"] = "Para gerenciar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
             if (produto.IdDoador != usuarioId)
             {
-                TempData["ErroSeguranca"] = "Acesso Negado: Este produto não pertence à sua conta.";
+                TempData["Erro"] = "Acesso Negado: Este produto não pertence à sua conta.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -326,14 +326,14 @@ namespace Doalim_dev.Controllers
 
             if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Para alterar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                TempData["Erro"] = "Para alterar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
             var produtoOriginal = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produtoOriginal == null || produtoOriginal.IdDoador != usuarioId)
             {
-                TempData["ErroSeguranca"] = "Tentativa de Fraude identificada. Operação cancelada.";
+                TempData["Erro"] = "Tentativa de Fraude identificada. Operação cancelada.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -362,7 +362,7 @@ namespace Doalim_dev.Controllers
 
                 if (lotesDoProduto != idsLotesRecebidos.Count)
                 {
-                    TempData["ErroSeguranca"] = "Tentativa de alterar lote de outro produto identificada. Operação cancelada.";
+                    TempData["Erro"] = "Tentativa de alterar lote de outro produto identificada. Operação cancelada.";
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -675,43 +675,85 @@ namespace Doalim_dev.Controllers
             if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
 
-            var reservas = await _context.Reservas
-                .Include(r => r.Lote)
-                    .ThenInclude(l => l.Produto)
-                        .ThenInclude(p => p.Doador)
-                .Include(r => r.Beneficiario)
-                    .ThenInclude(b => b.Usuario)
+            // Carrega reservas ativas (Pendente + Confirmada) em memoria
+            var reservasAtivas = await _context.Reservas
+                .Include(r => r.Lote).ThenInclude(l => l.Produto)
+                .Include(r => r.Beneficiario).ThenInclude(b => b.Usuario)
                 .Where(r => r.Lote.Produto.IdDoador == usuarioId
                             && (r.Status == StatusReserva.Pendente
-                                   || r.Status == StatusReserva.Confirmada))
+                             || r.Status == StatusReserva.Confirmada))
                 .OrderByDescending(r => r.DataReserva)
-                .Select(r => new GerenciarReservaDoadorViewModel
-                {
-                    IdReserva = r.IdReserva,
-                    IdPedido = r.IdPedido ?? 0,
-                    DataReserva = r.DataReserva,
-                    StatusReserva = r.Status.ToString(),
-                    QuantidadeReservada = r.QuantidadeReservada,
-                    NumeroLote = r.Lote.NumeroLote,
-                    DataValidadeLote = r.Lote.DataValidade,
-                    IdProduto = r.Lote.Produto.IdProduto,
-                    NomeProduto = r.Lote.Produto.NomeProduto,
-                    MarcaProduto = r.Lote.Produto.MarcaProduto,
-                    CategoriaProduto = r.Lote.Produto.CategoriaProduto,
-                    UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
-                    FotoProduto = r.Lote.Produto.FotoProduto == null
-                        ? null
-                        : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
-                    NomeBeneficiario = r.Beneficiario.Usuario.Nome,
-                    TelefoneBeneficiario = r.Beneficiario.Usuario.Telefone,
-                    EhOng = r.Beneficiario.Eong,
-                    DataRetiradaInicio = r.DataRetiradaInicio,
-                    DataRetiradaFim = r.DataRetiradaFim,
-                    TokenConfirmacao = r.TokenConfirmacao
-                })
                 .ToListAsync();
 
-            return View(reservas);
+            // Carrega reservas Retiradas (para avaliacao pendente)
+            var reservasRetiradas = await _context.Reservas
+                .Include(r => r.Lote).ThenInclude(l => l.Produto)
+                .Include(r => r.Beneficiario).ThenInclude(b => b.Usuario)
+                .Where(r => r.Lote.Produto.IdDoador == usuarioId
+                            && r.Status == StatusReserva.Retirada)
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
+
+            // Busca avaliacoes ja feitas pelo doador para as reservas Retiradas
+            var idsRetiradas = reservasRetiradas.Select(r => r.IdReserva).ToList();
+            Dictionary<int, int> avaliacoesDoador = new();
+            if (idsRetiradas.Any())
+            {
+                avaliacoesDoador = await _context.Avaliacoes
+                    .Where(a => a.IdAvaliador == usuarioId
+                             && a.IdReserva != null
+                             && idsRetiradas.Contains(a.IdReserva.Value))
+                    .ToDictionaryAsync(a => a.IdReserva!.Value, a => a.Nota);
+            }
+
+            // Funcao local de projecao (reutilizada para ativas e retiradas)
+            GerenciarReservaDoadorViewModel MapReserva(Reserva r, bool ehRetirada = false) => new()
+            {
+                IdReserva            = r.IdReserva,
+                IdPedido             = r.IdPedido ?? 0,
+                DataReserva          = r.DataReserva,
+                StatusReserva        = r.Status.ToString(),
+                QuantidadeReservada  = r.QuantidadeReservada,
+                NumeroLote           = r.Lote.NumeroLote,
+                DataValidadeLote     = r.Lote.DataValidade,
+                IdProduto            = r.Lote.Produto.IdProduto,
+                NomeProduto          = r.Lote.Produto.NomeProduto,
+                MarcaProduto         = r.Lote.Produto.MarcaProduto,
+                CategoriaProduto     = r.Lote.Produto.CategoriaProduto,
+                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
+                FotoProduto          = r.Lote.Produto.FotoProduto == null
+                                        ? null
+                                        : ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
+                IdUsuarioBeneficiario = r.IdBeneficiario,
+                NomeBeneficiario      = r.Beneficiario.Usuario.Nome,
+                TelefoneBeneficiario  = r.Beneficiario.Usuario.Telefone,
+                EhOng                 = r.Beneficiario.Eong,
+                DataRetiradaInicio    = r.DataRetiradaInicio,
+                DataRetiradaFim       = r.DataRetiradaFim,
+                TokenConfirmacao      = r.TokenConfirmacao,
+                PodeAvaliar           = ehRetirada,
+                JaAvaliou             = ehRetirada && avaliacoesDoador.ContainsKey(r.IdReserva),
+                NotaAvaliacao         = (ehRetirada && avaliacoesDoador.TryGetValue(r.IdReserva, out var n))
+                                        ? n : (int?)null
+            };
+
+            var viewModel = new GerenciarReservasPageViewModel
+            {
+                Pendentes   = reservasAtivas
+                    .Where(r => r.Status == StatusReserva.Pendente)
+                    .Select(r => MapReserva(r))
+                    .ToList(),
+                Confirmadas = reservasAtivas
+                    .Where(r => r.Status == StatusReserva.Confirmada)
+                    .Select(r => MapReserva(r))
+                    .ToList(),
+                PendentesAvaliacao = reservasRetiradas
+                    .Where(r => !avaliacoesDoador.ContainsKey(r.IdReserva))
+                    .Select(r => MapReserva(r, ehRetirada: true))
+                    .ToList()
+            };
+
+            return View(viewModel);
         }
 
         // =========================================================================================
@@ -901,7 +943,7 @@ namespace Doalim_dev.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = $"Entrega da reserva #{reserva.IdReserva} confirmada com sucesso!";
+            TempData["Sucesso"] = $"Entrega da reserva #{reserva.IdReserva} confirmada! Avalie o beneficiario na secao abaixo.";
             return RedirectToAction(nameof(GerenciarReservas));
         }
     }

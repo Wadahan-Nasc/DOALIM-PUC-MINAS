@@ -32,4 +32,13 @@ namespace Doalim_dev.Models
         Retirado = 2,
         Cancelado = 3
     }
+
+    public enum StatusReserva
+    {
+        Pendente = 0,
+        Confirmada = 1,
+        Retirada = 2,
+        Cancelada = 3,
+        Rejeitada = 4
+    }
 }

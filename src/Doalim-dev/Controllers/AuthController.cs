@@ -48,10 +48,14 @@ namespace Doalim_dev.Controllers
                     "O aceite do Termo de Responsabilidade é obrigatório para doadores.");
 
             if (ehPF && string.IsNullOrWhiteSpace(vm.Cpf))
-                ModelState.AddModelError(nameof(vm.Cpf), "CPF  para pessoa fisíca.");
+                ModelState.AddModelError(nameof(vm.Cpf), "CPF obrigatório para pessoa física.");
+            else if (ehPF && !string.IsNullOrWhiteSpace(vm.Cpf) && !UsuarioRegras.CpfValido(vm.Cpf))
+                ModelState.AddModelError(nameof(vm.Cpf), "CPF inválido. Verifique os dígitos informados.");
 
             if (ehPJ && string.IsNullOrWhiteSpace(vm.Cnpj))
-                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ  para pessoa jurídica.");
+                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ obrigatório para pessoa jurídica.");
+            else if (ehPJ && !string.IsNullOrWhiteSpace(vm.Cnpj) && !UsuarioRegras.CnpjValido(vm.Cnpj))
+                ModelState.AddModelError(nameof(vm.Cnpj), "CNPJ inválido. Verifique os dígitos informados.");
 
             if (await _context.Usuarios.AnyAsync(u => u.Email == vm.Email))
                 ModelState.AddModelError(nameof(vm.Email), "Este e-mail já está cadastrado.");
@@ -74,8 +78,6 @@ namespace Doalim_dev.Controllers
                 DataCadastro = DateTime.UtcNow,
                 StatusVerificacao = StatusVerificacao.Pendente
             };
-
-            //_context.Usuarios.Add(usuario);
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -104,42 +106,10 @@ namespace Doalim_dev.Controllers
             {
                 using var ms = new MemoryStream();
                 await vm.ArquivoComprovacaoUpload.CopyToAsync(ms);
-                usuario.Arquivocomprovacao = ms.ToArray();
-            }
-
-            // Cria o endereço vinculado ao usuário
-            var endereco = new Endereco
-            {
-                IdUsuario = usuario.IdUsuario,
-                Cep = vm.Cep,
-                Logradouro = vm.Logradouro,
-                Numero = vm.Numero,
-                Complemento = vm.Complemento,
-                Bairro = vm.Bairro,
-                Cidade = vm.Cidade,
-                Estado = vm.Estado
-            };
-            _context.Enderecos.Add(endereco);
-
-            // Foto de perfil — opcional
-            if (vm.FotoPerfilUpload != null && vm.FotoPerfilUpload.Length > 0)
-            {
-                using var ms = new MemoryStream();
-                await vm.FotoPerfilUpload.CopyToAsync(ms);
-                usuario.FotoPerfil = ms.ToArray();
-            }
-
-            // Arquivo de comprovação — opcional
-            if (vm.ArquivoComprovacaoUpload != null && vm.ArquivoComprovacaoUpload.Length > 0)
-            {
-                using var ms = new MemoryStream();
-                await vm.ArquivoComprovacaoUpload.CopyToAsync(ms);
-                usuario.Arquivocomprovacao = ms.ToArray();
+                usuario.ArquivoComprovacao = ms.ToArray();
             }
 
             await _context.SaveChangesAsync();
-
-            //await _context.SaveChangesAsync(); // Gera o IdUsuario
 
             if (ehDoador)
             {

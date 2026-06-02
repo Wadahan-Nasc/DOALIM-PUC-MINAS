@@ -1,31 +1,28 @@
 using Doalim_dev.Models;
-using Doalim_dev.Models.ViewModels;
+using Doalim_dev.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Doalim_dev.Models.ViewModels;
 
 namespace Doalim_dev.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsuariosController : Controller
+    public class UsuariosController : BaseController
     {
-        private readonly AppDbContext _context;
+        public UsuariosController(AppDbContext context) : base(context) { }
 
-        public UsuariosController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private const int ItensPorPagina = 15;
 
-        public async Task<IActionResult> Index(string? busca = null)
+        public async Task<IActionResult> Index(string? busca = null, int pagina = 1)
         {
             var query = _context.Usuarios
                 .AsNoTracking()
                 .OrderByDescending(u => u.TipoUsuario != TipoUsuario.Admin
                     && u.StatusVerificacao == StatusVerificacao.Pendente
-                    && u.Arquivocomprovacao != null
-                    && u.Arquivocomprovacao.Length > 0)
+                    && u.ArquivoComprovacao != null)
                 .ThenBy(u => u.Nome)
                 .AsQueryable();
 
@@ -37,8 +34,20 @@ namespace Doalim_dev.Controllers
                     || u.Email.Contains(termo));
             }
 
-            ViewBag.Busca = busca;
-            return View(await query.ToListAsync());
+            var totalRegistros = await query.CountAsync();
+            var totalPaginas   = (int)Math.Ceiling(totalRegistros / (double)ItensPorPagina);
+            pagina = Math.Clamp(pagina, 1, Math.Max(1, totalPaginas));
+
+            var usuarios = await query
+                .Skip((pagina - 1) * ItensPorPagina)
+                .Take(ItensPorPagina)
+                .ToListAsync();
+
+            ViewBag.Busca        = busca;
+            ViewBag.PaginaAtual  = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+
+            return View(usuarios);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -54,6 +63,42 @@ namespace Doalim_dev.Controllers
                 return NotFound();
 
             return View(usuario);
+        }
+
+        // Serve o arquivo de comprovação com headers HTTP corretos para abrir inline no browser
+        [HttpGet]
+        public async Task<IActionResult> VerComprovacao(int id)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .Select(u => new { u.IdUsuario, u.ArquivoComprovacao })
+                .FirstOrDefaultAsync(u => u.IdUsuario == id);
+
+            if (usuario == null || usuario.ArquivoComprovacao == null || usuario.ArquivoComprovacao.Length == 0)
+                return NotFound();
+
+            var arquivo = usuario.ArquivoComprovacao;
+
+            // Detecta MIME pelos magic bytes
+            string mime;
+            if (arquivo.Length >= 4
+                && arquivo[0] == 0x25 && arquivo[1] == 0x50
+                && arquivo[2] == 0x44 && arquivo[3] == 0x46)
+            {
+                mime = "application/pdf";   // %PDF
+            }
+            else if (arquivo.Length >= 4
+                && arquivo[0] == 0x89 && arquivo[1] == 0x50
+                && arquivo[2] == 0x4E && arquivo[3] == 0x47)
+            {
+                mime = "image/png";          // PNG
+            }
+            else
+            {
+                mime = "image/jpeg";         // fallback JPEG
+            }
+
+            return File(arquivo, mime);
         }
 
         public IActionResult Create(TipoUsuario? tipoUsuario = null)
@@ -85,7 +130,7 @@ namespace Doalim_dev.Controllers
             {
                 usuario.Cpf = null;
                 usuario.Cnpj = null;
-                usuario.Arquivocomprovacao = null;
+                usuario.ArquivoComprovacao = null;
                 usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
             }
             else
@@ -101,7 +146,7 @@ namespace Doalim_dev.Controllers
             usuario.DataCadastro = DateTime.UtcNow;
             usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
             usuario.FotoPerfil = null;
-            usuario.Arquivocomprovacao = null;
+            usuario.ArquivoComprovacao = null;
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -156,17 +201,10 @@ namespace Doalim_dev.Controllers
             if (usuario.TipoUsuario == TipoUsuario.Admin)
             {
                 usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
-                usuario.Arquivocomprovacao = null;
+                usuario.ArquivoComprovacao = null;
                 await _context.SaveChangesAsync();
                 TempData["Sucesso"] = "Administradores nao precisam de arquivo de comprovacao.";
                 return RedirectToAction(nameof(Index));
-            }
-
-            if (status == StatusVerificacao.Aprovado
-                && (usuario.Arquivocomprovacao == null || usuario.Arquivocomprovacao.Length == 0))
-            {
-                TempData["Erro"] = "Nao e possivel aprovar um usuario sem arquivo de comprovacao.";
-                return RedirectToAction(nameof(Details), new { id });
             }
 
             usuario.StatusVerificacao = status;
@@ -284,18 +322,29 @@ namespace Doalim_dev.Controllers
 
             if (UsuarioRegras.PrecisaComprovacao(usuario) && comprovacaoValida.conteudo != null)
             {
-                usuario.Arquivocomprovacao = comprovacaoValida.conteudo;
+                usuario.ArquivoComprovacao = comprovacaoValida.conteudo;
                 usuario.StatusVerificacao = StatusVerificacao.Pendente;
             }
 
             if (!UsuarioRegras.PrecisaComprovacao(usuario))
             {
-                usuario.Arquivocomprovacao = null;
+                usuario.ArquivoComprovacao = null;
                 usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;
             }
 
-            if (!string.IsNullOrWhiteSpace(Request.Form["NovaSenha"]))
-                usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Request.Form["NovaSenha"].ToString());
+            var novaSenha       = Request.Form["NovaSenha"].ToString();
+            var confirmaSenha   = Request.Form["ConfirmaNovaSenha"].ToString();
+
+            if (!string.IsNullOrWhiteSpace(novaSenha))
+            {
+                if (novaSenha != confirmaSenha)
+                {
+                    TempData["Erro"] = "A nova senha e a confirmação não conferem. Nenhuma alteração foi salva.";
+                    await PopularMeuPerfilViewBagAsync(usuario.IdUsuario);
+                    return View(usuario);
+                }
+                usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(novaSenha);
+            }
 
             AtualizarEndereco(usuario, model.Endereco);
 
@@ -329,8 +378,10 @@ namespace Doalim_dev.Controllers
             usuario.TipoUsuario = UsuarioRegras.TipoDoadorCorrespondente(usuario);
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = "Perfil de doador ativado. Entre novamente para atualizar o menu de acesso.";
-            return RedirectToAction(nameof(MeuPerfil));
+            // Força o relogin para que o cookie de autenticação reflita as novas roles
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["Sucesso"] = "Perfil de doador ativado com sucesso! Faça login novamente para acessar as novas funcionalidades.";
+            return RedirectToAction("Login", "Auth");
         }
 
         [HttpPost]
@@ -357,8 +408,10 @@ namespace Doalim_dev.Controllers
             usuario.TipoUsuario = UsuarioRegras.TipoBeneficiarioCorrespondente(usuario);
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = "Perfil de beneficiario ativado. Entre novamente para atualizar o menu de acesso.";
-            return RedirectToAction(nameof(MeuPerfil));
+            // Força o relogin para que o cookie de autenticação reflita as novas roles
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["Sucesso"] = "Perfil de beneficiário ativado com sucesso! Faça login novamente para acessar as novas funcionalidades.";
+            return RedirectToAction("Login", "Auth");
         }
 
         [AllowAnonymous]
@@ -374,20 +427,104 @@ namespace Doalim_dev.Controllers
             if (usuario == null)
                 return NotFound();
 
+            // Estatísticas de avaliações
+            var stats = await _context.Avaliacoes
+                .Where(a => a.IdAvaliado == id.Value)
+                .GroupBy(a => a.IdAvaliado)
+                .Select(g => new { NotaMedia = g.Average(a => (double)a.Nota), Total = g.Count() })
+                .FirstOrDefaultAsync();
+
+            // Avaliacao agora e feita diretamente nos cards de reserva (por reserva).
+            // O perfil publico exibe apenas a media — sem formulario de avaliacao.
             var vm = new PerfilPublicoViewModel
             {
-                IdUsuario = usuario.IdUsuario,
-                Nome = usuario.Nome,
-                FotoPerfil = usuario.FotoPerfil,
-                Bio = usuario.Bio,
-                TipoUsuario = usuario.TipoUsuario,
-                Verificado = UsuarioRegras.TemComprovacaoAprovada(usuario),
-                MembroDesde = usuario.DataCadastro,
-                NotaMedia = null,
-                TotalAvaliacoes = 0
+                IdUsuario       = usuario.IdUsuario,
+                Nome            = usuario.Nome,
+                FotoPerfil      = usuario.FotoPerfil,
+                Bio             = usuario.Bio,
+                TipoUsuario     = usuario.TipoUsuario,
+                Verificado      = UsuarioRegras.TemComprovacaoAprovada(usuario),
+                MembroDesde     = usuario.DataCadastro,
+                NotaMedia       = stats?.NotaMedia,
+                TotalAvaliacoes = stats?.Total ?? 0,
+                NotaDoLogado    = null,
+                PodeAvaliar     = false
             };
 
             return View(vm);
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // POST: /Usuarios/AvaliarUsuario
+        // Registra ou atualiza a avaliacao do usuario logado para a reserva informada.
+        // O "avaliado" e determinado automaticamente a partir da reserva (nao precisa ser enviado
+        // pelo formulario — evita adulteracao de dados).
+        // -----------------------------------------------------------------------------------------
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AvaliarUsuario(int idReserva, int nota)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login", "Auth");
+
+            var idLogado = ObterIdUsuarioLogado();
+            if (idLogado == 0) return RedirectToAction("Login", "Auth");
+
+            if (nota < 1 || nota > 5)
+            {
+                TempData["Erro"] = "Nota invalida. Escolha entre 1 e 5 estrelas.";
+                return RedirectToAction("MinhasReservas", "Reservas");
+            }
+
+            // Carrega a reserva para determinar quem e o "avaliado"
+            var reserva = await _context.Reservas
+                .Include(r => r.Lote).ThenInclude(l => l.Produto)
+                .FirstOrDefaultAsync(r => r.IdReserva == idReserva);
+
+            if (reserva == null) return NotFound();
+            if (reserva.Status != StatusReserva.Retirada) return BadRequest();
+
+            // Determina o avaliado e a pagina de retorno
+            int idAvaliado;
+            bool ehBeneficiario = reserva.IdBeneficiario == idLogado;
+            bool ehDoador       = reserva.Lote.Produto.IdDoador == idLogado;
+
+            if (ehBeneficiario)
+                idAvaliado = reserva.Lote.Produto.IdDoador;
+            else if (ehDoador)
+                idAvaliado = reserva.IdBeneficiario;
+            else
+                return Forbid();
+
+            // Bloqueia avaliacao duplicada — nao permite alterar nota ja enviada
+            var avaliacaoExistente = await _context.Avaliacoes
+                .AnyAsync(a => a.IdAvaliador == idLogado && a.IdReserva == idReserva);
+
+            if (avaliacaoExistente)
+            {
+                TempData["Erro"] = "Voce ja avaliou esta reserva. A avaliacao nao pode ser alterada.";
+                return ehBeneficiario
+                    ? RedirectToAction("MinhasReservas", "Reservas")
+                    : RedirectToAction("GerenciarReservas", "Produtos");
+            }
+
+            _context.Avaliacoes.Add(new Avaliacao
+            {
+                IdAvaliador   = idLogado,
+                IdAvaliado    = idAvaliado,
+                IdReserva     = idReserva,
+                Nota          = nota,
+                DataAvaliacao = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = "Avaliacao enviada! Obrigado pelo feedback.";
+
+            return ehBeneficiario
+                ? RedirectToAction("MinhasReservas", "Reservas")
+                : RedirectToAction("GerenciarReservas", "Produtos");
         }
 
         private async Task<Usuario?> ObterUsuarioLogadoAsync()
@@ -398,25 +535,6 @@ namespace Doalim_dev.Controllers
                 return await _context.Usuarios
                     .Include(u => u.Endereco)
                     .FirstOrDefaultAsync(u => u.IdUsuario == id);
-                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
-                var extensao = Path.GetExtension(arquivoFotoPerfil.FileName).ToLowerInvariant();
-
-                if (!extensoesPermitidas.Contains(extensao))
-                {
-                    TempData["Erro"] = "Formato de foto inválido. Use PNG, JPG ou JPEG.";
-                    return View(model);
-                }
-
-                const long tamanhoMaximo = 2 * 1024 * 1024; // 2MB
-                if (arquivoFotoPerfil.Length > tamanhoMaximo)
-                {
-                    TempData["Erro"] = "A foto excede o tamanho máximo permitido de 2MB.";
-                    return View(model);
-                }
-
-                using var msFoto = new MemoryStream();
-                await arquivoFotoPerfil.CopyToAsync(msFoto);
-                usuario.FotoPerfil = msFoto.ToArray();
             }
 
             var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
@@ -459,31 +577,16 @@ namespace Doalim_dev.Controllers
                 usuario.Cpf = null;
                 if (string.IsNullOrWhiteSpace(UsuarioRegras.NormalizarDigitos(usuario.Cnpj)))
                     ModelState.AddModelError(nameof(usuario.Cnpj), "Informe o CNPJ.");
+                else if (!UsuarioRegras.CnpjValido(usuario.Cnpj))
+                    ModelState.AddModelError(nameof(usuario.Cnpj), "CNPJ inválido. Verifique os dígitos informados.");
             }
             else
             {
                 usuario.Cnpj = null;
                 if (string.IsNullOrWhiteSpace(UsuarioRegras.NormalizarDigitos(usuario.Cpf)))
                     ModelState.AddModelError(nameof(usuario.Cpf), "Informe o CPF.");
-                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
-                var extensao = Path.GetExtension(arquivoComprovacao.FileName).ToLowerInvariant();
-
-                if (!extensoesPermitidas.Contains(extensao))
-                {
-                    TempData["Erro"] = "Formato de arquivo inválido. Use PNG, JPG, JPEG ou PDF.";
-                    return View(model);
-                }
-
-                const long tamanhoMaximo = 5 * 1024 * 1024; // 5MB
-                if (arquivoComprovacao.Length > tamanhoMaximo)
-                {
-                    TempData["Erro"] = "O arquivo excede o tamanho máximo permitido de 5MB.";
-                    return View(model);
-                }
-
-                using var msComp = new MemoryStream();
-                await arquivoComprovacao.CopyToAsync(msComp);
-                usuario.Arquivocomprovacao = msComp.ToArray();
+                else if (!UsuarioRegras.CpfValido(usuario.Cpf))
+                    ModelState.AddModelError(nameof(usuario.Cpf), "CPF inválido. Verifique os dígitos informados.");
             }
         }
 
@@ -491,7 +594,7 @@ namespace Doalim_dev.Controllers
         {
             ModelState.Remove(nameof(Usuario.TermosAceitados));
             ModelState.Remove(nameof(Usuario.FotoPerfil));
-            ModelState.Remove(nameof(Usuario.Arquivocomprovacao));
+            ModelState.Remove(nameof(Usuario.ArquivoComprovacao));
             ModelState.Remove(nameof(Usuario.Endereco));
             ModelState.Remove("Endereco.Usuario");
         }
@@ -513,15 +616,6 @@ namespace Doalim_dev.Controllers
                 if (!await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuario.IdUsuario))
                     _context.Beneficiarios.Add(new Beneficiario { IdUsuario = usuario.IdUsuario });
             }
-            usuario.Nome = model.Nome;
-            // Atualiza senha apenas se preenchida
-            if (!string.IsNullOrWhiteSpace(Request.Form["NovaSenha"]))
-                usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Request.Form["NovaSenha"]!);
-            usuario.Email = model.Email;
-            usuario.Telefone = model.Telefone;
-            usuario.Bio = model.Bio;
-
-            // FotoPerfil, Cpf e Cnpj são tratados separadamente acima
 
             await _context.SaveChangesAsync();
         }
@@ -579,39 +673,6 @@ namespace Doalim_dev.Controllers
         {
             ViewBag.EhDoador = await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId);
             ViewBag.EhBeneficiario = await _context.Beneficiarios.AsNoTracking().AnyAsync(b => b.IdUsuario == usuarioId);
-            TempData["Sucesso"] = "Perfil atualizado com sucesso!";
-            return RedirectToAction("MeuPerfil");                      
-            }
-        
-    // GET: /Usuarios/PerfilPublico/5
-            [AllowAnonymous]
-        public async Task<IActionResult> PerfilPublico(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.IdUsuario == id && u.Ativo);
-
-            if (usuario == null)
-                return NotFound();
-
-            // Dados públicos — nunca expor Email, Cpf, Cnpj, Telefone, Endereco, SenhaHash
-            var vm = new PerfilPublicoViewModel
-            {
-                IdUsuario = usuario.IdUsuario,
-                Nome = usuario.Nome,
-                FotoPerfil = usuario.FotoPerfil,
-                Bio = usuario.Bio,
-                TipoUsuario = usuario.TipoUsuario,
-                Verificado = usuario.StatusVerificacao == StatusVerificacao.Aprovado,
-                MembroDesde = usuario.DataCadastro,
-                // Avaliações ficam para quando RF-014 estiver pronto
-                NotaMedia = null,
-                TotalAvaliacoes = 0
-            };
-
-            return View(vm);
         }
     }
 }

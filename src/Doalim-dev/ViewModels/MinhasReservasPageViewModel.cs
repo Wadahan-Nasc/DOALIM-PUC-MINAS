@@ -4,5 +4,6 @@ namespace Doalim_dev.ViewModels
     {
         public MinhasReservasFiltroViewModel Filtros { get; set; } = new();
         public List<MinhasReservasViewModel> Reservas { get; set; } = new();
+
     }
 }

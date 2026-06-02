@@ -1,47 +1,25 @@
 @model Doalim_dev.Models.Usuario
-@using Doalim_dev.Models
 
 @{
     ViewData["Title"] = "Detalhes do usuario";
-    var foto = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
+    var foto      = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
         ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
         : string.Empty;
-    var documento = Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0
-        ? $"data:application/octet-stream;base64,{Convert.ToBase64String(Model.Arquivocomprovacao)}"
+    var mimeDoc   = UsuarioViewHelper.MimeDocumento(Model.ArquivoComprovacao);
+    var documento = Model.ArquivoComprovacao != null && Model.ArquivoComprovacao.Length > 0
+        ? $"data:{mimeDoc};base64,{Convert.ToBase64String(Model.ArquivoComprovacao)}"
         : string.Empty;
     var ehAdmin = Model.TipoUsuario == TipoUsuario.Admin;
 }
 
 @functions {
-    private static string Iniciais(string nome)
+    private static string ClasseStatus(StatusVerificacao status) => status switch
     {
-        if (string.IsNullOrWhiteSpace(nome))
-            return "US";
-
-        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return ((partes[0][0].ToString()) + (partes.Length > 1 ? partes[^1][0].ToString() : string.Empty)).ToUpperInvariant();
-    }
-
-    private static string MascaraEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-            return "Nao informado";
-
-        var partes = email.Split('@', 2);
-        var nome = partes[0].Length <= 2 ? partes[0][0] + "*" : partes[0][..2] + "***";
-        return $"{nome}@{partes[1]}";
-    }
-
-    private static string ClasseStatus(StatusVerificacao status)
-    {
-        return status switch
-        {
-            StatusVerificacao.Aprovado => "status-success",
-            StatusVerificacao.Rejeitado => "status-danger",
-            StatusVerificacao.Pendente => "status-warning",
-            _ => "status-neutral"
-        };
-    }
+        StatusVerificacao.Aprovado  => "status-success",
+        StatusVerificacao.Rejeitado => "status-danger",
+        StatusVerificacao.Pendente  => "status-warning",
+        _ => "status-neutral"
+    };
 }
 
 <section class="admin-dashboard">
@@ -65,7 +43,7 @@
             }
             else
             {
-                <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
+                <span class="admin-profile-photo admin-profile-initials">@UsuarioViewHelper.Iniciais(Model.Nome)</span>
             }
             <h2>@Model.Nome</h2>
             <span class="admin-pill">@Model.TipoUsuario</span>
@@ -79,7 +57,7 @@
                 <h2>Resumo publico</h2>
                 <dl>
                     <dt>E-mail</dt>
-                    <dd>@MascaraEmail(Model.Email)</dd>
+                    <dd>@UsuarioViewHelper.MascaraEmail(Model.Email)</dd>
                     <dt>Membro desde</dt>
                     <dd>@Model.DataCadastro.ToString("dd/MM/yyyy")</dd>
                     <dt>Bio</dt>
@@ -102,9 +80,10 @@
                         {
                             <span class="admin-status status-neutral">Admin dispensado</span>
                         }
-                        else if (!string.IsNullOrWhiteSpace(documento))
+                        else if (Model.ArquivoComprovacao != null && Model.ArquivoComprovacao.Length > 0)
                         {
-                            <a href="@documento" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                            <a href="@Url.Action("VerComprovacao", "Usuarios", new { id = Model.IdUsuario })"
+                               target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-paperclip"></i>
                                 Abrir comprovacao
                             </a>
@@ -116,27 +95,33 @@
                     </dd>
                 </dl>
 
-                @if (!ehAdmin && !string.IsNullOrWhiteSpace(documento))
+                @if (!ehAdmin && Model.ArquivoComprovacao != null && Model.ArquivoComprovacao.Length > 0)
                 {
                     <div class="admin-detail-actions">
-                        <form asp-action="AtualizarStatusVerificacao" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.IdUsuario" />
-                            <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check2"></i>
-                                Aprovar
-                            </button>
-                        </form>
-                        <form asp-action="AtualizarStatusVerificacao" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.IdUsuario" />
-                            <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
-                            <button type="submit" class="btn btn-outline-danger">
-                                <i class="bi bi-x-lg"></i>
-                                Rejeitar
-                            </button>
-                        </form>
+                        @if (Model.StatusVerificacao != StatusVerificacao.Aprovado)
+                        {
+                            <form asp-action="AtualizarStatusVerificacao" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.IdUsuario" />
+                                <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check2"></i>
+                                    Aprovar
+                                </button>
+                            </form>
+                        }
+                        @if (Model.StatusVerificacao != StatusVerificacao.Rejeitado)
+                        {
+                            <form asp-action="AtualizarStatusVerificacao" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.IdUsuario" />
+                                <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="bi bi-x-lg"></i>
+                                    Rejeitar
+                                </button>
+                            </form>
+                        }
                     </div>
                 }
             </div>

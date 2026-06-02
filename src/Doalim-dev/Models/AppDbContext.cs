@@ -19,6 +19,7 @@ namespace Doalim_dev.Models
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<CarrinhoItem> CarrinhoItens { get; set; }
         public DbSet<ValorLookup> ValoresLookup { get; set; }
+        public DbSet<Avaliacao> Avaliacoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -151,28 +152,52 @@ namespace Doalim_dev.Models
                 .HasIndex(v => new { v.Tipo, v.Nome })
                 .IsUnique();
 
-            // Seed dos valores padrão de domínio
+            // Seed dos valores padrão de domínio — EhValorPadrao = true protege da exclusão
             modelBuilder.Entity<ValorLookup>().HasData(
                 // Categorias
-                new ValorLookup { IdValor = 1,  Tipo = TipoLookup.Categoria,          Nome = "Grão",                Ativo = true },
-                new ValorLookup { IdValor = 2,  Tipo = TipoLookup.Categoria,          Nome = "Bebida",              Ativo = true },
-                new ValorLookup { IdValor = 3,  Tipo = TipoLookup.Categoria,          Nome = "Carne",               Ativo = true },
-                new ValorLookup { IdValor = 4,  Tipo = TipoLookup.Categoria,          Nome = "Produtos de Limpeza", Ativo = true },
-                new ValorLookup { IdValor = 5,  Tipo = TipoLookup.Categoria,          Nome = "Higiene Pessoal",     Ativo = true },
-                new ValorLookup { IdValor = 6,  Tipo = TipoLookup.Categoria,          Nome = "Laticínios",          Ativo = true },
-                new ValorLookup { IdValor = 7,  Tipo = TipoLookup.Categoria,          Nome = "Verdura",             Ativo = true },
-                new ValorLookup { IdValor = 8,  Tipo = TipoLookup.Categoria,          Nome = "Legume",              Ativo = true },
-                new ValorLookup { IdValor = 9,  Tipo = TipoLookup.Categoria,          Nome = "Fruta",               Ativo = true },
+                new ValorLookup { IdValor = 1,  Tipo = TipoLookup.Categoria,          Nome = "Grão",                Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 2,  Tipo = TipoLookup.Categoria,          Nome = "Bebida",              Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 3,  Tipo = TipoLookup.Categoria,          Nome = "Carne",               Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 4,  Tipo = TipoLookup.Categoria,          Nome = "Produtos de Limpeza", Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 5,  Tipo = TipoLookup.Categoria,          Nome = "Higiene Pessoal",     Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 6,  Tipo = TipoLookup.Categoria,          Nome = "Laticínios",          Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 7,  Tipo = TipoLookup.Categoria,          Nome = "Verdura",             Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 8,  Tipo = TipoLookup.Categoria,          Nome = "Legume",              Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 9,  Tipo = TipoLookup.Categoria,          Nome = "Fruta",               Ativo = true, EhValorPadrao = true },
                 // Unidades de medida
-                new ValorLookup { IdValor = 10, Tipo = TipoLookup.UnidadeMedida,      Nome = "Kg",                  Ativo = true },
-                new ValorLookup { IdValor = 11, Tipo = TipoLookup.UnidadeMedida,      Nome = "mg",                  Ativo = true },
-                new ValorLookup { IdValor = 12, Tipo = TipoLookup.UnidadeMedida,      Nome = "L",                   Ativo = true },
-                new ValorLookup { IdValor = 13, Tipo = TipoLookup.UnidadeMedida,      Nome = "ml",                  Ativo = true },
+                new ValorLookup { IdValor = 10, Tipo = TipoLookup.UnidadeMedida,      Nome = "Kg",                  Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 11, Tipo = TipoLookup.UnidadeMedida,      Nome = "mg",                  Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 12, Tipo = TipoLookup.UnidadeMedida,      Nome = "L",                   Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 13, Tipo = TipoLookup.UnidadeMedida,      Nome = "ml",                  Ativo = true, EhValorPadrao = true },
                 // Tipos de armazenamento
-                new ValorLookup { IdValor = 14, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Ambiente",            Ativo = true },
-                new ValorLookup { IdValor = 15, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Congelado",           Ativo = true },
-                new ValorLookup { IdValor = 16, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Local fechado",       Ativo = true }
+                new ValorLookup { IdValor = 14, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Ambiente",            Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 15, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Congelado",           Ativo = true, EhValorPadrao = true },
+                new ValorLookup { IdValor = 16, Tipo = TipoLookup.TipoArmazenamento,  Nome = "Local fechado",       Ativo = true, EhValorPadrao = true }
             );
+
+            // Avaliações: duas FKs para Usuario sem cascade duplo (evita ciclo de cascade delete)
+            modelBuilder.Entity<Avaliacao>()
+                .HasOne(a => a.Avaliador)
+                .WithMany()
+                .HasForeignKey(a => a.IdAvaliador)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Avaliacao>()
+                .HasOne(a => a.Avaliado)
+                .WithMany()
+                .HasForeignKey(a => a.IdAvaliado)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Cada reserva permite no maximo uma avaliacao por avaliador
+            modelBuilder.Entity<Avaliacao>()
+                .HasIndex(a => new { a.IdAvaliador, a.IdReserva })
+                .IsUnique();
+
+            modelBuilder.Entity<Avaliacao>()
+                .HasOne(a => a.Reserva)
+                .WithMany()
+                .HasForeignKey(a => a.IdReserva)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

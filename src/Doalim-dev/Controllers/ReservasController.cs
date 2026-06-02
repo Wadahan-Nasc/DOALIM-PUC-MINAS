@@ -82,6 +82,22 @@ namespace Doalim_dev.Controllers
                 .OrderByDescending(r => r.DataReserva)
                 .ToListAsync();
 
+            // Busca avaliacoes ja feitas pelo beneficiario para reservas Retiradas
+            var idsRetiradas = reservasDb
+                .Where(r => r.Status == StatusReserva.Retirada)
+                .Select(r => r.IdReserva)
+                .ToList();
+
+            Dictionary<int, int> avaliacoesPorReserva = new();
+            if (idsRetiradas.Any())
+            {
+                avaliacoesPorReserva = await _context.Avaliacoes
+                    .Where(a => a.IdAvaliador == usuarioId
+                             && a.IdReserva != null
+                             && idsRetiradas.Contains(a.IdReserva.Value))
+                    .ToDictionaryAsync(a => a.IdReserva!.Value, a => a.Nota);
+            }
+
             var reservas = reservasDb.Select(r => new MinhasReservasViewModel
             {
                 IdReserva = r.IdReserva,
@@ -100,15 +116,22 @@ namespace Doalim_dev.Controllers
                 UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
                 FotoProduto = r.Lote.Produto.FotoProduto == null
                     ? null
-                    : $"data:image/jpeg;base64,{Convert.ToBase64String(r.Lote.Produto.FotoProduto)}",
+                    : ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
+                IdUsuarioDoador = r.Lote.Produto.IdDoador,
                 NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
                 TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone,
-                MotivoRejeicao = r.MotivoRejeicao
+                MotivoRejeicao = r.MotivoRejeicao,
+                PodeAvaliar = r.Status == StatusReserva.Retirada,
+                JaAvaliou   = r.Status == StatusReserva.Retirada
+                              && avaliacoesPorReserva.ContainsKey(r.IdReserva),
+                NotaAvaliacao = (r.Status == StatusReserva.Retirada
+                                 && avaliacoesPorReserva.TryGetValue(r.IdReserva, out var nota))
+                                ? nota : (int?)null
             }).ToList();
 
             var viewModel = new MinhasReservasPageViewModel
             {
-                Filtros = filtros,
+                Filtros  = filtros,
                 Reservas = reservas
             };
 

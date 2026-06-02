@@ -34,5 +34,11 @@ namespace Doalim_dev.Models
         public string Nome { get; set; } = "";
 
         public bool Ativo { get; set; } = true;
+
+        /// <summary>
+        /// Indica que este valor faz parte do seed inicial do sistema.
+        /// Valores padrão não podem ser excluídos — apenas desativados.
+        /// </summary>
+        public bool EhValorPadrao { get; set; } = false;
     }
 }

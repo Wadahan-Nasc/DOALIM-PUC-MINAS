@@ -3,15 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Doalim_dev.Models
 {
-    public enum StatusReserva
-    {
-        Pendente = 0,
-        Confirmada = 1,
-        Retirada = 2,
-        Cancelada = 3,
-        Rejeitada = 4
-    }
-
     [Table("Reservas")]
     public class Reserva
     {

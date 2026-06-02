@@ -41,7 +41,7 @@ namespace Doalim_dev.Models
         public string? Bio { get; set; }
 
         [Display(Name = "Arquivo de Comprovação")]
-        public byte[]? Arquivocomprovacao { get; set; }
+        public byte[]? ArquivoComprovacao { get; set; }
 
         // Armazena o hash BCrypt — NUNCA a senha em texto puro
         [Required]

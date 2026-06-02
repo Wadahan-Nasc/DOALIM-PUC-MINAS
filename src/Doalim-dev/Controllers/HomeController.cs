@@ -20,14 +20,13 @@ namespace Doalim_dev.Controllers
         {
             var agora = DateTime.UtcNow;
 
+            // DbContext não é thread-safe: queries executadas sequencialmente
             ViewBag.TotalUsuarios = await _context.Usuarios.CountAsync();
 
-            // Produtos que possuem pelo menos um lote ativo (validade futura e qtd > 0)
             ViewBag.ProdutosDisponiveis = await _context.Produtos
                 .CountAsync(p => p.StatusProduto
                     && p.Lotes.Any(l => l.DataValidade > agora && l.Quantidade > 0));
 
-            // Soma de todas as quantidades dos lotes ativos
             ViewBag.AlimentosDisponiveis = await _context.Produtos
                 .Where(p => p.StatusProduto)
                 .SelectMany(p => p.Lotes)

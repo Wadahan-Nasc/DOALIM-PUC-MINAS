@@ -63,6 +63,36 @@ namespace Doalim_dev.Controllers
         //   Alguma Confirmada         → Pedido.Confirmado
         //   Demais casos              → Pedido.Pendente
         // -------------------------------------------------------------------------
+        // -------------------------------------------------------------------------
+        // Converte um byte[] de foto de produto em data URL, detectando PNG/JPEG/SVG
+        // pelo magic bytes para definir o MIME type correto.
+        // Disponível para ProdutosController, CarrinhoController e ReservasController.
+        // -------------------------------------------------------------------------
+        protected static string ObterFotoProdutoDataUrl(byte[]? fotoProduto)
+        {
+            if (fotoProduto == null || fotoProduto.Length == 0) return string.Empty;
+
+            string mime;
+
+            if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x89 && fotoProduto[1] == 0x50
+                && fotoProduto[2] == 0x4E && fotoProduto[3] == 0x47)
+            {
+                mime = "image/png";
+            }
+            else if (fotoProduto.Length >= 2
+                && fotoProduto[0] == 0xFF && fotoProduto[1] == 0xD8)
+            {
+                mime = "image/jpeg";
+            }
+            else
+            {
+                mime = "image/jpeg"; // fallback seguro para a maioria dos uploads
+            }
+
+            return $"data:{mime};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+
         protected async Task AtualizarStatusPedidoAsync(int? idPedido)
         {
             if (idPedido == null) return;

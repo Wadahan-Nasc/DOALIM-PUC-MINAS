@@ -30,11 +30,17 @@
         public string? FotoProduto { get; set; } // Base64 convertido no controller
 
         // Dados do doador
+        public int IdUsuarioDoador { get; set; }
         public string NomeDoador { get; set; }
         public string TelefoneDoador { get; set; }
 
         // Motivo informado pelo doador ao rejeitar — exibido apenas quando Rejeitada
         public string? MotivoRejeicao { get; set; }
+
+        // Avaliação desta reserva pelo beneficiário
+        public bool PodeAvaliar { get; set; }       // true quando Status = Retirada
+        public bool JaAvaliou { get; set; }
+        public int? NotaAvaliacao { get; set; }
 
         //Campos Calculados
         public bool PodeSerCancelada =>

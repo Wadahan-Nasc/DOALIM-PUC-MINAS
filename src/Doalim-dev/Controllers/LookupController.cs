@@ -99,10 +99,10 @@ namespace Doalim_dev.Controllers
             if (valor == null)
                 return NotFound();
 
-            // Protege os valores padrão de seed (IdValor 1–16)
-            if (valor.IdValor <= 16)
+            // Protege os valores que fazem parte do seed inicial do sistema
+            if (valor.EhValorPadrao)
             {
-                TempData["Erro"] = "Valores padrão não podem ser excluídos. Use o botão de desativar.";
+                TempData["Erro"] = "Valores padrão do sistema não podem ser excluídos. Use o botão de desativar.";
                 return RedirectToAction(nameof(Index));
             }
 

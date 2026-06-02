@@ -1,57 +1,39 @@
 @model IEnumerable<Doalim_dev.Models.Usuario>
-@using Doalim_dev.Models
 
 @{
     ViewData["Title"] = "Usuarios";
+
+    // Paginação
+    var itensPorPagina = 15;
+    var paginaAtual    = ViewBag.PaginaAtual  as int? ?? 1;
+    var totalPaginas   = ViewBag.TotalPaginas as int? ?? 1;
+
     var usuarios = Model.ToList();
-    var comuns = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin).ToList();
-    var pendentes = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Pendente && u.Arquivocomprovacao != null && u.Arquivocomprovacao.Length > 0);
-    var semArquivo = comuns.Count(u => u.Arquivocomprovacao == null || u.Arquivocomprovacao.Length == 0);
-    var aprovados = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Aprovado);
+    var comuns   = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin).ToList();
+    var pendentes  = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Pendente
+                                    && u.ArquivoComprovacao != null && u.ArquivoComprovacao.Length > 0);
+    var semArquivo = comuns.Count(u => u.ArquivoComprovacao == null || u.ArquivoComprovacao.Length == 0);
+    var aprovados  = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Aprovado);
 }
 
 @functions {
-    private static string Iniciais(string nome)
-    {
-        if (string.IsNullOrWhiteSpace(nome))
-            return "US";
-
-        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return ((partes[0][0].ToString()) + (partes.Length > 1 ? partes[^1][0].ToString() : string.Empty)).ToUpperInvariant();
-    }
-
-    private static string MascaraEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-            return "Nao informado";
-
-        var partes = email.Split('@', 2);
-        var nome = partes[0].Length <= 2 ? partes[0][0] + "*" : partes[0][..2] + "***";
-        return $"{nome}@{partes[1]}";
-    }
-
     private static string ClasseStatus(Usuario usuario)
     {
-        if (usuario.TipoUsuario == TipoUsuario.Admin)
-            return "status-neutral";
-
+        if (usuario.TipoUsuario == TipoUsuario.Admin) return "status-neutral";
         return usuario.StatusVerificacao switch
         {
-            StatusVerificacao.Aprovado => "status-success",
+            StatusVerificacao.Aprovado  => "status-success",
             StatusVerificacao.Rejeitado => "status-danger",
-            StatusVerificacao.Pendente => "status-warning",
+            StatusVerificacao.Pendente  => "status-warning",
             _ => "status-neutral"
         };
     }
 
     private static string TextoStatus(Usuario usuario)
     {
-        if (usuario.TipoUsuario == TipoUsuario.Admin)
-            return "Nao aplicavel";
-
-        if (usuario.Arquivocomprovacao == null || usuario.Arquivocomprovacao.Length == 0)
+        if (usuario.TipoUsuario == TipoUsuario.Admin) return "Nao aplicavel";
+        if (usuario.ArquivoComprovacao == null || usuario.ArquivoComprovacao.Length == 0)
             return "Sem comprovacao";
-
         return usuario.StatusVerificacao.ToString();
     }
 }
@@ -129,8 +111,9 @@
                     var foto = item.FotoPerfil != null && item.FotoPerfil.Length > 0
                         ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.FotoPerfil)}"
                         : string.Empty;
-                    var documento = item.Arquivocomprovacao != null && item.Arquivocomprovacao.Length > 0
-                        ? $"data:application/octet-stream;base64,{Convert.ToBase64String(item.Arquivocomprovacao)}"
+                    var mimeDoc   = UsuarioViewHelper.MimeDocumento(item.ArquivoComprovacao);
+                    var documento = item.ArquivoComprovacao != null && item.ArquivoComprovacao.Length > 0
+                        ? $"data:{mimeDoc};base64,{Convert.ToBase64String(item.ArquivoComprovacao)}"
                         : string.Empty;
                     var podeAprovar = item.TipoUsuario != TipoUsuario.Admin && !string.IsNullOrWhiteSpace(documento);
 
@@ -143,11 +126,11 @@
                                 }
                                 else
                                 {
-                                    <span class="admin-avatar">@Iniciais(item.Nome)</span>
+                                    <span class="admin-avatar">@UsuarioViewHelper.Iniciais(item.Nome)</span>
                                 }
                                 <div>
                                     <strong>@item.Nome</strong>
-                                    <small>@MascaraEmail(item.Email)</small>
+                                    <small>@UsuarioViewHelper.MascaraEmail(item.Email)</small>
                                 </div>
                             </div>
                         </td>
@@ -207,4 +190,34 @@
             </tbody>
         </table>
     </div>
+
+    @if (totalPaginas > 1)
+    {
+        <nav class="d-flex justify-content-center mt-3" aria-label="Paginação de usuários">
+            <ul class="pagination">
+                <li class="page-item @(paginaAtual <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-busca="@ViewBag.Busca"
+                       asp-route-pagina="@(paginaAtual - 1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                @for (int p = 1; p <= totalPaginas; p++)
+                {
+                    <li class="page-item @(p == paginaAtual ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-busca="@ViewBag.Busca"
+                           asp-route-pagina="@p">@p</a>
+                    </li>
+                }
+                <li class="page-item @(paginaAtual >= totalPaginas ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-busca="@ViewBag.Busca"
+                       asp-route-pagina="@(paginaAtual + 1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </section>

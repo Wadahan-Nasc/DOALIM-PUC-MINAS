@@ -75,8 +75,7 @@ namespace Doalim_dev.Controllers
                     MarcaProduto = c.Produto.MarcaProduto,
                     CategoriaProduto = c.Produto.CategoriaProduto,
                     UnidadeMedidaProduto = c.Produto.UnidadeMedida,
-                    FotoProduto = c.Produto.FotoProduto == null ?
-                                    "" : $"data:image/jpeg;base64,{Convert.ToBase64String(c.Produto.FotoProduto)}",
+                    FotoProduto = ObterFotoProdutoDataUrl(c.Produto.FotoProduto),
                     NomeDoador = c.Produto.Doador.Usuario.Nome,
                     QuantidadeDesejada = c.QuantidadeDesejada,
                     DataExpiracao = c.DataExpiracao,

@@ -19,7 +19,7 @@
 
     <div class="admin-profile">
         <div class="admin-profile-card">
-            <span class="admin-profile-photo admin-profile-initials">@Iniciais(Model.Nome)</span>
+            <span class="admin-profile-photo admin-profile-initials">@UsuarioViewHelper.Iniciais(Model.Nome)</span>
             <h2>@Model.Nome</h2>
             <span class="admin-pill">@Model.TipoUsuario</span>
             <span class="admin-status status-danger">Ação permanente</span>
@@ -51,15 +51,3 @@
     </div>
 </section>
 
-@functions {
-    private static string Iniciais(string nome)
-    {
-        if (string.IsNullOrWhiteSpace(nome))
-            return "US";
-
-        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var primeira = partes[0][0].ToString();
-        var segunda = partes.Length > 1 ? partes[^1][0].ToString() : string.Empty;
-        return (primeira + segunda).ToUpperInvariant();
-    }
-}

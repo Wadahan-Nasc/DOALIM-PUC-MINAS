@@ -1,4 +1,4 @@
-﻿@model Doalim_dev.Models.ViewModels.PerfilPublicoViewModel
+﻿@model Doalim_dev.ViewModels.PerfilPublicoViewModel
 @{
     ViewData["Title"] = $"Perfil de {Model.Nome}";
 
@@ -84,31 +84,25 @@
             <div class="row g-2 text-center">
                 <div class="col">
                     <div class="bg-light rounded-3 p-3">
-                        <div class="text-muted small">avaliação</div>
-                        <div class="fw-500 fs-4">@Model.NotaMedia.Value.ToString("0.0")</div>
+                        <div class="text-muted small">Nota média</div>
+                        <div class="fw-bold fs-4">@Model.NotaMedia.Value.ToString("0.0")</div>
                         <div class="text-warning small">
                             @for (int i = 1; i <= 5; i++)
                             {
                                 if (i <= Math.Floor(Model.NotaMedia.Value))
-                                {
-                                    <i class="bi bi-star-fill"></i>
-                                }
+                                { <i class="bi bi-star-fill"></i> }
                                 else if (i - Model.NotaMedia.Value < 1)
-                                {
-                                    <i class="bi bi-star-half"></i>
-                                }
+                                { <i class="bi bi-star-half"></i> }
                                 else
-                                {
-                                    <i class="bi bi-star"></i>
-                                }
+                                { <i class="bi bi-star"></i> }
                             }
                         </div>
                     </div>
                 </div>
                 <div class="col">
                     <div class="bg-light rounded-3 p-3">
-                        <div class="text-muted small">avaliações</div>
-                        <div class="fw-500 fs-4">@Model.TotalAvaliacoes</div>
+                        <div class="text-muted small">Avaliações</div>
+                        <div class="fw-bold fs-4">@Model.TotalAvaliacoes</div>
                         <div class="text-muted small">recebidas</div>
                     </div>
                 </div>
@@ -118,9 +112,11 @@
         {
             <div class="border rounded-3 p-3 text-center text-muted small">
                 <i class="bi bi-star me-1"></i>
-                Avaliações disponíveis em breve
+                Ainda sem avaliações.
             </div>
         }
+
+        @* Avaliacao e feita diretamente nos cards de reserva (MinhasReservas / GerenciarReservas) *@
     </div>
 
     <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary btn-sm">

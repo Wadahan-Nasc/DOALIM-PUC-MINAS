@@ -24,6 +24,7 @@ namespace Doalim_dev.ViewModels
         public string? FotoProduto { get; set; } // Base64 convertido no controller
 
         // Dados do beneficiário
+        public int IdUsuarioBeneficiario { get; set; }
         public string NomeBeneficiario { get; set; }
         public string TelefoneBeneficiario { get; set; }
         public bool EhOng { get; set; }
@@ -34,6 +35,11 @@ namespace Doalim_dev.ViewModels
 
         // Token de confirmação — exibido ao doador após aprovação
         public string? TokenConfirmacao { get; set; }
+
+        // Avaliação desta reserva pelo doador
+        public bool PodeAvaliar { get; set; }       // true quando Status = Retirada
+        public bool JaAvaliou { get; set; }
+        public int? NotaAvaliacao { get; set; }
 
         //Campos calculados
         public bool PodeAprovar =>

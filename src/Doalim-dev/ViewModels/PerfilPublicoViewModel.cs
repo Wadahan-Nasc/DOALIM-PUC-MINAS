@@ -1,4 +1,6 @@
-﻿namespace Doalim_dev.Models.ViewModels
+﻿using Doalim_dev.Models;
+
+namespace Doalim_dev.ViewModels
 {
     public class PerfilPublicoViewModel
     {
@@ -11,5 +13,10 @@
         public DateTime MembroDesde { get; set; }
         public double? NotaMedia { get; set; }
         public int TotalAvaliacoes { get; set; }
+
+        // Dados de avaliação do usuário logado (se já avaliou este perfil)
+        public int? NotaDoLogado { get; set; }
+        public bool JaAvaliou => NotaDoLogado.HasValue;
+        public bool PodeAvaliar { get; set; }
     }
 }
