@@ -17,7 +17,7 @@
         <form asp-action="ResetSenha" asp-controller="Auth" method="post">
             @Html.AntiForgeryToken()
 
-            <%-- Campos hidden — não editáveis pelo usuário --%>
+            @*<%-- Campos hidden — não editáveis pelo usuário --%>*@
             <input asp-for="Token" type="hidden" />
             <input asp-for="Email" type="hidden" />
 

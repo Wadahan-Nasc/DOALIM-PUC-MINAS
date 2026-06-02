@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Doalim_dev.Models.ViewModels;
 
 namespace Doalim_dev.Controllers
 {
@@ -119,7 +120,9 @@ namespace Doalim_dev.Controllers
             if (id == null)
                 return NotFound();
 
-            var usuario = await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(u => u.IdUsuario == id);
+            var usuario = await _context.Usuarios
+                .Include(u => u.Endereco)
+                .FirstOrDefaultAsync(u => u.IdUsuario == id);
             if (usuario == null)
                 return NotFound();
 
@@ -395,6 +398,25 @@ namespace Doalim_dev.Controllers
                 return await _context.Usuarios
                     .Include(u => u.Endereco)
                     .FirstOrDefaultAsync(u => u.IdUsuario == id);
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
+                var extensao = Path.GetExtension(arquivoFotoPerfil.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de foto inválido. Use PNG, JPG ou JPEG.";
+                    return View(model);
+                }
+
+                const long tamanhoMaximo = 2 * 1024 * 1024; // 2MB
+                if (arquivoFotoPerfil.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "A foto excede o tamanho máximo permitido de 2MB.";
+                    return View(model);
+                }
+
+                using var msFoto = new MemoryStream();
+                await arquivoFotoPerfil.CopyToAsync(msFoto);
+                usuario.FotoPerfil = msFoto.ToArray();
             }
 
             var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
@@ -443,6 +465,25 @@ namespace Doalim_dev.Controllers
                 usuario.Cnpj = null;
                 if (string.IsNullOrWhiteSpace(UsuarioRegras.NormalizarDigitos(usuario.Cpf)))
                     ModelState.AddModelError(nameof(usuario.Cpf), "Informe o CPF.");
+                var extensoesPermitidas = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
+                var extensao = Path.GetExtension(arquivoComprovacao.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    TempData["Erro"] = "Formato de arquivo inválido. Use PNG, JPG, JPEG ou PDF.";
+                    return View(model);
+                }
+
+                const long tamanhoMaximo = 5 * 1024 * 1024; // 5MB
+                if (arquivoComprovacao.Length > tamanhoMaximo)
+                {
+                    TempData["Erro"] = "O arquivo excede o tamanho máximo permitido de 5MB.";
+                    return View(model);
+                }
+
+                using var msComp = new MemoryStream();
+                await arquivoComprovacao.CopyToAsync(msComp);
+                usuario.Arquivocomprovacao = msComp.ToArray();
             }
         }
 
@@ -472,6 +513,15 @@ namespace Doalim_dev.Controllers
                 if (!await _context.Beneficiarios.AnyAsync(b => b.IdUsuario == usuario.IdUsuario))
                     _context.Beneficiarios.Add(new Beneficiario { IdUsuario = usuario.IdUsuario });
             }
+            usuario.Nome = model.Nome;
+            // Atualiza senha apenas se preenchida
+            if (!string.IsNullOrWhiteSpace(Request.Form["NovaSenha"]))
+                usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Request.Form["NovaSenha"]!);
+            usuario.Email = model.Email;
+            usuario.Telefone = model.Telefone;
+            usuario.Bio = model.Bio;
+
+            // FotoPerfil, Cpf e Cnpj são tratados separadamente acima
 
             await _context.SaveChangesAsync();
         }
@@ -529,6 +579,39 @@ namespace Doalim_dev.Controllers
         {
             ViewBag.EhDoador = await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId);
             ViewBag.EhBeneficiario = await _context.Beneficiarios.AsNoTracking().AnyAsync(b => b.IdUsuario == usuarioId);
+            TempData["Sucesso"] = "Perfil atualizado com sucesso!";
+            return RedirectToAction("MeuPerfil");                      
+            }
+        
+    // GET: /Usuarios/PerfilPublico/5
+            [AllowAnonymous]
+        public async Task<IActionResult> PerfilPublico(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.IdUsuario == id && u.Ativo);
+
+            if (usuario == null)
+                return NotFound();
+
+            // Dados públicos — nunca expor Email, Cpf, Cnpj, Telefone, Endereco, SenhaHash
+            var vm = new PerfilPublicoViewModel
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nome = usuario.Nome,
+                FotoPerfil = usuario.FotoPerfil,
+                Bio = usuario.Bio,
+                TipoUsuario = usuario.TipoUsuario,
+                Verificado = usuario.StatusVerificacao == StatusVerificacao.Aprovado,
+                MembroDesde = usuario.DataCadastro,
+                // Avaliações ficam para quando RF-014 estiver pronto
+                NotaMedia = null,
+                TotalAvaliacoes = 0
+            };
+
+            return View(vm);
         }
     }
 }
