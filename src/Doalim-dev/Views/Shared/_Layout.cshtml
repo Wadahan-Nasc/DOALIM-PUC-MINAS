@@ -1,14 +1,16 @@
+@using Microsoft.EntityFrameworkCore
+@inject Doalim_dev.Models.AppDbContext _context
 @{
     var emailLogado = User.Identity?.IsAuthenticated == true
         ? (User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity.Name)
         : null;
 
     var fotoPerfil = emailLogado != null
-    ? await _context.Usuarios
-        .Where(u => u.Email == emailLogado)
-        .Select(u => u.FotoPerfil)
-        .FirstOrDefaultAsync()
-    : null;
+        ? await _context.Usuarios
+            .Where(u => u.Email == emailLogado)
+            .Select(u => u.FotoPerfil)
+            .FirstOrDefaultAsync()
+        : null;
 }
 
 <!DOCTYPE html>

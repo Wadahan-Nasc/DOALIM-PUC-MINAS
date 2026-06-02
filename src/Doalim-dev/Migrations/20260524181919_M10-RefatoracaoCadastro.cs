@@ -15,25 +15,11 @@ namespace Doalim_dev.Migrations
                 name: "Endereco",
                 table: "Usuarios");
 
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "FotoPerfil",
-                table: "Usuarios",
-                type: "varbinary(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500,
-                oldNullable: true);
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [FotoPerfil];");
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [FotoPerfil] varbinary(max) NULL;");
 
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "Arquivocomprovacao",
-                table: "Usuarios",
-                type: "varbinary(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500,
-                oldNullable: true);
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [Arquivocomprovacao];");
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [Arquivocomprovacao] varbinary(max) NULL;");
 
             migrationBuilder.CreateTable(
                 name: "DocumentosVerificacao",
@@ -105,25 +91,11 @@ namespace Doalim_dev.Migrations
             migrationBuilder.DropTable(
                 name: "Enderecos");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "FotoPerfil",
-                table: "Usuarios",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true,
-                oldClrType: typeof(byte[]),
-                oldType: "varbinary(max)",
-                oldNullable: true);
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [FotoPerfil];");
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [FotoPerfil] nvarchar(500) NULL;");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Arquivocomprovacao",
-                table: "Usuarios",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true,
-                oldClrType: typeof(byte[]),
-                oldType: "varbinary(max)",
-                oldNullable: true);
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [Arquivocomprovacao];");
+            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [Arquivocomprovacao] nvarchar(500) NULL;");
 
             migrationBuilder.AddColumn<string>(
                 name: "Endereco",

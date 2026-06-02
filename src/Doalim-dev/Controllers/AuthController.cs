@@ -371,10 +371,7 @@ namespace Doalim_dev.Controllers
                 new Claim(ClaimTypes.Email,          usuario.Email),
                 // A Claim de Role permite que outros controllers usem
                 // [Authorize(Roles = "Admin")] ou [Authorize(Roles = "DoadorPJ")] etc.
-                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString()),
-                // FotoPerfil armazenada no cookie para evitar query ao banco no _Layout
-                // Nota: atualiza apenas no próximo login se o usuário trocar a foto
-                new Claim("FotoPerfil",              usuario.FotoPerfil ?? string.Empty)
+                new Claim(ClaimTypes.Role,           usuario.TipoUsuario.ToString())
             };
 
             var identidade  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
