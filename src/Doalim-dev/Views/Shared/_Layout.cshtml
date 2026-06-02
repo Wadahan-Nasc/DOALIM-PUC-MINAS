@@ -34,7 +34,7 @@
                     <img src="~/images/logo.png" alt="Doalim" height="60" />
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Abrir navegação">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -56,28 +56,22 @@
                         }
                     </ul>
                     <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
                             @if (User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                           asp-controller="Produtos" asp-action="Index"
-                                           title="Meus Produtos">
+                                    <a class="nav-link text-dark" asp-controller="Produtos" asp-action="Index" title="Meus Produtos">
                                         <i class="bi bi-box-seam" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                           asp-controller="Produtos" asp-action="GerenciarReservas"
-                                           title="Gerenciar Reservas">
+                                    <a class="nav-link text-dark" asp-controller="Produtos" asp-action="GerenciarReservas" title="Gerenciar Reservas">
                                         <i class="bi bi-clipboard-check" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                           asp-controller="Produtos" asp-action="HistoricoDoacoes"
-                                           title="Histórico de Doações">
+                                    <a class="nav-link text-dark" asp-controller="Produtos" asp-action="HistoricoDoacoes" title="Histórico de Doações">
                                         <i class="bi bi-clock-history" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
@@ -85,25 +79,18 @@
                             @if (User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                           asp-controller="Carrinho" asp-action="Index"
-                                           title="Meu Carrinho">
+                                    <a class="nav-link text-dark" asp-controller="Carrinho" asp-action="Index" title="Meu Carrinho">
                                         <i class="bi bi-cart" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                           asp-controller="Reservas" asp-action="MinhasReservas"
-                                           title="Minhas Reservas">
+                                    <a class="nav-link text-dark" asp-controller="Reservas" asp-action="MinhasReservas" title="Minhas Reservas">
                                         <i class="bi bi-list-check" style="font-size: 1.4rem;"></i>
                                     </a>
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Usuarios" asp-action="PerfilPublico"
-                                   asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
-                                   title="Meu Perfil Público">
+                                <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="PerfilPublico" asp-route-id="@usuarioIdClaim" title="Meu Perfil Público">
                                     <i class="bi bi-person-badge" style="font-size: 1.4rem;"></i>
                                 </a>
                             </li>
@@ -111,9 +98,7 @@
                                 <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Usuarios" asp-action="MeuPerfil"
-                                   title="Meu Perfil">
+                                <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="MeuPerfil" title="Meu Perfil">
                                     @if (fotoPerfil != null && fotoPerfil.Length > 0)
                                     {
                                         var base64 = Convert.ToBase64String(fotoPerfil);
@@ -129,9 +114,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Auth" asp-action="Logout"
-                                   title="Sair">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Logout" title="Sair">
                                     <i class="bi bi-box-arrow-right" style="font-size: 1.4rem;"></i>
                                 </a>
                             </li>
@@ -141,7 +124,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid app-main-container">
         <main role="main" class="pb-3">
             @if (TempData["Erro"] != null)
             {
@@ -173,7 +156,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        // Auto-dismiss dos alertas de feedback após 3 segundos
         (function () {
             var alertas = document.querySelectorAll('#alert-feedback');
             alertas.forEach(function (alerta) {

@@ -116,13 +116,11 @@ namespace Doalim_dev.Controllers
                 return RedirectToAction("Login", "Auth");
 
             // Garante que apenas beneficiários aprovados podem adicionar ao carrinho
-            var aprovado = await _context.Usuarios
-                .AnyAsync(u => u.IdUsuario == usuarioId
-                            && u.StatusVerificacao == StatusVerificacao.Aprovado);
+            var aprovado = await UsuarioPodeReservarAsync(usuarioId);
 
             if (!aprovado)
             {
-                TempData["Erro"] = "Sua conta ainda não foi aprovada pelo administrador. Aguarde a validação para realizar reservas.";
+                TempData["Erro"] = "Para reservar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
                 return RedirectToAction("Vitrine", "Produtos");
             }
 

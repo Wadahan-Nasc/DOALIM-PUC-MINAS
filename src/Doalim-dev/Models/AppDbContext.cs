@@ -29,6 +29,20 @@ namespace Doalim_dev.Models
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Cpf)
+                .IsUnique()
+                .HasFilter("[Cpf] IS NOT NULL AND [Cpf] <> ''");
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Cnpj)
+                .IsUnique()
+                .HasFilter("[Cnpj] IS NOT NULL AND [Cnpj] <> ''");
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Telefone)
+                .IsUnique();
+
             // Relacionamento 1:N entre Usuario e TermoAceitacao
             modelBuilder.Entity<TermoAceitacao>()
                 .HasOne(t => t.Usuario)

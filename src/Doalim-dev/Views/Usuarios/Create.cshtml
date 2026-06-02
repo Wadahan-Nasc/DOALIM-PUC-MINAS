@@ -1,8 +1,9 @@
 @model Doalim_dev.Models.Usuario
+@using Doalim_dev.Models
 
 @{
     var criandoAdmin = Model.TipoUsuario == TipoUsuario.Admin;
-    ViewData["Title"] = criandoAdmin ? "Novo administrador" : "Novo usuário";
+    ViewData["Title"] = criandoAdmin ? "Novo administrador" : "Novo usuario";
 }
 
 <section class="admin-dashboard">
@@ -10,7 +11,7 @@
         <div>
             <span class="admin-eyebrow">Cadastro administrativo</span>
             <h1>@ViewData["Title"]</h1>
-            <p>Crie contas de usuários comuns ou libere acesso para outro administrador.</p>
+            <p>Crie a conta base. Dados privados e comprovacao ficam sob controle do proprio usuario.</p>
         </div>
         <a asp-action="Index" class="btn btn-outline-success">
             <i class="bi bi-arrow-left"></i>
@@ -18,15 +19,14 @@
         </a>
     </div>
 
-    <form asp-action="Create" class="admin-form">
+    <form asp-action="Create" method="post" class="admin-form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
         <input type="hidden" asp-for="Ativo" value="true" />
 
         <div class="admin-form-main">
             <div class="admin-form-section">
-                <h2>Dados de acesso</h2>
-
+                <h2>Acesso</h2>
                 <div class="row g-3">
                     <div class="col-md-8">
                         <label asp-for="Nome" class="form-label"></label>
@@ -44,8 +44,8 @@
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
                     <div class="col-md-5">
-                        <label asp-for="SenhaHash" class="form-label">Senha de acesso</label>
-                        <input asp-for="SenhaHash" class="form-control" type="password" placeholder="Senha temporária" autocomplete="new-password" />
+                        <label asp-for="SenhaHash" class="form-label">Senha temporaria</label>
+                        <input asp-for="SenhaHash" class="form-control" type="password" autocomplete="new-password" />
                         <span asp-validation-for="SenhaHash" class="text-danger small"></span>
                     </div>
                     <div class="col-md-5">
@@ -53,17 +53,11 @@
                         <input asp-for="Telefone" class="form-control" placeholder="(31) 99999-0000" />
                         <span asp-validation-for="Telefone" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-7">
-                        <label asp-for="Endereco" class="form-label"></label>
-                        <input asp-for="Endereco" class="form-control" placeholder="Rua, número, bairro, cidade" />
-                        <span asp-validation-for="Endereco" class="text-danger small"></span>
-                    </div>
                 </div>
             </div>
 
             <div class="admin-form-section">
-                <h2>Identificação e documentação</h2>
-
+                <h2>Identificacao</h2>
                 <div class="row g-3">
                     <div class="col-md-6" data-field="cpf">
                         <label asp-for="Cpf" class="form-label"></label>
@@ -75,16 +69,6 @@
                         <input asp-for="Cnpj" class="form-control" placeholder="00.000.000/0001-00" />
                         <span asp-validation-for="Cnpj" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="FotoPerfil" class="form-label"></label>
-                        <input asp-for="FotoPerfil" class="form-control" placeholder="URL da foto do perfil" />
-                        <span asp-validation-for="FotoPerfil" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-6" data-field="documento">
-                        <label asp-for="Arquivocomprovacao" class="form-label">Arquivo de comprovação</label>
-                        <input asp-for="Arquivocomprovacao" class="form-control" placeholder="URL ou caminho do documento" />
-                        <span asp-validation-for="Arquivocomprovacao" class="text-danger small"></span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -92,13 +76,13 @@
         <aside class="admin-form-side">
             <div class="admin-side-panel">
                 <i class="bi bi-shield-check"></i>
-                <strong>Acesso administrativo</strong>
-                <p>Ao selecionar <b>Admin</b>, o sistema cria também o vínculo na tabela de administradores.</p>
+                <strong>Privacidade</strong>
+                <p>O admin nao edita perfil, senha, endereco, foto ou comprovacao depois da criacao.</p>
             </div>
             <div class="admin-side-panel">
                 <i class="bi bi-file-earmark-check"></i>
-                <strong>Comprovação</strong>
-                <p>Todos os usuários entram como pendentes até a documentação ser aprovada no painel.</p>
+                <strong>Comprovacao</strong>
+                <p>Admins sao dispensados. Usuarios comuns precisam enviar o arquivo em Meu Perfil.</p>
             </div>
             <button type="submit" class="btn btn-success w-100">
                 <i class="bi bi-check2-circle"></i>
@@ -116,16 +100,17 @@
         const camposCpf = document.querySelectorAll('[data-field="cpf"]');
         const camposCnpj = document.querySelectorAll('[data-field="cnpj"]');
 
-        function atualizarCamposAdmin() {
+        function atualizarCampos() {
             const valor = tipoUsuario.value;
+            const ehAdmin = valor === '4';
             const ehPf = valor === '0' || valor === '2';
             const ehPj = valor === '1' || valor === '3';
 
-            camposCpf.forEach(campo => campo.style.display = ehPf ? '' : 'none');
-            camposCnpj.forEach(campo => campo.style.display = ehPj ? '' : 'none');
+            camposCpf.forEach(campo => campo.style.display = !ehAdmin && ehPf ? '' : 'none');
+            camposCnpj.forEach(campo => campo.style.display = !ehAdmin && ehPj ? '' : 'none');
         }
 
-        tipoUsuario.addEventListener('change', atualizarCamposAdmin);
-        atualizarCamposAdmin();
+        tipoUsuario.addEventListener('change', atualizarCampos);
+        atualizarCampos();
     </script>
 }

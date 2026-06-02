@@ -28,6 +28,31 @@ namespace Doalim_dev.Controllers
             return int.TryParse(claim, out var id) ? id : 0;
         }
 
+        protected async Task<bool> UsuarioComprovadoAsync(int usuarioId)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == usuarioId);
+
+            return usuario != null && UsuarioRegras.TemComprovacaoAprovada(usuario);
+        }
+
+        protected async Task<bool> UsuarioPodeDoarAsync(int usuarioId)
+        {
+            if (!await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId))
+                return false;
+
+            return await UsuarioComprovadoAsync(usuarioId);
+        }
+
+        protected async Task<bool> UsuarioPodeReservarAsync(int usuarioId)
+        {
+            if (!await _context.Beneficiarios.AsNoTracking().AnyAsync(b => b.IdUsuario == usuarioId))
+                return false;
+
+            return await UsuarioComprovadoAsync(usuarioId);
+        }
+
         // -------------------------------------------------------------------------
         // Recalcula e persiste o StatusPedido com base no estado atual
         // de todas as suas Reservas filhas.

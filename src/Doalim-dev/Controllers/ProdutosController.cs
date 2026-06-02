@@ -1,7 +1,8 @@
-using Doalim_dev.Models;
+﻿using Doalim_dev.Models;
 using Doalim_dev.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -17,11 +18,10 @@ namespace Doalim_dev.Controllers
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
 
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores possuem um painel de gerenciamento.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
 
             // Auto-Inativação
@@ -93,11 +93,7 @@ namespace Doalim_dev.Controllers
             ViewBag.StatusFiltro = statusFiltro;
 
             // Categorias disponíveis para o filtro — carregadas do domínio extensível
-            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasDisponiveis = await ObterCategoriasVitrineAsync();
 
             return View(produtos);
         }
@@ -106,11 +102,13 @@ namespace Doalim_dev.Controllers
         // GET
         public async Task<IActionResult> Create()
         {
-            var ehDoador = User.IsInRole(TipoUsuario.DoadorPF.ToString()) || User.IsInRole(TipoUsuario.DoadorPJ.ToString());
-            if (!ehDoador)
+            int usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0) return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
             {
-                TempData["ErroSeguranca"] = "Acesso negado: Apenas Doadores podem cadastrar produtos.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErroSeguranca"] = "Para cadastrar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
             }
             await CarregarLookupsAsync();
             return View();
@@ -124,6 +122,12 @@ namespace Doalim_dev.Controllers
 
             int usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0) return RedirectToAction("Login", "Auth");
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para doar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
 
             produto.IdDoador = usuarioId;
 
@@ -213,9 +217,7 @@ namespace Doalim_dev.Controllers
 
                 if (int.TryParse(usuarioIdClaim, out var usuarioId))
                 {
-                    usuarioAprovado = await _context.Usuarios
-                        .AsNoTracking()
-                        .AnyAsync(u => u.IdUsuario == usuarioId && u.StatusVerificacao == StatusVerificacao.Aprovado);
+                    usuarioAprovado = await UsuarioComprovadoAsync(usuarioId);
                 }
             }
 
@@ -238,11 +240,7 @@ namespace Doalim_dev.Controllers
                 query = query.Where(p => p.CategoriaProduto == filtros.Categoria);
 
             // Categorias disponíveis para o select do filtro
-            ViewBag.CategoriasVitrine = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasVitrine = await ObterCategoriasVitrineAsync();
 
             var produtos = await query.ToListAsync();
             var idsDoadores = produtos.Select(p => p.IdDoador).Distinct().ToList();
@@ -300,6 +298,12 @@ namespace Doalim_dev.Controllers
             var produto = await _context.Produtos.Include(p => p.Lotes).FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produto == null) return NotFound();
 
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para gerenciar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
+
             if (produto.IdDoador != usuarioId)
             {
                 TempData["ErroSeguranca"] = "Acesso Negado: Este produto não pertence à sua conta.";
@@ -319,6 +323,12 @@ namespace Doalim_dev.Controllers
             if (id != produto.IdProduto) return NotFound();
 
             int usuarioId = ObterIdUsuarioLogado();
+
+            if (!await UsuarioPodeDoarAsync(usuarioId))
+            {
+                TempData["ErroSeguranca"] = "Para alterar doações, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.";
+                return RedirectToAction("MeuPerfil", "Usuarios");
+            }
 
             var produtoOriginal = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.IdProduto == id);
             if (produtoOriginal == null || produtoOriginal.IdDoador != usuarioId)
@@ -528,11 +538,7 @@ namespace Doalim_dev.Controllers
             }
 
             // Categorias disponíveis para o select do filtro
-            ViewBag.CategoriasDisponiveis = await _context.ValoresLookup
-                .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
-                .OrderBy(v => v.Nome)
-                .Select(v => v.Nome)
-                .ToListAsync();
+            ViewBag.CategoriasDisponiveis = await ObterCategoriasVitrineAsync();
 
             // Carrega para memória antes de projetar (FotoProduto usa Convert.ToBase64String)
             var reservasDb = await query
@@ -574,14 +580,19 @@ namespace Doalim_dev.Controllers
         /// </summary>
         private async Task CarregarLookupsAsync()
         {
-            var todos = await _context.ValoresLookup
-                .Where(v => v.Ativo)
-                .OrderBy(v => v.Nome)
-                .ToListAsync();
+            var todos = await ObterLookupsSegurosAsync();
 
-            ViewBag.Categorias          = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
-            ViewBag.TiposArmazenamento  = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
-            ViewBag.UnidadesMedida      = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
+            if (todos.Any())
+            {
+                ViewBag.Categorias = todos.Where(v => v.Tipo == TipoLookup.Categoria).Select(v => v.Nome).ToList();
+                ViewBag.TiposArmazenamento = todos.Where(v => v.Tipo == TipoLookup.TipoArmazenamento).Select(v => v.Nome).ToList();
+                ViewBag.UnidadesMedida = todos.Where(v => v.Tipo == TipoLookup.UnidadeMedida).Select(v => v.Nome).ToList();
+                return;
+            }
+
+            ViewBag.Categorias = await ObterCategoriasVitrineAsync();
+            ViewBag.TiposArmazenamento = new List<string> { "Ambiente", "Congelado", "Local fechado" };
+            ViewBag.UnidadesMedida = new List<string> { "Kg", "mg", "L", "ml" };
         }
 
         private bool ProdutoExists(int id) => _context.Produtos.Any(e => e.IdProduto == id);
@@ -615,6 +626,42 @@ namespace Doalim_dev.Controllers
             }
 
             return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+
+        private async Task<List<string>> ObterCategoriasVitrineAsync()
+        {
+            try
+            {
+                return await _context.ValoresLookup
+                    .Where(v => v.Tipo == TipoLookup.Categoria && v.Ativo)
+                    .OrderBy(v => v.Nome)
+                    .Select(v => v.Nome)
+                    .ToListAsync();
+            }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                return await _context.Produtos
+                    .Where(p => p.CategoriaProduto != null && p.CategoriaProduto != "")
+                    .Select(p => p.CategoriaProduto)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToListAsync();
+            }
+        }
+
+        private async Task<List<ValorLookup>> ObterLookupsSegurosAsync()
+        {
+            try
+            {
+                return await _context.ValoresLookup
+                    .Where(v => v.Ativo)
+                    .OrderBy(v => v.Nome)
+                    .ToListAsync();
+            }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                return new List<ValorLookup>();
+            }
         }
 
         // =======================================================================================

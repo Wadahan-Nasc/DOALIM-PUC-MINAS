@@ -11,15 +11,25 @@ namespace Doalim_dev.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Endereco",
-                table: "Usuarios");
+            migrationBuilder.Sql(@"
+IF COL_LENGTH(N'Usuarios', N'Endereco') IS NOT NULL
+BEGIN
+    DECLARE @constraint_Endereco sysname;
+    SELECT @constraint_Endereco = d.name
+    FROM sys.default_constraints d
+    INNER JOIN sys.columns c ON d.parent_column_id = c.column_id AND d.parent_object_id = c.object_id
+    WHERE d.parent_object_id = OBJECT_ID(N'[Usuarios]')
+      AND c.name = N'Endereco';
 
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [FotoPerfil];");
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [FotoPerfil] varbinary(max) NULL;");
+    IF @constraint_Endereco IS NOT NULL
+        EXEC(N'ALTER TABLE [Usuarios] DROP CONSTRAINT [' + @constraint_Endereco + N'];');
 
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [Arquivocomprovacao];");
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [Arquivocomprovacao] varbinary(max) NULL;");
+    ALTER TABLE [Usuarios] DROP COLUMN [Endereco];
+END
+");
+
+            ConverterColunaArquivoUsuarioParaVarbinary(migrationBuilder, "FotoPerfil");
+            ConverterColunaArquivoUsuarioParaVarbinary(migrationBuilder, "Arquivocomprovacao");
 
             migrationBuilder.CreateTable(
                 name: "DocumentosVerificacao",
@@ -91,11 +101,8 @@ namespace Doalim_dev.Migrations
             migrationBuilder.DropTable(
                 name: "Enderecos");
 
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [FotoPerfil];");
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [FotoPerfil] nvarchar(500) NULL;");
-
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] DROP COLUMN [Arquivocomprovacao];");
-            migrationBuilder.Sql("ALTER TABLE [Usuarios] ADD [Arquivocomprovacao] nvarchar(500) NULL;");
+            ConverterColunaArquivoUsuarioParaTexto(migrationBuilder, "FotoPerfil");
+            ConverterColunaArquivoUsuarioParaTexto(migrationBuilder, "Arquivocomprovacao");
 
             migrationBuilder.AddColumn<string>(
                 name: "Endereco",
@@ -104,6 +111,78 @@ namespace Doalim_dev.Migrations
                 maxLength: 300,
                 nullable: false,
                 defaultValue: "");
+        }
+
+        private static void ConverterColunaArquivoUsuarioParaVarbinary(MigrationBuilder migrationBuilder, string coluna)
+        {
+            migrationBuilder.Sql($@"
+IF COL_LENGTH(N'Usuarios', N'{coluna}') IS NOT NULL
+BEGIN
+    DECLARE @tipo_{coluna} sysname;
+    SELECT @tipo_{coluna} = t.name
+    FROM sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    WHERE c.object_id = OBJECT_ID(N'[Usuarios]')
+      AND c.name = N'{coluna}';
+
+    DECLARE @constraint_{coluna} sysname;
+    SELECT @constraint_{coluna} = d.name
+    FROM sys.default_constraints d
+    INNER JOIN sys.columns c ON d.parent_column_id = c.column_id AND d.parent_object_id = c.object_id
+    WHERE d.parent_object_id = OBJECT_ID(N'[Usuarios]')
+      AND c.name = N'{coluna}';
+
+    IF @constraint_{coluna} IS NOT NULL
+        EXEC(N'ALTER TABLE [Usuarios] DROP CONSTRAINT [' + @constraint_{coluna} + N'];');
+
+    IF @tipo_{coluna} IN (N'binary', N'varbinary', N'image')
+    BEGIN
+        ALTER TABLE [Usuarios] ALTER COLUMN [{coluna}] varbinary(max) NULL;
+    END
+    ELSE
+    BEGIN
+        EXEC sp_rename N'[Usuarios].[{coluna}]', N'{coluna}TextoAntigo', N'COLUMN';
+        ALTER TABLE [Usuarios] ADD [{coluna}] varbinary(max) NULL;
+        ALTER TABLE [Usuarios] DROP COLUMN [{coluna}TextoAntigo];
+    END
+END
+");
+        }
+
+        private static void ConverterColunaArquivoUsuarioParaTexto(MigrationBuilder migrationBuilder, string coluna)
+        {
+            migrationBuilder.Sql($@"
+IF COL_LENGTH(N'Usuarios', N'{coluna}') IS NOT NULL
+BEGIN
+    DECLARE @tipo_down_{coluna} sysname;
+    SELECT @tipo_down_{coluna} = t.name
+    FROM sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    WHERE c.object_id = OBJECT_ID(N'[Usuarios]')
+      AND c.name = N'{coluna}';
+
+    DECLARE @constraint_down_{coluna} sysname;
+    SELECT @constraint_down_{coluna} = d.name
+    FROM sys.default_constraints d
+    INNER JOIN sys.columns c ON d.parent_column_id = c.column_id AND d.parent_object_id = c.object_id
+    WHERE d.parent_object_id = OBJECT_ID(N'[Usuarios]')
+      AND c.name = N'{coluna}';
+
+    IF @constraint_down_{coluna} IS NOT NULL
+        EXEC(N'ALTER TABLE [Usuarios] DROP CONSTRAINT [' + @constraint_down_{coluna} + N'];');
+
+    IF @tipo_down_{coluna} IN (N'nvarchar', N'varchar', N'nchar', N'char')
+    BEGIN
+        ALTER TABLE [Usuarios] ALTER COLUMN [{coluna}] nvarchar(500) NULL;
+    END
+    ELSE
+    BEGIN
+        EXEC sp_rename N'[Usuarios].[{coluna}]', N'{coluna}BinarioAntigo', N'COLUMN';
+        ALTER TABLE [Usuarios] ADD [{coluna}] nvarchar(500) NULL;
+        ALTER TABLE [Usuarios] DROP COLUMN [{coluna}BinarioAntigo];
+    END
+END
+");
         }
     }
 }

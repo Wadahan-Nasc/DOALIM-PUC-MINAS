@@ -1,25 +1,29 @@
-﻿@model Doalim_dev.Models.Usuario
+@model Doalim_dev.Models.Usuario
+@using Doalim_dev.Models
 
 @{
     ViewData["Title"] = "Meu Perfil";
+    var ehAdmin = Model.TipoUsuario == TipoUsuario.Admin;
+    var ehDoador = ViewBag.EhDoador == true;
+    var ehBeneficiario = ViewBag.EhBeneficiario == true;
+    var temComprovacao = Model.Arquivocomprovacao != null && Model.Arquivocomprovacao.Length > 0;
+    var foto = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
+        ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
+        : string.Empty;
 }
 
-<div class="container mt-4" style="max-width: 640px;">
-    <h2 class="mb-4">Meu Perfil</h2>
-
-    @if (TempData["Sucesso"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Sucesso"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<section class="profile-shell">
+    <div class="profile-header">
+        <div>
+            <span class="admin-eyebrow">Conta</span>
+            <h1>Meu Perfil</h1>
+            <p>Atualize seus dados, envie sua comprovacao e ative os perfis que deseja usar.</p>
         </div>
-    }
-
-    @if (TempData["Erro"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Erro"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="profile-badges">
+            <span class="admin-pill">@Model.TipoUsuario</span>
+            <span class="admin-status @(ehAdmin ? "status-neutral" : Model.StatusVerificacao == StatusVerificacao.Aprovado ? "status-success" : Model.StatusVerificacao == StatusVerificacao.Rejeitado ? "status-danger" : "status-warning")">
+                @(ehAdmin ? "Comprovacao dispensada" : Model.StatusVerificacao)
+            </span>
         </div>
     }
 
@@ -182,52 +186,142 @@
                     </a>
                 </div>
             }
+        </aside>
 
-            <input type="file"
-                   name="arquivoComprovacao"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg,.pdf" />
-            <div class="form-text">Formatos aceitos: PNG, JPG, JPEG ou PDF. Tamanho máximo: 5MB.</div>
-        </div>
+        <form asp-controller="Usuarios" asp-action="MeuPerfil" method="post" enctype="multipart/form-data" class="profile-form">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        @* Aviso para Beneficiários levando em consideração o campo "StatusVerificacao" *@
-        @if (Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPF ||
-             Model.TipoUsuario == Doalim_dev.Models.TipoUsuario.BeneficiarioPJ)
-        {
-            <div class="alert alert-warning d-flex align-items-start gap-2 mt-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
-                <div>
-                    <strong>Atenção!</strong> Para reservar doações, é necessário que seu
-                    arquivo de comprovação seja enviado e aprovado pela administração.
+            <input type="hidden" asp-for="IdUsuario" />
+            <input type="hidden" asp-for="SenhaHash" />
+            <input type="hidden" asp-for="TipoUsuario" />
+            <input type="hidden" asp-for="StatusVerificacao" />
+            <input type="hidden" asp-for="Ativo" />
+            <input type="hidden" asp-for="DataCadastro" />
 
-                    @if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Pendente)
+            <div class="admin-form-section">
+                <h2>Dados principais</h2>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label asp-for="Nome" class="form-label"></label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span asp-validation-for="Nome" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Telefone" class="form-label"></label>
+                        <input asp-for="Telefone" class="form-control" />
+                        <span asp-validation-for="Telefone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Nova senha</label>
+                        <input type="password" name="NovaSenha" class="form-control" autocomplete="new-password" placeholder="Opcional" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Bio" class="form-label">Bio</label>
+                        <textarea asp-for="Bio" class="form-control" rows="3" maxlength="300"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-form-section">
+                <h2>Documentos privados</h2>
+                <div class="row g-3">
+                    @if (!string.IsNullOrEmpty(Model.Cpf))
                     {
-                        <span class="d-block mt-1 text-warning-emphasis">
-                            <i class="bi bi-clock"></i> Seu arquivo está <strong>aguardando aprovação</strong>.
-                        </span>
+                        <div class="col-md-6">
+                            <label asp-for="Cpf" class="form-label"></label>
+                            <input asp-for="Cpf" class="form-control bg-secondary-subtle" readonly />
+                        </div>
                     }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Aprovado)
+                    @if (!string.IsNullOrEmpty(Model.Cnpj))
                     {
-                        <span class="d-block mt-1 text-success">
-                            <i class="bi bi-check-circle"></i> Seu cadastro está <strong>aprovado</strong>!
-                        </span>
+                        <div class="col-md-6">
+                            <label asp-for="Cnpj" class="form-label"></label>
+                            <input asp-for="Cnpj" class="form-control bg-secondary-subtle" readonly />
+                        </div>
                     }
-                    else if (Model.StatusVerificacao == Doalim_dev.Models.StatusVerificacao.Rejeitado)
+                    <div class="col-md-6">
+                        <label class="form-label">Foto de perfil</label>
+                        <input type="file" name="arquivoFotoPerfil" class="form-control" accept=".png,.jpg,.jpeg" />
+                        <div class="form-text">PNG, JPG ou JPEG ate 2MB.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Arquivo de comprovacao</label>
+                        @if (ehAdmin)
+                        {
+                            <div class="form-control bg-secondary-subtle">Admin nao precisa de comprovacao</div>
+                        }
+                        else
+                        {
+                            <input type="file" name="arquivoComprovacao" class="form-control" accept=".png,.jpg,.jpeg,.pdf" />
+                            <div class="form-text">PNG, JPG, JPEG ou PDF ate 5MB.</div>
+                        }
+                    </div>
+                    @if (!ehAdmin && temComprovacao)
                     {
-                        <span class="d-block mt-1 text-danger">
-                            <i class="bi bi-x-circle"></i> Seu arquivo foi <strong>rejeitado</strong>. Envie um novo documento.
-                        </span>
+                        <div class="col-12">
+                            <a href="data:application/octet-stream;base64,@Convert.ToBase64String(Model.Arquivocomprovacao!)" download="comprovacao" class="admin-doc-link">
+                                <i class="bi bi-paperclip"></i>
+                                Ver comprovacao enviada
+                            </a>
+                        </div>
                     }
                 </div>
             </div>
-        }
 
-        <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-success">Salvar alterações</button>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+            <div class="admin-form-section">
+                <h2>Endereco</h2>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input name="Endereco.Cep" class="form-control" placeholder="CEP" id="cep" value="@Model.Endereco?.Cep" maxlength="9" />
+                    </div>
+                    <div class="col-md-8">
+                        <input name="Endereco.Logradouro" class="form-control" placeholder="Logradouro" id="logradouro" value="@Model.Endereco?.Logradouro" />
+                    </div>
+                    <div class="col-md-3">
+                        <input name="Endereco.Numero" class="form-control" placeholder="Numero" value="@Model.Endereco?.Numero" />
+                    </div>
+                    <div class="col-md-5">
+                        <input name="Endereco.Complemento" class="form-control" placeholder="Complemento" value="@Model.Endereco?.Complemento" />
+                    </div>
+                    <div class="col-md-4">
+                        <input name="Endereco.Bairro" class="form-control" placeholder="Bairro" id="bairro" value="@Model.Endereco?.Bairro" />
+                    </div>
+                    <div class="col-md-8">
+                        <input name="Endereco.Cidade" class="form-control" placeholder="Cidade" id="cidade" value="@Model.Endereco?.Cidade" />
+                    </div>
+                    <div class="col-md-4">
+                        <input name="Endereco.Estado" class="form-control" placeholder="UF" id="estado" value="@Model.Endereco?.Estado" maxlength="2" />
+                    </div>
+                </div>
+            </div>
+
+            @if (!ehAdmin)
+            {
+                <div class="alert alert-warning d-flex align-items-start gap-2">
+                    <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                    <div>
+                        Para doar ou reservar, envie a comprovacao e aguarde aprovacao do admin.
+                    </div>
+                </div>
+            }
+
+            <div class="profile-submit">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check2-circle"></i>
+                    Salvar alteracoes
+                </button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</section>
 
 @section Scripts {
     @{
