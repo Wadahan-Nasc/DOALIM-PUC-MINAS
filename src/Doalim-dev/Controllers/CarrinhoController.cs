@@ -310,7 +310,11 @@ namespace Doalim_dev.Controllers
                 _context.Pedidos.Add(pedido);
                 await _context.SaveChangesAsync(); // Gera IdPedido para as reservas
 
-                // Deduz estoque e cria reservas para cada item
+                // Deduz estoque e cria reservas para cada item.
+                // Mantemos pares (reservaObj, vmObj) para preencher o IdReserva gerado
+                // pelo banco após o SaveChangesAsync (antes do save o Id ainda é 0).
+                var pares = new List<(Reserva reserva, ResumoReservaViewModel vm)>();
+
                 foreach (var item in itensNoCarrinho)
                 {
                     var lote = lotesSelecionados[item.IdProduto];
@@ -330,7 +334,7 @@ namespace Doalim_dev.Controllers
                     if (!aindaTemOutrosLotes && lote.Quantidade == 0)
                         item.Produto.StatusProduto = false;
 
-                    _context.Reservas.Add(new Reserva
+                    var reservaObj = new Reserva
                     {
                         IdLote = lote.IdLote,
                         IdBeneficiario = usuarioId,
@@ -338,9 +342,10 @@ namespace Doalim_dev.Controllers
                         QuantidadeReservada = item.QuantidadeDesejada,
                         Status = StatusReserva.Pendente,
                         DataReserva = DateTime.UtcNow
-                    });
+                    };
+                    _context.Reservas.Add(reservaObj);
 
-                    resumoReservas.Add(new ResumoReservaViewModel
+                    var vmObj = new ResumoReservaViewModel
                     {
                         NomeProduto = item.Produto.NomeProduto,
                         MarcaProduto = item.Produto.MarcaProduto,
@@ -350,14 +355,22 @@ namespace Doalim_dev.Controllers
                         DataValidadeLote = lote.DataValidade,
                         QuantidadeDesejada = item.QuantidadeDesejada,
                         NomeDoador = item.Produto.Doador?.Usuario?.Nome ?? "Doador",
+                        FotoProduto = ObterFotoProdutoDataUrl(item.Produto.FotoProduto),
                         StatusReserva = "Pendente",
                         Sucesso = true
-                    });
+                    };
+                    resumoReservas.Add(vmObj);
+                    pares.Add((reservaObj, vmObj));
                 }
 
                 // Remove todos os itens do carrinho e confirma a transação
                 _context.CarrinhoItens.RemoveRange(itensNoCarrinho);
                 await _context.SaveChangesAsync();
+
+                // Após o save, os IdReserva gerados pelo banco já estão nos objetos EF
+                foreach (var (r, v) in pares)
+                    v.IdReserva = r.IdReserva;
+
                 await transaction.CommitAsync();
 
                 viewModel = new PedidoConfirmadoViewModel

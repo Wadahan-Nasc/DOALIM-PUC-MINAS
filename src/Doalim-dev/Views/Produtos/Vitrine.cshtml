@@ -8,57 +8,40 @@
     var podeReservar = ViewBag.PodeReservar == true;
     var ehBeneficiarioPF = ViewBag.EhBeneficiarioPF == true;
     var categorias = ViewBag.CategoriasVitrine as List<string> ?? new List<string>();
+    var cidadeBeneficiario = ViewBag.CidadeBeneficiario as string;
 }
 
 <section class="vitrine-page-clean">
     <header class="vitrine-clean-header">
         <div>
             <span class="admin-eyebrow">Vitrine Doalim</span>
-            <h1>Alimentos disponiveis</h1>
+            <h1>Alimentos disponíveis</h1>
             <p>Consulte os itens ativos, filtre por necessidade e reserve quando sua conta estiver aprovada.</p>
-        </div>
-        <div class="vitrine-clean-stats">
-            <div>
-                <strong>@Model.Produtos.Count()</strong>
-                <span>produtos</span>
-            </div>
-            <div>
-                <strong>@Model.Produtos.Sum(p => p.QuantidadeDisponivel)</strong>
-                <span>itens</span>
-            </div>
         </div>
     </header>
 
-    @if (usuarioLogado && !usuarioAprovado)
+    @if (usuarioLogado && !usuarioAprovado && usuarioBeneficiario)
     {
         <div class="vitrine-notice">
             <i class="bi bi-shield-exclamation"></i>
-            <span>Para reservar, envie o arquivo de comprovacao no seu perfil e aguarde a aprovacao do admin.</span>
+            <span>Para reservar, envie o arquivo de comprovação no seu perfil e aguarde a aprovação do administrador.</span>
             <a asp-controller="Usuarios" asp-action="MeuPerfil" class="btn btn-sm btn-outline-warning">Meu Perfil</a>
         </div>
     }
-    else if (usuarioLogado && usuarioAprovado && !usuarioBeneficiario)
-    {
-        <div class="vitrine-notice">
-            <i class="bi bi-person-plus"></i>
-            <span>Ative o perfil de beneficiario em Meu Perfil para poder reservar alimentos.</span>
-            <a asp-controller="Usuarios" asp-action="MeuPerfil" class="btn btn-sm btn-outline-success">Ativar perfil</a>
-        </div>
-    }
 
-    <form method="get" asp-controller="Produtos" asp-action="Vitrine" class="vitrine-filter">
+    <form method="get" asp-controller="Produtos" asp-action="Vitrine" class="vitrine-filter" id="formFiltroVitrine">
         <div class="vitrine-filter-title">
             <i class="bi bi-sliders"></i>
             <div>
                 <strong>Filtrar vitrine</strong>
-                <span>Busque por nome, categoria, quantidade e validade.</span>
+                <span>Busque por nome, categoria, quantidade, validade e localidade.</span>
             </div>
         </div>
 
         <div class="vitrine-filter-grid">
             <div>
                 <label class="form-label">Buscar por nome</label>
-                <input type="text" name="NomeBusca" value="@Model.Filtros.NomeBusca" class="form-control" placeholder="Arroz, feijao, macarrao..." />
+                <input type="text" name="NomeBusca" value="@Model.Filtros.NomeBusca" class="form-control" placeholder="Arroz, feijão, macarrão..." />
             </div>
             <div>
                 <label class="form-label">Categoria</label>
@@ -71,13 +54,13 @@
                 </select>
             </div>
             <div>
-                <label class="form-label">Quantidade minima</label>
+                <label class="form-label">Quantidade mínima</label>
                 <input type="number" name="QuantidadeMinima" value="@Model.Filtros.QuantidadeMinima" class="form-control" min="0" placeholder="Ex: 10" />
             </div>
             <div>
                 <label class="form-label">Validade</label>
                 <select name="OrdemValidade" class="form-select">
-                    <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">Mais proxima</option>
+                    <option value="asc" selected="@(Model.Filtros.OrdemValidade == "asc")">Mais próxima</option>
                     <option value="desc" selected="@(Model.Filtros.OrdemValidade == "desc")">Mais distante</option>
                 </select>
             </div>
@@ -92,6 +75,59 @@
                 </a>
             </div>
         </div>
+
+        @* Filtros de localidade — exibidos apenas para beneficiários logados *@
+        @if (usuarioBeneficiario)
+        {
+            <div class="mt-3 pt-3 border-top" style="border-color:#dce8d6 !important;">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="form-check form-switch mb-0">
+                        @* Hidden field garante que o valor "false" seja enviado quando o toggle estiver desativado *@
+                        <input type="hidden" name="FiltrarPorCidade" value="false" />
+                        <input class="form-check-input" type="checkbox" id="toggleCidade"
+                               name="FiltrarPorCidade" value="true"
+                               @(Model.Filtros.FiltrarPorCidade ? "checked" : "")
+                               onchange="atualizarFiltroCidade(this.checked)" />
+                        <label class="form-check-label fw-semibold" for="toggleCidade">
+                            <i class="bi bi-geo-alt-fill text-success me-1"></i>
+                            Visualizar apenas da minha cidade
+                        </label>
+                    </div>
+
+                    @* Campos de cidade/bairro manual — aparecem quando o toggle está DESATIVADO *@
+                    <div id="campoCidadeManual" class="d-flex gap-2 flex-wrap @(Model.Filtros.FiltrarPorCidade ? "d-none" : "")">
+                        <div>
+                            <input type="text" name="Cidade" value="@Model.Filtros.Cidade"
+                                   class="form-control form-control-sm" style="width:180px;"
+                                   placeholder="Cidade do doador" />
+                        </div>
+                        <div>
+                            <input type="text" name="Bairro" value="@Model.Filtros.Bairro"
+                                   class="form-control form-control-sm" style="width:160px;"
+                                   placeholder="Bairro (opcional)" />
+                        </div>
+                    </div>
+
+                    @* Campo de bairro quando filtro por cidade própria está ativo *@
+                    <div id="campoBairroProximo" class="@(!Model.Filtros.FiltrarPorCidade ? "d-none" : "")">
+                        <input type="text" name="Bairro" value="@Model.Filtros.Bairro"
+                               class="form-control form-control-sm" style="width:180px;"
+                               placeholder="Filtrar por bairro (opcional)" />
+                    </div>
+                </div>
+
+                @if (string.IsNullOrWhiteSpace(cidadeBeneficiario) && Model.Filtros.FiltrarPorCidade)
+                {
+                    <p class="text-muted small mt-2 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Complete seu endereço em
+                        <a asp-controller="Usuarios" asp-action="MeuPerfil" class="text-success fw-semibold">Meu Perfil</a>
+                        para ativar o filtro por cidade.
+                    </p>
+                }
+            </div>
+        }
+
     </form>
 
     @if (!Model.Produtos.Any())
@@ -134,10 +170,6 @@
 
                         <div class="vitrine-card-facts">
                             <div>
-                                <strong>@alimento.QuantidadeDisponivel</strong>
-                                <span>disponiveis</span>
-                            </div>
-                            <div>
                                 <strong>@alimento.NomeDoador</strong>
                                 <span>doador</span>
                             </div>
@@ -177,7 +209,7 @@
                             }
                             else if (!usuarioAprovado)
                             {
-                                <button type="button" class="btn btn-outline-warning w-100" disabled>Aguardando aprovacao</button>
+                                <button type="button" class="btn btn-outline-warning w-100" disabled>Aguardando aprovação</button>
                             }
                             else
                             {
@@ -193,6 +225,23 @@
 
 @section Scripts {
     <script>
+        function atualizarFiltroCidade(ativo) {
+            var manual = document.getElementById('campoCidadeManual');
+            var proximo = document.getElementById('campoBairroProximo');
+            if (!manual || !proximo) return;
+            if (ativo) {
+                manual.classList.add('d-none');
+                proximo.classList.remove('d-none');
+                // Limpa campos manuais ao ativar o filtro automático
+                manual.querySelectorAll('input').forEach(function(i){ i.value = ''; });
+            } else {
+                manual.classList.remove('d-none');
+                proximo.classList.add('d-none');
+                // Limpa bairro do modo automático
+                proximo.querySelectorAll('input').forEach(function(i){ i.value = ''; });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.qtd-input').forEach(function (input) {
                 input.addEventListener('input', function () {
@@ -204,10 +253,10 @@
                     const aviso = form.querySelector('.aviso-limite');
 
                     if (isNaN(val) || val < 1) {
-                        aviso.textContent = 'A quantidade minima e 1.';
+                        aviso.textContent = 'A quantidade mínima é 1.';
                         btn.disabled = true;
                     } else if (val > max) {
-                        aviso.textContent = 'Limite para ' + tipo + ': maximo ' + max + ' unidade(s).';
+                        aviso.textContent = 'Limite para ' + tipo + ': máximo ' + max + ' unidade(s).';
                         btn.disabled = true;
                     } else {
                         aviso.textContent = '';

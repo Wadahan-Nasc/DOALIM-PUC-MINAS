@@ -108,23 +108,15 @@
                                     <i class="bi bi-box-seam me-1"></i>Meus Produtos
                                 </a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#"
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-clipboard-data me-1"></i>Relatorios
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Produtos" asp-action="GerenciarReservas">
+                                    <i class="bi bi-clipboard-check me-1"></i>Gerenciar Reservas
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Produtos" asp-action="GerenciarReservas">
-                                            <i class="bi bi-clipboard-check text-success me-2"></i>Gerenciar Reservas
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Produtos" asp-action="HistoricoDoacoes">
-                                            <i class="bi bi-clock-history text-primary me-2"></i>Historico de Doacoes
-                                        </a>
-                                    </li>
-                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Produtos" asp-action="HistoricoDoacoes">
+                                    <i class="bi bi-clock-history me-1"></i>Histórico de Doações
+                                </a>
                             </li>
                         }
 
@@ -141,12 +133,12 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Usuarios" asp-action="Index">
-                                    <i class="bi bi-people me-1"></i>Usuarios
+                                    <i class="bi bi-people me-1"></i>Usuários
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Lookup" asp-action="Index">
-                                    <i class="bi bi-sliders me-1"></i>Dominios
+                                    <i class="bi bi-sliders me-1"></i>Domínios
                                 </a>
                             </li>
                         }
@@ -192,7 +184,7 @@
                                     <li>
                                         <a class="dropdown-item" asp-controller="Usuarios" asp-action="PerfilPublico"
                                            asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
-                                            <i class="bi bi-person-badge me-2 text-secondary"></i>Perfil Publico
+                                            <i class="bi bi-person-badge me-2 text-secondary"></i>Perfil Público
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider" /></li>

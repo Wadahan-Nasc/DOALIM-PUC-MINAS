@@ -1,4 +1,4 @@
-﻿namespace Doalim_dev.ViewModels
+namespace Doalim_dev.ViewModels
 {
     public class MinhasReservasViewModel
     {
@@ -6,33 +6,36 @@
         public int IdReserva { get; set; }
         public int IdPedido { get; set; }
         public DateTime DataReserva { get; set; }
-        public string StatusReserva { get; set; }
+        public string StatusReserva { get; set; } = string.Empty;
         public int QuantidadeReservada { get; set; }
 
         // Token de confirmação da reserva
-        // Exibido apenas quando Status = Confirmada (Reserva.cs)
+        // Exibido apenas quando Status = Confirmada
         public string? TokenConfirmacao { get; set; }
 
-        //Intervalo de retirada do pedido
-        // É preenchido pelo doador durante aprovação da reserva
+        // Intervalo de retirada do pedido
+        // Preenchido pelo doador durante aprovação da reserva
         public DateTime? DataRetiradaInicio { get; set; }
         public DateTime? DataRetiradaFim { get; set; }
 
         // Dados do lote reservado
-        public string NumeroLote { get; set; }
+        public string NumeroLote { get; set; } = string.Empty;
         public DateTime DataValidadeLote { get; set; }
 
         // Dados do produto
-        public string NomeProduto { get; set; }
-        public string MarcaProduto { get; set; }
-        public string CategoriaProduto { get; set; }
-        public string UnidadeMedidaProduto { get; set; }
+        public string NomeProduto { get; set; } = string.Empty;
+        public string MarcaProduto { get; set; } = string.Empty;
+        public string CategoriaProduto { get; set; } = string.Empty;
+        public string UnidadeMedidaProduto { get; set; } = string.Empty;
         public string? FotoProduto { get; set; } // Base64 convertido no controller
 
         // Dados do doador
         public int IdUsuarioDoador { get; set; }
-        public string NomeDoador { get; set; }
-        public string TelefoneDoador { get; set; }
+        public string NomeDoador { get; set; } = string.Empty;
+        public string? TelefoneDoador { get; set; }
+
+        // Endereço do doador — exibido apenas quando status = Confirmada
+        public string? EnderecoDoador { get; set; }
 
         // Motivo informado pelo doador ao rejeitar — exibido apenas quando Rejeitada
         public string? MotivoRejeicao { get; set; }
@@ -42,10 +45,10 @@
         public bool JaAvaliou { get; set; }
         public int? NotaAvaliacao { get; set; }
 
-        //Campos Calculados
+        // Campos calculados
+        // Cancelamento permitido apenas quando ainda não confirmado pelo doador (status Pendente)
         public bool PodeSerCancelada =>
-            StatusReserva == "Pendente" ||
-            StatusReserva == "Confirmada";
+            StatusReserva == "Pendente";
 
         public bool ExibirToken =>
             StatusReserva == "Confirmada" && !string.IsNullOrEmpty(TokenConfirmacao);

@@ -210,22 +210,31 @@ namespace Doalim_dev.Controllers
             var usuarioLogado = User.Identity?.IsAuthenticated == true;
             var usuarioBeneficiario = UsuarioEhBeneficiario();
             var usuarioAprovado = false;
+            int usuarioIdLogado = 0;
 
             if (usuarioLogado)
             {
                 var usuarioIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                if (int.TryParse(usuarioIdClaim, out var usuarioId))
-                {
-                    usuarioAprovado = await UsuarioComprovadoAsync(usuarioId);
-                }
+                if (int.TryParse(usuarioIdClaim, out usuarioIdLogado))
+                    usuarioAprovado = await UsuarioComprovadoAsync(usuarioIdLogado);
             }
 
-            ViewBag.UsuarioLogado = usuarioLogado;
+            // Cidade do beneficiário logado (para filtro padrão por localidade)
+            string? cidadeBeneficiario = null;
+            if (usuarioBeneficiario && usuarioIdLogado > 0)
+            {
+                cidadeBeneficiario = await _context.Enderecos
+                    .Where(e => e.IdUsuario == usuarioIdLogado)
+                    .Select(e => e.Cidade)
+                    .FirstOrDefaultAsync();
+            }
+
+            ViewBag.UsuarioLogado       = usuarioLogado;
             ViewBag.UsuarioBeneficiario = usuarioBeneficiario;
-            ViewBag.UsuarioAprovado = usuarioAprovado;
-            ViewBag.PodeReservar = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
-            ViewBag.EhBeneficiarioPF = User.IsInRole("BeneficiarioPF");
+            ViewBag.UsuarioAprovado     = usuarioAprovado;
+            ViewBag.PodeReservar        = usuarioLogado && usuarioBeneficiario && usuarioAprovado;
+            ViewBag.EhBeneficiarioPF    = User.IsInRole("BeneficiarioPF");
+            ViewBag.CidadeBeneficiario  = cidadeBeneficiario;
 
             var hoje = DateTime.Today;
             var query = _context.Produtos
@@ -238,6 +247,38 @@ namespace Doalim_dev.Controllers
 
             if (!string.IsNullOrWhiteSpace(filtros.Categoria))
                 query = query.Where(p => p.CategoriaProduto == filtros.Categoria);
+
+            // Filtro de localidade — aplicado apenas para beneficiários
+            if (usuarioBeneficiario)
+            {
+                if (filtros.FiltrarPorCidade && !string.IsNullOrWhiteSpace(cidadeBeneficiario))
+                {
+                    // Filtra pelos doadores da mesma cidade do beneficiário
+                    var idsDoadoresCidade = await _context.Enderecos
+                        .Where(e => e.Cidade == cidadeBeneficiario)
+                        .Select(e => e.IdUsuario)
+                        .ToListAsync();
+                    query = query.Where(p => idsDoadoresCidade.Contains(p.IdDoador));
+                }
+                else if (!filtros.FiltrarPorCidade && !string.IsNullOrWhiteSpace(filtros.Cidade))
+                {
+                    // Beneficiário digitou uma cidade específica
+                    var idsDoadoresCidade = await _context.Enderecos
+                        .Where(e => e.Cidade.Contains(filtros.Cidade))
+                        .Select(e => e.IdUsuario)
+                        .ToListAsync();
+                    query = query.Where(p => idsDoadoresCidade.Contains(p.IdDoador));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filtros.Bairro))
+                {
+                    var idsDoadoresBairro = await _context.Enderecos
+                        .Where(e => e.Bairro.Contains(filtros.Bairro))
+                        .Select(e => e.IdUsuario)
+                        .ToListAsync();
+                    query = query.Where(p => idsDoadoresBairro.Contains(p.IdDoador));
+                }
+            }
 
             // Categorias disponíveis para o select do filtro
             ViewBag.CategoriasVitrine = await ObterCategoriasVitrineAsync();
@@ -666,35 +707,53 @@ namespace Doalim_dev.Controllers
 
         // =======================================================================================
         // GET: /Produtos/GerenciarReservas
-        // Exibe todas as reservas pendentes e confirmadas dos produtos do doador logado.
+        // Exibe reservas do doador logado com filtros opcionais.
         // =======================================================================================
         [Authorize(Roles = "DoadorPF,DoadorPJ")]
-        public async Task<IActionResult> GerenciarReservas()
+        public async Task<IActionResult> GerenciarReservas(
+            string? nomeBeneficiario = null,
+            DateTime? dataInicio     = null,
+            DateTime? dataFim        = null,
+            string?   status         = null)
         {
             var usuarioId = ObterIdUsuarioLogado();
             if (usuarioId == 0)
                 return RedirectToAction("Login", "Auth");
 
-            // Carrega reservas ativas (Pendente + Confirmada) em memoria
-            var reservasAtivas = await _context.Reservas
+            // Query base — carrega todos os status relevantes de uma só vez
+            var queryBase = _context.Reservas
                 .Include(r => r.Lote).ThenInclude(l => l.Produto)
                 .Include(r => r.Beneficiario).ThenInclude(b => b.Usuario)
                 .Where(r => r.Lote.Produto.IdDoador == usuarioId
-                            && (r.Status == StatusReserva.Pendente
-                             || r.Status == StatusReserva.Confirmada))
+                         && (r.Status == StatusReserva.Pendente
+                          || r.Status == StatusReserva.Confirmada
+                          || r.Status == StatusReserva.Retirada));
+
+            // Filtro por nome do beneficiário
+            if (!string.IsNullOrWhiteSpace(nomeBeneficiario))
+                queryBase = queryBase.Where(r =>
+                    r.Beneficiario.Usuario.Nome.Contains(nomeBeneficiario));
+
+            // Filtro por período de reserva
+            if (dataInicio.HasValue)
+                queryBase = queryBase.Where(r => r.DataReserva >= dataInicio.Value.Date);
+            if (dataFim.HasValue)
+                queryBase = queryBase.Where(r => r.DataReserva < dataFim.Value.Date.AddDays(1));
+
+            var todas = await queryBase
                 .OrderByDescending(r => r.DataReserva)
                 .ToListAsync();
 
-            // Carrega reservas Retiradas (para avaliacao pendente)
-            var reservasRetiradas = await _context.Reservas
-                .Include(r => r.Lote).ThenInclude(l => l.Produto)
-                .Include(r => r.Beneficiario).ThenInclude(b => b.Usuario)
-                .Where(r => r.Lote.Produto.IdDoador == usuarioId
-                            && r.Status == StatusReserva.Retirada)
-                .OrderByDescending(r => r.DataReserva)
-                .ToListAsync();
+            // Divide por status (o filtro de status esconde seções inteiras)
+            bool mostrarPendente   = string.IsNullOrEmpty(status) || status == "Pendente";
+            bool mostrarConfirmada = string.IsNullOrEmpty(status) || status == "Confirmada";
+            bool mostrarRetirada   = string.IsNullOrEmpty(status) || status == "Retirada";
 
-            // Busca avaliacoes ja feitas pelo doador para as reservas Retiradas
+            var reservasPendentes   = mostrarPendente   ? todas.Where(r => r.Status == StatusReserva.Pendente).ToList()   : new();
+            var reservasConfirmadas = mostrarConfirmada ? todas.Where(r => r.Status == StatusReserva.Confirmada).ToList() : new();
+            var reservasRetiradas   = mostrarRetirada   ? todas.Where(r => r.Status == StatusReserva.Retirada).ToList()   : new();
+
+            // Avaliações já realizadas pelo doador para as reservas Retiradas
             var idsRetiradas = reservasRetiradas.Select(r => r.IdReserva).ToList();
             Dictionary<int, int> avaliacoesDoador = new();
             if (idsRetiradas.Any())
@@ -706,24 +765,31 @@ namespace Doalim_dev.Controllers
                     .ToDictionaryAsync(a => a.IdReserva!.Value, a => a.Nota);
             }
 
-            // Funcao local de projecao (reutilizada para ativas e retiradas)
+            // Pedidos em que ao menos uma avaliação existe — grupo todo considerado avaliado
+            var pedidosJaAvaliados = reservasRetiradas
+                .Where(r => avaliacoesDoador.ContainsKey(r.IdReserva))
+                .Select(r => r.IdPedido)
+                .Distinct()
+                .ToHashSet();
+
+            // Função local de projeção
             GerenciarReservaDoadorViewModel MapReserva(Reserva r, bool ehRetirada = false) => new()
             {
-                IdReserva            = r.IdReserva,
-                IdPedido             = r.IdPedido ?? 0,
-                DataReserva          = r.DataReserva,
-                StatusReserva        = r.Status.ToString(),
-                QuantidadeReservada  = r.QuantidadeReservada,
-                NumeroLote           = r.Lote.NumeroLote,
-                DataValidadeLote     = r.Lote.DataValidade,
-                IdProduto            = r.Lote.Produto.IdProduto,
-                NomeProduto          = r.Lote.Produto.NomeProduto,
-                MarcaProduto         = r.Lote.Produto.MarcaProduto,
-                CategoriaProduto     = r.Lote.Produto.CategoriaProduto,
-                UnidadeMedidaProduto = r.Lote.Produto.UnidadeMedida,
-                FotoProduto          = r.Lote.Produto.FotoProduto == null
-                                        ? null
-                                        : ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
+                IdReserva             = r.IdReserva,
+                IdPedido              = r.IdPedido ?? 0,
+                DataReserva           = r.DataReserva,
+                StatusReserva         = r.Status.ToString(),
+                QuantidadeReservada   = r.QuantidadeReservada,
+                NumeroLote            = r.Lote.NumeroLote,
+                DataValidadeLote      = r.Lote.DataValidade,
+                IdProduto             = r.Lote.Produto.IdProduto,
+                NomeProduto           = r.Lote.Produto.NomeProduto,
+                MarcaProduto          = r.Lote.Produto.MarcaProduto,
+                CategoriaProduto      = r.Lote.Produto.CategoriaProduto,
+                UnidadeMedidaProduto  = r.Lote.Produto.UnidadeMedida,
+                FotoProduto           = r.Lote.Produto.FotoProduto == null
+                                          ? null
+                                          : ObterFotoProdutoDataUrl(r.Lote.Produto.FotoProduto),
                 IdUsuarioBeneficiario = r.IdBeneficiario,
                 NomeBeneficiario      = r.Beneficiario.Usuario.Nome,
                 TelefoneBeneficiario  = r.Beneficiario.Usuario.Telefone,
@@ -734,23 +800,26 @@ namespace Doalim_dev.Controllers
                 PodeAvaliar           = ehRetirada,
                 JaAvaliou             = ehRetirada && avaliacoesDoador.ContainsKey(r.IdReserva),
                 NotaAvaliacao         = (ehRetirada && avaliacoesDoador.TryGetValue(r.IdReserva, out var n))
-                                        ? n : (int?)null
+                                          ? n : (int?)null
             };
 
             var viewModel = new GerenciarReservasPageViewModel
             {
-                Pendentes   = reservasAtivas
-                    .Where(r => r.Status == StatusReserva.Pendente)
-                    .Select(r => MapReserva(r))
-                    .ToList(),
-                Confirmadas = reservasAtivas
-                    .Where(r => r.Status == StatusReserva.Confirmada)
-                    .Select(r => MapReserva(r))
-                    .ToList(),
-                PendentesAvaliacao = reservasRetiradas
-                    .Where(r => !avaliacoesDoador.ContainsKey(r.IdReserva))
+                Pendentes   = reservasPendentes.Select(r => MapReserva(r)).ToList(),
+                Confirmadas = reservasConfirmadas.Select(r => MapReserva(r)).ToList(),
+
+                // Retiradas: TODOS os itens de pedidos ainda não avaliados
+                // (agrupados por pedido na view para mostrar todos os produtos do card)
+                Retiradas = reservasRetiradas
+                    .Where(r => !pedidosJaAvaliados.Contains(r.IdPedido))
                     .Select(r => MapReserva(r, ehRetirada: true))
-                    .ToList()
+                    .ToList(),
+
+                // Filtros ativos — para manter os valores no formulário
+                FiltroNomeBeneficiario = nomeBeneficiario,
+                FiltroDataInicio       = dataInicio,
+                FiltroDataFim          = dataFim,
+                FiltroStatus           = status
             };
 
             return View(viewModel);
@@ -809,15 +878,28 @@ namespace Doalim_dev.Controllers
             }
 
             // Gera o token de confirmação — 8 caracteres alfanuméricos em maiúsculo
-            reserva.TokenConfirmacao = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            var tokenGerado = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            reserva.TokenConfirmacao = tokenGerado;
             reserva.DataRetiradaInicio = viewModel.DataRetiradaInicio;
             reserva.DataRetiradaFim = viewModel.DataRetiradaFim;
             reserva.Status = StatusReserva.Confirmada;
 
-            // NOTA: O StatusLote NÃO é alterado aqui.
-            // A quantidade já foi deduzida do lote em Finalizar.
-            // O lote permanece Disponivel para eventuais quantidades restantes,
-            // ou Inativo se foi totalmente consumido.
+            // Aprova todas as reservas irmãs do mesmo pedido e mesmo doador com o mesmo token
+            var irmasParaAprovar = await _context.Reservas
+                .Include(r => r.Lote).ThenInclude(l => l.Produto)
+                .Where(r => r.IdPedido == reserva.IdPedido
+                         && r.IdReserva != reserva.IdReserva
+                         && r.Status == StatusReserva.Pendente
+                         && r.Lote.Produto.IdDoador == usuarioId)
+                .ToListAsync();
+
+            foreach (var irma in irmasParaAprovar)
+            {
+                irma.TokenConfirmacao = tokenGerado;
+                irma.DataRetiradaInicio = viewModel.DataRetiradaInicio;
+                irma.DataRetiradaFim = viewModel.DataRetiradaFim;
+                irma.Status = StatusReserva.Confirmada;
+            }
 
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(reserva.IdPedido);
@@ -829,6 +911,74 @@ namespace Doalim_dev.Controllers
         }
 
         // =====================================================================
+        // POST: /Produtos/RejeitarItens
+        // Doador rejeita uma seleção de reservas dentro de um pedido.
+        // Quando todos os itens do pedido são enviados, equivale à rejeição total.
+        // =====================================================================
+        [HttpPost]
+        [Authorize(Roles = "DoadorPF,DoadorPJ")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejeitarItens(int idPedido, List<int> idsReservas, string? motivoRejeicao)
+        {
+            var usuarioId = ObterIdUsuarioLogado();
+            if (usuarioId == 0)
+                return RedirectToAction("Login", "Auth");
+
+            if (string.IsNullOrWhiteSpace(motivoRejeicao))
+            {
+                TempData["Erro"] = "Informe o motivo da rejeição.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            if (idsReservas == null || !idsReservas.Any())
+            {
+                TempData["Erro"] = "Selecione ao menos um item para rejeitar.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            var reservas = await _context.Reservas
+                .Include(r => r.Lote)
+                    .ThenInclude(l => l.Produto)
+                .Where(r => idsReservas.Contains(r.IdReserva)
+                         && r.IdPedido == idPedido
+                         && r.Lote.Produto.IdDoador == usuarioId
+                         && r.Status == StatusReserva.Pendente)
+                .ToListAsync();
+
+            if (!reservas.Any())
+            {
+                TempData["Erro"] = "Nenhuma reserva válida encontrada para rejeitar.";
+                return RedirectToAction(nameof(GerenciarReservas));
+            }
+
+            foreach (var reserva in reservas)
+            {
+                reserva.Status = StatusReserva.Rejeitada;
+                reserva.MotivoRejeicao = motivoRejeicao.Trim();
+                reserva.DataEncerramento = DateTime.UtcNow;
+
+                // Devolve o lote para a vitrine se ainda estiver dentro da validade
+                if (reserva.Lote.DataValidade.Date >= DateTime.Today)
+                {
+                    reserva.Lote.Quantidade += reserva.QuantidadeReservada;
+
+                    if (reserva.Lote.StatusLote == StatusLote.Inativo)
+                        reserva.Lote.StatusLote = StatusLote.Disponivel;
+
+                    reserva.Lote.Produto.StatusProduto = true;
+                }
+            }
+
+            // Atualiza o status do pedido
+            await AtualizarStatusPedidoAsync(idPedido);
+            await _context.SaveChangesAsync();
+
+            TempData["Sucesso"] = reservas.Count == 1
+                ? $"1 item rejeitado com sucesso."
+                : $"{reservas.Count} itens rejeitados com sucesso.";
+            return RedirectToAction(nameof(GerenciarReservas));
+        }
+
         // POST: /Produtos/RejeitarReserva
         // Doador rejeita a reserva. O lote volta para a vitrine
         // se ainda estiver dentro da validade.
@@ -932,11 +1082,25 @@ namespace Doalim_dev.Controllers
             reserva.Status = StatusReserva.Retirada;
             reserva.DataEncerramento = DateTime.UtcNow;
 
-            // Marca o lote como Entregue apenas se não houver mais estoque.
-            // Se ainda houver quantidade disponível, o lote permanece como está
-            // para não bloquear outras reservas em andamento.
             if (reserva.Lote.Quantidade == 0)
                 reserva.Lote.StatusLote = StatusLote.Entregue;
+
+            // Confirma todas as reservas irmãs do mesmo pedido e mesmo doador
+            var irmasParaConfirmar = await _context.Reservas
+                .Include(r => r.Lote).ThenInclude(l => l.Produto)
+                .Where(r => r.IdPedido == reserva.IdPedido
+                         && r.IdReserva != reserva.IdReserva
+                         && r.Status == StatusReserva.Confirmada
+                         && r.Lote.Produto.IdDoador == usuarioId)
+                .ToListAsync();
+
+            foreach (var irma in irmasParaConfirmar)
+            {
+                irma.Status = StatusReserva.Retirada;
+                irma.DataEncerramento = DateTime.UtcNow;
+                if (irma.Lote.Quantidade == 0)
+                    irma.Lote.StatusLote = StatusLote.Entregue;
+            }
 
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(reserva.IdPedido);

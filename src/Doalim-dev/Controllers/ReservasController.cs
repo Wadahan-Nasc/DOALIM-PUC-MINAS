@@ -26,6 +26,7 @@ namespace Doalim_dev.Controllers
                     .ThenInclude(l => l.Produto)
                         .ThenInclude(p => p.Doador)
                             .ThenInclude(d => d.Usuario)
+                                .ThenInclude(u => u.Endereco)
                 .Where(r => r.IdBeneficiario == usuarioId)
                 .AsQueryable();
 
@@ -120,6 +121,10 @@ namespace Doalim_dev.Controllers
                 IdUsuarioDoador = r.Lote.Produto.IdDoador,
                 NomeDoador = r.Lote.Produto.Doador.Usuario.Nome,
                 TelefoneDoador = r.Lote.Produto.Doador.Usuario.Telefone,
+                EnderecoDoador = r.Lote.Produto.Doador.Usuario.Endereco == null ? null
+                    : $"{r.Lote.Produto.Doador.Usuario.Endereco.Logradouro}, {r.Lote.Produto.Doador.Usuario.Endereco.Numero}"
+                    + (string.IsNullOrWhiteSpace(r.Lote.Produto.Doador.Usuario.Endereco.Complemento) ? "" : $" - {r.Lote.Produto.Doador.Usuario.Endereco.Complemento}")
+                    + $" — {r.Lote.Produto.Doador.Usuario.Endereco.Bairro}, {r.Lote.Produto.Doador.Usuario.Endereco.Cidade}/{r.Lote.Produto.Doador.Usuario.Endereco.Estado}",
                 MotivoRejeicao = r.MotivoRejeicao,
                 PodeAvaliar = r.Status == StatusReserva.Retirada,
                 JaAvaliou   = r.Status == StatusReserva.Retirada

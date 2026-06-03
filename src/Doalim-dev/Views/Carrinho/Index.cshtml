@@ -100,8 +100,7 @@ else
                             <form asp-controller="Carrinho" asp-action="Remover" method="post">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="idCarrinhoItem" value="@item.IdCarrinho" />
-                                <button type="submit" class="btn btn-outline-danger btn-sm"
-                                        onclick="return confirm('Remover @item.NomeProduto do carrinho?')">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Remover do carrinho">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

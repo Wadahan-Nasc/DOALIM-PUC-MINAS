@@ -1,7 +1,7 @@
 @model IEnumerable<Doalim_dev.Models.Usuario>
 
 @{
-    ViewData["Title"] = "Usuarios";
+    ViewData["Title"] = "Usuários";
 
     // Paginação
     var itensPorPagina = 15;
@@ -31,9 +31,9 @@
 
     private static string TextoStatus(Usuario usuario)
     {
-        if (usuario.TipoUsuario == TipoUsuario.Admin) return "Nao aplicavel";
+        if (usuario.TipoUsuario == TipoUsuario.Admin) return "Não aplicável";
         if (usuario.ArquivoComprovacao == null || usuario.ArquivoComprovacao.Length == 0)
-            return "Sem comprovacao";
+            return "Sem comprovação";
         return usuario.StatusVerificacao.ToString();
     }
 }
@@ -41,14 +41,14 @@
 <section class="admin-dashboard">
     <div class="admin-page-header">
         <div>
-            <span class="admin-eyebrow">Administracao</span>
-            <h1>Usuarios</h1>
-            <p>Aprove comprovacoes sem expor CPF, CNPJ, telefone, endereco ou senha.</p>
+            <span class="admin-eyebrow">Administração</span>
+            <h1>Usuários</h1>
+            <p>Analise comprovações sem expor CPF, CNPJ, telefone, endereço ou senha. Use "Ver detalhes" para aprovar ou rejeitar.</p>
         </div>
         <div class="admin-header-actions">
             <a asp-action="Create" class="btn btn-success">
                 <i class="bi bi-person-plus"></i>
-                Novo usuario
+                Novo usuário
             </a>
             <a asp-action="Create" asp-route-tipoUsuario="@TipoUsuario.Admin" class="btn btn-outline-success">
                 <i class="bi bi-shield-plus"></i>
@@ -76,13 +76,34 @@
         </div>
     </div>
 
-    <form method="get" class="admin-search">
+    <form method="get" style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,0.9fr) minmax(0,0.9fr) auto auto; gap:10px; align-items:end; margin-bottom:18px; padding:14px; border:1px solid #dce8d6; border-radius:8px; background:#f8fbf6;">
         <div>
             <label class="form-label" for="busca">Buscar</label>
             <div class="admin-search-box">
                 <i class="bi bi-search"></i>
                 <input id="busca" name="busca" value="@ViewBag.Busca" class="form-control" placeholder="Nome ou e-mail" />
             </div>
+        </div>
+        <div>
+            <label class="form-label" for="tipo">Perfil</label>
+            <select id="tipo" name="tipo" class="form-select">
+                <option value="" selected="@(string.IsNullOrEmpty(ViewBag.Tipo as string))">Todos os perfis</option>
+                <option value="DoadorPF"       selected="@(ViewBag.Tipo == "DoadorPF")">Doador PF</option>
+                <option value="DoadorPJ"       selected="@(ViewBag.Tipo == "DoadorPJ")">Doador PJ</option>
+                <option value="BeneficiarioPF" selected="@(ViewBag.Tipo == "BeneficiarioPF")">Beneficiário PF</option>
+                <option value="BeneficiarioPJ" selected="@(ViewBag.Tipo == "BeneficiarioPJ")">Beneficiário PJ</option>
+                <option value="Admin"          selected="@(ViewBag.Tipo == "Admin")">Administrador</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label" for="status">Status</label>
+            <select id="status" name="status" class="form-select">
+                <option value=""          selected="@(string.IsNullOrEmpty(ViewBag.Status as string))">Todos os status</option>
+                <option value="Pendente"  selected="@(ViewBag.Status == "Pendente")">Pendente</option>
+                <option value="Aprovado"  selected="@(ViewBag.Status == "Aprovado")">Aprovado</option>
+                <option value="Rejeitado" selected="@(ViewBag.Status == "Rejeitado")">Rejeitado</option>
+                <option value="SemArquivo" selected="@(ViewBag.Status == "SemArquivo")">Sem arquivo</option>
+            </select>
         </div>
         <button type="submit" class="btn btn-success">
             <i class="bi bi-funnel"></i>
@@ -101,8 +122,8 @@
                     <th>Usuario</th>
                     <th>Perfil</th>
                     <th>Status</th>
-                    <th>Comprovacao</th>
-                    <th class="text-end">Acoes</th>
+                    <th>Comprovação</th>
+                    <th class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -150,39 +171,15 @@
                             }
                             else
                             {
-                                <span class="admin-status status-warning">Aguardando envio</span>
+                                <span class="admin-status status-warning">Sem arquivo enviado</span>
                             }
                         </td>
                         <td>
                             <div class="admin-row-actions">
                                 <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-eye"></i>
-                                    Ver
+                                    Ver detalhes
                                 </a>
-                                @if (podeAprovar && item.StatusVerificacao != StatusVerificacao.Aprovado)
-                                {
-                                    <form asp-action="AtualizarStatusVerificacao" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@item.IdUsuario" />
-                                        <input type="hidden" name="status" value="@StatusVerificacao.Aprovado" />
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="bi bi-check2"></i>
-                                            Aprovar
-                                        </button>
-                                    </form>
-                                }
-                                @if (podeAprovar && item.StatusVerificacao != StatusVerificacao.Rejeitado)
-                                {
-                                    <form asp-action="AtualizarStatusVerificacao" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@item.IdUsuario" />
-                                        <input type="hidden" name="status" value="@StatusVerificacao.Rejeitado" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-x-lg"></i>
-                                            Rejeitar
-                                        </button>
-                                    </form>
-                                }
                             </div>
                         </td>
                     </tr>
@@ -198,6 +195,8 @@
                 <li class="page-item @(paginaAtual <= 1 ? "disabled" : "")">
                     <a class="page-link" asp-action="Index"
                        asp-route-busca="@ViewBag.Busca"
+                       asp-route-status="@ViewBag.Status"
+                       asp-route-tipo="@ViewBag.Tipo"
                        asp-route-pagina="@(paginaAtual - 1)">
                         <i class="bi bi-chevron-left"></i>
                     </a>
@@ -207,12 +206,16 @@
                     <li class="page-item @(p == paginaAtual ? "active" : "")">
                         <a class="page-link" asp-action="Index"
                            asp-route-busca="@ViewBag.Busca"
+                           asp-route-status="@ViewBag.Status"
+                           asp-route-tipo="@ViewBag.Tipo"
                            asp-route-pagina="@p">@p</a>
                     </li>
                 }
                 <li class="page-item @(paginaAtual >= totalPaginas ? "disabled" : "")">
                     <a class="page-link" asp-action="Index"
                        asp-route-busca="@ViewBag.Busca"
+                       asp-route-status="@ViewBag.Status"
+                       asp-route-tipo="@ViewBag.Tipo"
                        asp-route-pagina="@(paginaAtual + 1)">
                         <i class="bi bi-chevron-right"></i>
                     </a>

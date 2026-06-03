@@ -16,7 +16,8 @@ namespace Doalim_dev.Controllers
 
         private const int ItensPorPagina = 15;
 
-        public async Task<IActionResult> Index(string? busca = null, int pagina = 1)
+        public async Task<IActionResult> Index(string? busca = null, int pagina = 1,
+                                                string? status = null, string? tipo = null)
         {
             var query = _context.Usuarios
                 .AsNoTracking()
@@ -34,6 +35,17 @@ namespace Doalim_dev.Controllers
                     || u.Email.Contains(termo));
             }
 
+            // Filtro por tipo de perfil
+            if (!string.IsNullOrWhiteSpace(tipo) && Enum.TryParse<TipoUsuario>(tipo, out var tipoEnum))
+                query = query.Where(u => u.TipoUsuario == tipoEnum);
+
+            // Filtro por status de verificação
+            if (status == "SemArquivo")
+                query = query.Where(u => u.TipoUsuario != TipoUsuario.Admin
+                                      && (u.ArquivoComprovacao == null || u.ArquivoComprovacao.Length == 0));
+            else if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<StatusVerificacao>(status, out var statusEnum))
+                query = query.Where(u => u.StatusVerificacao == statusEnum);
+
             var totalRegistros = await query.CountAsync();
             var totalPaginas   = (int)Math.Ceiling(totalRegistros / (double)ItensPorPagina);
             pagina = Math.Clamp(pagina, 1, Math.Max(1, totalPaginas));
@@ -44,6 +56,8 @@ namespace Doalim_dev.Controllers
                 .ToListAsync();
 
             ViewBag.Busca        = busca;
+            ViewBag.Status       = status;
+            ViewBag.Tipo         = tipo;
             ViewBag.PaginaAtual  = pagina;
             ViewBag.TotalPaginas = totalPaginas;
 
@@ -66,9 +80,17 @@ namespace Doalim_dev.Controllers
         }
 
         // Serve o arquivo de comprovação com headers HTTP corretos para abrir inline no browser
+        // Acessível pelo próprio usuário (dono do arquivo) ou pelo administrador.
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> VerComprovacao(int id)
         {
+            // Verifica permissão: dono do arquivo ou admin
+            var idLogado = ObterIdUsuarioLogado();
+            var ehAdmin  = User.IsInRole("Admin");
+            if (!ehAdmin && idLogado != id)
+                return User.Identity?.IsAuthenticated == true ? Forbid() : RedirectToAction("Login", "Auth");
+
             var usuario = await _context.Usuarios
                 .AsNoTracking()
                 .Select(u => new { u.IdUsuario, u.ArquivoComprovacao })
@@ -210,8 +232,8 @@ namespace Doalim_dev.Controllers
             usuario.StatusVerificacao = status;
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = $"Comprovacao de {usuario.Nome} atualizada para {status}.";
-            return RedirectToAction(nameof(Index));
+            TempData["Sucesso"] = $"Comprovação de {usuario.Nome} atualizada para {status}.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -258,7 +280,7 @@ namespace Doalim_dev.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MeuPerfil(Usuario model, IFormFile? arquivoComprovacao, IFormFile? arquivoFotoPerfil)
+        public async Task<IActionResult> MeuPerfil(Usuario model, IFormFile? arquivoComprovacao, IFormFile? arquivoFotoPerfil, bool removerComprovacao = false)
         {
             if (User.Identity?.IsAuthenticated != true)
                 return RedirectToAction("Login", "Auth");
@@ -320,13 +342,20 @@ namespace Doalim_dev.Controllers
             if (fotoValida.conteudo != null)
                 usuario.FotoPerfil = fotoValida.conteudo;
 
-            if (UsuarioRegras.PrecisaComprovacao(usuario) && comprovacaoValida.conteudo != null)
+            if (UsuarioRegras.PrecisaComprovacao(usuario))
             {
-                usuario.ArquivoComprovacao = comprovacaoValida.conteudo;
-                usuario.StatusVerificacao = StatusVerificacao.Pendente;
+                if (removerComprovacao)
+                {
+                    usuario.ArquivoComprovacao = null;
+                    usuario.StatusVerificacao = StatusVerificacao.Pendente;
+                }
+                else if (comprovacaoValida.conteudo != null)
+                {
+                    usuario.ArquivoComprovacao = comprovacaoValida.conteudo;
+                    usuario.StatusVerificacao = StatusVerificacao.Pendente;
+                }
             }
-
-            if (!UsuarioRegras.PrecisaComprovacao(usuario))
+            else
             {
                 usuario.ArquivoComprovacao = null;
                 usuario.StatusVerificacao = StatusVerificacao.NaoAplicavel;

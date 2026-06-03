@@ -1,7 +1,7 @@
 @model Doalim_dev.Models.Usuario
 
 @{
-    ViewData["Title"] = "Detalhes do usuario";
+    ViewData["Title"] = "Detalhes do usuário";
     var foto      = Model.FotoPerfil != null && Model.FotoPerfil.Length > 0
         ? $"data:image/jpeg;base64,{Convert.ToBase64String(Model.FotoPerfil)}"
         : string.Empty;
@@ -25,9 +25,9 @@
 <section class="admin-dashboard">
     <div class="admin-page-header">
         <div>
-            <span class="admin-eyebrow">Analise de cadastro</span>
+            <span class="admin-eyebrow">Análise de cadastro</span>
             <h1>@Model.Nome</h1>
-            <p>Dados sensiveis permanecem privados. O admin avalia apenas status e comprovacao.</p>
+            <p>Dados sensíveis permanecem privados. O administrador avalia apenas status e comprovação.</p>
         </div>
         <a asp-action="Index" class="btn btn-outline-success">
             <i class="bi bi-arrow-left"></i>
@@ -54,24 +54,24 @@
 
         <div class="admin-details-grid">
             <div class="admin-detail-section">
-                <h2>Resumo publico</h2>
+                <h2>Resumo público</h2>
                 <dl>
                     <dt>E-mail</dt>
                     <dd>@UsuarioViewHelper.MascaraEmail(Model.Email)</dd>
                     <dt>Membro desde</dt>
                     <dd>@Model.DataCadastro.ToString("dd/MM/yyyy")</dd>
                     <dt>Bio</dt>
-                    <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "Nao informada" : Model.Bio)</dd>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "Não informada" : Model.Bio)</dd>
                 </dl>
             </div>
 
             <div class="admin-detail-section">
-                <h2>Comprovacao</h2>
+                <h2>Comprovação</h2>
                 <dl>
                     <dt>Status</dt>
                     <dd>
                         <span class="admin-status @(ehAdmin ? "status-neutral" : ClasseStatus(Model.StatusVerificacao))">
-                            @(ehAdmin ? "Nao aplicavel" : Model.StatusVerificacao)
+                            @(ehAdmin ? "Não aplicável" : Model.StatusVerificacao)
                         </span>
                     </dd>
                     <dt>Arquivo</dt>
@@ -85,7 +85,7 @@
                             <a href="@Url.Action("VerComprovacao", "Usuarios", new { id = Model.IdUsuario })"
                                target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-paperclip"></i>
-                                Abrir comprovacao
+                                Abrir comprovação
                             </a>
                         }
                         else

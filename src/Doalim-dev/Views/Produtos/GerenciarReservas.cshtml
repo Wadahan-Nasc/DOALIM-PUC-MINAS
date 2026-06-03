@@ -4,7 +4,7 @@
     ViewData["Title"] = "Gerenciar Reservas";
     var pendentes  = Model.Pendentes;
     var confirmadas = Model.Confirmadas;
-    var paraAvaliar = Model.PendentesAvaliacao;
+    var retiradas   = Model.Retiradas;
 }
 
 <style>
@@ -33,13 +33,22 @@
     .section-header {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 16px;
-        border-radius: 10px;
-        margin-bottom: 1rem;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: .75rem;
+        font-size: .82rem;
     }
-
-    /* Estrelas de avaliacao */
+    .produto-row {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+    .produto-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
     .btn-star {
         cursor: pointer;
         line-height: 1;
@@ -58,149 +67,234 @@
     </a>
 </div>
 
-@if (!pendentes.Any() && !confirmadas.Any() && !paraAvaliar.Any())
+@* ──────── FILTROS ──────── *@
+<form method="get" asp-controller="Produtos" asp-action="GerenciarReservas"
+      class="card p-3 mb-4 shadow-sm" style="border-radius:12px; background:#f9fbf9; border:1px solid #e8f5e9;">
+    <div class="row g-2">
+        <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold small mb-1">Beneficiário</label>
+            <input type="text" name="nomeBeneficiario"
+                   value="@Model.FiltroNomeBeneficiario"
+                   class="form-control form-control-sm"
+                   placeholder="Nome do beneficiário..." />
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label fw-semibold small mb-1">Reservado de</label>
+            <input type="date" name="dataInicio"
+                   value="@Model.FiltroDataInicio?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label fw-semibold small mb-1">Reservado até</label>
+            <input type="date" name="dataFim"
+                   value="@Model.FiltroDataFim?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-12 col-md-2">
+            <label class="form-label fw-semibold small mb-1">Status</label>
+            <select name="status" class="form-select form-select-sm">
+                <option value=""           selected="@(string.IsNullOrEmpty(Model.FiltroStatus))">Todos</option>
+                <option value="Pendente"   selected="@(Model.FiltroStatus == "Pendente")">Pendente</option>
+                <option value="Confirmada" selected="@(Model.FiltroStatus == "Confirmada")">Confirmada</option>
+                <option value="Retirada"   selected="@(Model.FiltroStatus == "Retirada")">Retirada</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-success btn-sm px-3 flex-grow-1">
+                <i class="bi bi-search me-1"></i>Filtrar
+            </button>
+            <a asp-controller="Produtos" asp-action="GerenciarReservas"
+               class="btn btn-outline-secondary btn-sm px-3">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+    </div>
+</form>
+
+@if (!pendentes.Any() && !confirmadas.Any() && !retiradas.Any())
 {
     <div class="alert alert-info rounded-3">
-        <i class="bi bi-info-circle me-2"></i>Nenhuma reserva pendente ou confirmada no momento.
+        <i class="bi bi-info-circle me-2"></i>
+        @if (Model.TemFiltroAtivo)
+        {
+            <span>Nenhuma reserva encontrada para os filtros aplicados.</span>
+        }
+        else
+        {
+            <span>Nenhuma reserva pendente, confirmada ou aguardando avaliação no momento.</span>
+        }
     </div>
 }
 
 @* ──────── PENDENTES ──────── *@
 @if (pendentes.Any())
 {
-    <div class="section-header bg-warning bg-opacity-10 border border-warning mb-3">
-        <span class="badge bg-warning text-dark fs-6">@pendentes.Count</span>
-        <span class="fw-bold text-warning-emphasis">
-            <i class="bi bi-hourglass-split me-1"></i>Aguardando sua aprovacao
+    <div class="section-header bg-warning bg-opacity-10 border border-warning mb-2">
+        <span class="badge bg-warning text-dark">@pendentes.GroupBy(r => r.IdPedido).Count()</span>
+        <span class="fw-semibold text-warning-emphasis">
+            <i class="bi bi-hourglass-split me-1"></i>Aguardando sua aprovação
         </span>
     </div>
 
     <div class="row g-3 mb-5">
-        @foreach (var r in pendentes)
+        @foreach (var grupo in pendentes.GroupBy(r => r.IdPedido))
         {
-            <div class="col-md-6 col-lg-4">
-                <div class="card reserva-card-doador shadow-sm">
+            var rep = grupo.First();
+            var grupoId = $"g{rep.IdPedido}";
+
+            <div class="col-12 col-md-6">
+                <div class="card reserva-card-doador shadow-sm h-100">
                     <div class="top-strip bg-warning"></div>
-                    <div class="card-body p-2">
+                    <div class="card-body p-3">
 
-                        @* Produto *@
-                        <div class="d-flex gap-2 mb-2">
-                            @if (!string.IsNullOrEmpty(r.FotoProduto))
-                            {
-                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                     class="rounded flex-shrink-0"
-                                     style="width:50px;height:50px;object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0"
-                                     style="width:50px;height:50px;font-size:1.6rem;">&#127857;</div>
-                            }
-                            <div class="flex-grow-1 min-w-0">
-                                <div class="d-flex justify-content-between align-items-start gap-2">
-                                    <span class="fw-bold text-dark">@r.NomeProduto</span>
-                                    <span class="badge bg-warning text-dark flex-shrink-0">Pendente</span>
-                                </div>
-                                <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
-                                @if (r.LoteProximoVencimento)
-                                {
-                                    <span class="badge bg-warning text-dark mt-1" style="font-size:.75rem;">
-                                        <i class="bi bi-exclamation-triangle me-1"></i> Lote vence em breve
-                                    </span>
-                                }
-                            </div>
-                        </div>
-
-                        @* Informacoes *@
-                        <div class="row g-1 mb-2 px-1">
-                            <div class="col-6">
-                                <div class="info-label">Beneficiario</div>
+                        @* Cabeçalho *@
+                        <div class="row g-2 align-items-center mb-3">
+                            <div class="col">
+                                <div class="info-label">Beneficiário</div>
                                 <div class="info-value">
                                     <a asp-controller="Usuarios" asp-action="PerfilPublico"
-                                       asp-route-id="@r.IdUsuarioBeneficiario"
-                                       class="text-decoration-none text-dark fw-bold"
-                                       title="Ver perfil do beneficiario">
-                                        @r.NomeBeneficiario
+                                       asp-route-id="@rep.IdUsuarioBeneficiario"
+                                       class="text-decoration-none text-dark fw-bold">
+                                        @rep.NomeBeneficiario
                                         <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.6;"></i>
                                     </a>
-                                    @if (r.EhOng) { <span class="badge bg-info ms-1" style="font-size:.7rem;">ONG</span> }
+                                    @if (rep.EhOng) { <span class="badge bg-info ms-1" style="font-size:.7rem;">ONG</span> }
                                 </div>
-                                @if (!string.IsNullOrEmpty(r.TelefoneBeneficiario))
+                                @if (!string.IsNullOrEmpty(rep.TelefoneBeneficiario))
                                 {
-                                    <div class="text-muted small">@r.TelefoneBeneficiario</div>
+                                    <div class="text-muted small"><i class="bi bi-telephone me-1"></i>@rep.TelefoneBeneficiario</div>
                                 }
                             </div>
-                            <div class="col-6">
-                                <div class="info-label">Quantidade</div>
-                                <div class="info-value">@r.QuantidadeReservada <small class="text-muted fw-normal">@r.UnidadeMedidaProduto</small></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Lote</div>
-                                <div class="info-value">@r.NumeroLote</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Validade</div>
-                                <div class="info-value">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
-                            </div>
-                            <div class="col-6">
+                            <div class="col-auto text-end">
                                 <div class="info-label">Pedido</div>
-                                <div class="info-value">#@r.IdPedido</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Reservado em</div>
-                                <div class="info-value" style="font-size:.82rem;">@r.DataReserva.ToString("dd/MM/yy HH:mm")</div>
+                                <div class="info-value">#@rep.IdPedido</div>
+                                <div class="text-muted" style="font-size:.75rem;">@rep.DataReserva.ToString("dd/MM/yy HH:mm")</div>
                             </div>
                         </div>
 
-                        @* Botoes *@
+                        @* Produtos *@
+                        <div class="mb-3">
+                            @foreach (var r in grupo)
+                            {
+                                <div class="produto-row py-2">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                            @if (!string.IsNullOrEmpty(r.FotoProduto))
+                                            {
+                                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
+                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                                     style="width:48px;height:48px;font-size:1.3rem;">&#127857;</div>
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
+                                            <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
+                                            <div class="d-flex flex-wrap gap-3 mt-1" style="font-size:.82rem;">
+                                                <div>
+                                                    <div class="info-label">Qtd.</div>
+                                                    <div class="info-value small">@r.QuantidadeReservada @r.UnidadeMedidaProduto</div>
+                                                </div>
+                                                <div>
+                                                    <div class="info-label">Lote</div>
+                                                    <div class="info-value small">@r.NumeroLote</div>
+                                                </div>
+                                                <div>
+                                                    <div class="info-label">Validade</div>
+                                                    <div class="info-value small">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                                </div>
+                                            </div>
+                                            @if (r.LoteProximoVencimento)
+                                            {
+                                                <span class="badge bg-warning text-dark mt-1" style="font-size:.72rem;">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>Vence em breve
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @* Ações *@
                         <div class="d-flex gap-2 flex-wrap mb-1">
-                            @if (r.PodeAprovar)
+                            @if (rep.PodeAprovar)
                             {
-                                <button class="btn btn-success btn-sm rounded-pill px-3"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#aprovar-@r.IdReserva">
-                                    <i class="bi bi-check-circle me-1"></i> Aprovar
+                                <button class="btn btn-success btn-sm rounded-pill px-3" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#aprovar-@grupoId">
+                                    <i class="bi bi-check-circle me-1"></i>Aprovar
+                                    @if (grupo.Count() > 1) { <span class="badge bg-white text-success ms-1">@grupo.Count() itens</span> }
                                 </button>
                             }
-                            @if (r.PodeRejeitar)
+                            @if (rep.PodeRejeitar)
                             {
-                                <button class="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#rejeitar-@r.IdReserva">
-                                    <i class="bi bi-x-circle me-1"></i> Rejeitar
+                                <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#rejeitar-@grupoId">
+                                    <i class="bi bi-x-circle me-1"></i>Rejeitar
                                 </button>
                             }
                         </div>
 
-                        @* Painel: Rejeitar *@
-                        @if (r.PodeRejeitar)
+                        @* Painel: Rejeitar com seleção por item *@
+                        @if (rep.PodeRejeitar)
                         {
-                            <div class="collapse mt-3" id="rejeitar-@r.IdReserva">
+                            <div class="collapse mt-3" id="rejeitar-@grupoId">
                                 <div class="card card-body rounded-3 bg-danger bg-opacity-10 border-danger">
-                                    <h6 class="mb-3 text-danger">
-                                        <i class="bi bi-x-circle me-1"></i> Informe o motivo da rejeicao
-                                    </h6>
-                                    <form asp-controller="Produtos" asp-action="RejeitarReserva" method="post">
+                                    <h6 class="mb-1 text-danger"><i class="bi bi-x-circle me-1"></i>Rejeitar itens</h6>
+                                    <p class="text-muted small mb-3">
+                                        Todos marcados por padrão. Desmarque os que deseja <strong>manter</strong>.
+                                    </p>
+                                    <form asp-controller="Produtos" asp-action="RejeitarItens" method="post">
                                         @Html.AntiForgeryToken()
-                                        <input type="hidden" name="idReserva" value="@r.IdReserva" />
+                                        <input type="hidden" name="idPedido" value="@rep.IdPedido" />
+                                        @if (grupo.Count() > 1)
+                                        {
+                                            <div class="mb-3">
+                                                @foreach (var r in grupo)
+                                                {
+                                                    <div class="form-check mb-1">
+                                                        <input class="form-check-input chk-rejeitar-@grupoId"
+                                                               type="checkbox" name="idsReservas"
+                                                               value="@r.IdReserva" id="chk-@r.IdReserva" checked />
+                                                        <label class="form-check-label" for="chk-@r.IdReserva">
+                                                            <span class="fw-semibold">@r.NomeProduto</span>
+                                                            <span class="text-muted small ms-1">@r.QuantidadeReservada @r.UnidadeMedidaProduto</span>
+                                                        </label>
+                                                    </div>
+                                                }
+                                                <div class="mt-1 mb-2">
+                                                    <button type="button" class="btn btn-link btn-sm text-muted p-0"
+                                                            onclick="toggleTodos('@grupoId', true)">
+                                                        <i class="bi bi-check-all me-1"></i>Marcar todos
+                                                    </button>
+                                                    <span class="text-muted small mx-1">|</span>
+                                                    <button type="button" class="btn btn-link btn-sm text-muted p-0"
+                                                            onclick="toggleTodos('@grupoId', false)">
+                                                        <i class="bi bi-x me-1"></i>Desmarcar todos
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <input type="hidden" name="idsReservas" value="@rep.IdReserva" />
+                                        }
                                         <div class="mb-2">
-                                            <textarea name="motivoRejeicao"
-                                                      class="form-control form-control-sm"
-                                                      rows="3"
-                                                      maxlength="500"
-                                                      placeholder="Ex: Produto ja foi destinado a outra instituicao..."
+                                            <textarea name="motivoRejeicao" class="form-control form-control-sm"
+                                                      rows="2" maxlength="500"
+                                                      placeholder="Ex: Produto já foi destinado a outra instituição..."
                                                       required></textarea>
-                                            <div class="text-muted small mt-1">Max. 500 caracteres. O beneficiario vera esta mensagem.</div>
+                                            <div class="text-muted small mt-1">Máx. 500 caracteres.</div>
                                         </div>
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-danger btn-sm rounded-pill">
-                                                <i class="bi bi-x2 me-1"></i> Confirmar rejeicao
+                                                <i class="bi bi-x-circle me-1"></i>Confirmar rejeição
                                             </button>
                                             <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill"
-                                                    data-bs-toggle="collapse"
-                                                    data-bs-target="#rejeitar-@r.IdReserva">
+                                                    data-bs-toggle="collapse" data-bs-target="#rejeitar-@grupoId">
                                                 Cancelar
                                             </button>
                                         </div>
@@ -210,42 +304,42 @@
                         }
 
                         @* Painel: Aprovar *@
-                        @if (r.PodeAprovar)
+                        @if (rep.PodeAprovar)
                         {
-                            <div class="collapse mt-3" id="aprovar-@r.IdReserva">
+                            <div class="collapse mt-3" id="aprovar-@grupoId">
                                 <div class="card card-body rounded-3 bg-success bg-opacity-10 border-success">
-                                    <h6 class="mb-3 text-success">
-                                        <i class="bi bi-calendar-range me-1"></i> Defina o intervalo de retirada
+                                    <h6 class="mb-2 text-success">
+                                        <i class="bi bi-calendar-range me-1"></i>Defina o intervalo de retirada
+                                        @if (grupo.Count() > 1)
+                                        {
+                                            <small class="text-muted fw-normal d-block">Aplicado a todos os @grupo.Count() itens.</small>
+                                        }
                                     </h6>
                                     <form asp-controller="Produtos" asp-action="AprovarReserva" method="post">
                                         @Html.AntiForgeryToken()
-                                        <input type="hidden" name="IdReserva" value="@r.IdReserva" />
+                                        <input type="hidden" name="IdReserva" value="@rep.IdReserva" />
                                         <div class="row g-2">
                                             <div class="col-6">
-                                                <label class="form-label small fw-semibold">Data inicio</label>
+                                                <label class="form-label small fw-semibold">Data início</label>
                                                 <input type="date" name="DataRetiradaInicio" class="form-control form-control-sm"
                                                        min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                                                       max="@r.DataValidadeLote.ToString("yyyy-MM-dd")"
-                                                       required />
+                                                       max="@grupo.Min(r => r.DataValidadeLote).ToString("yyyy-MM-dd")" required />
                                             </div>
                                             <div class="col-6">
                                                 <label class="form-label small fw-semibold">Data fim</label>
                                                 <input type="date" name="DataRetiradaFim" class="form-control form-control-sm"
                                                        min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                                                       max="@r.DataValidadeLote.ToString("yyyy-MM-dd")"
-                                                       required />
+                                                       max="@grupo.Min(r => r.DataValidadeLote).ToString("yyyy-MM-dd")" required />
                                             </div>
                                             <div class="col-12 text-muted small">
-                                                Validade do lote: <strong>@r.DataValidadeLote.ToString("dd/MM/yyyy")</strong>
-                                                — o intervalo nao pode ultrapassar essa data.
+                                                Validade mais próxima: <strong>@grupo.Min(r => r.DataValidadeLote).ToString("dd/MM/yyyy")</strong>
                                             </div>
                                             <div class="col-12 d-flex gap-2">
                                                 <button type="submit" class="btn btn-success btn-sm rounded-pill">
-                                                    <i class="bi bi-check2 me-1"></i> Confirmar aprovacao
+                                                    <i class="bi bi-check2 me-1"></i>Confirmar aprovação
                                                 </button>
                                                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill"
-                                                        data-bs-toggle="collapse"
-                                                        data-bs-target="#aprovar-@r.IdReserva">
+                                                        data-bs-toggle="collapse" data-bs-target="#aprovar-@grupoId">
                                                     Cancelar
                                                 </button>
                                             </div>
@@ -265,116 +359,137 @@
 @* ──────── CONFIRMADAS ──────── *@
 @if (confirmadas.Any())
 {
-    <div class="section-header bg-success bg-opacity-10 border border-success mb-3">
-        <span class="badge bg-success fs-6">@confirmadas.Count</span>
-        <span class="fw-bold text-success">
+    <div class="section-header bg-success bg-opacity-10 border border-success mb-2">
+        <span class="badge bg-success">@confirmadas.GroupBy(r => r.IdPedido).Count()</span>
+        <span class="fw-semibold text-success">
             <i class="bi bi-check-circle-fill me-1"></i>Aprovadas — aguardando retirada
         </span>
     </div>
 
     <div class="row g-3 mb-5">
-        @foreach (var r in confirmadas)
+        @foreach (var grupo in confirmadas.GroupBy(r => r.IdPedido))
         {
-            <div class="col-md-6 col-lg-4">
-                <div class="card reserva-card-doador shadow-sm @(r.RetiradaProxima ? "border-warning" : "")">
-                    <div class="top-strip @(r.RetiradaProxima ? "bg-warning" : "bg-success")"></div>
-                    <div class="card-body p-2">
+            var rep = grupo.First();
+            var grupoId = $"c{rep.IdPedido}";
+            var retiradaProxima = grupo.Any(r => r.RetiradaProxima);
 
-                        @* Produto *@
-                        <div class="d-flex gap-2 mb-2">
-                            @if (!string.IsNullOrEmpty(r.FotoProduto))
-                            {
-                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                     class="rounded flex-shrink-0"
-                                     style="width:50px;height:50px;object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0"
-                                     style="width:50px;height:50px;font-size:1.6rem;">&#127857;</div>
-                            }
-                            <div class="flex-grow-1 min-w-0">
-                                <div class="d-flex justify-content-between align-items-start gap-2">
-                                    <span class="fw-bold text-dark">@r.NomeProduto</span>
-                                    <span class="badge bg-success flex-shrink-0">Confirmada</span>
+            <div class="col-12 col-md-6">
+                <div class="card reserva-card-doador shadow-sm h-100 @(retiradaProxima ? "border-warning" : "")">
+                    <div class="top-strip @(retiradaProxima ? "bg-warning" : "bg-success")"></div>
+                    <div class="card-body p-3">
+
+                        @* Cabeçalho *@
+                        <div class="row g-2 align-items-start mb-3">
+                            <div class="col">
+                                <div class="info-label">Beneficiário</div>
+                                <div class="info-value">
+                                    <a asp-controller="Usuarios" asp-action="PerfilPublico"
+                                       asp-route-id="@rep.IdUsuarioBeneficiario"
+                                       class="text-decoration-none text-dark fw-bold">
+                                        @rep.NomeBeneficiario
+                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.6;"></i>
+                                    </a>
+                                    @if (rep.EhOng) { <span class="badge bg-info ms-1" style="font-size:.7rem;">ONG</span> }
                                 </div>
-                                <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
-                                @if (r.RetiradaProxima)
+                                @if (!string.IsNullOrEmpty(rep.TelefoneBeneficiario))
+                                {
+                                    <div class="text-muted small"><i class="bi bi-telephone me-1"></i>@rep.TelefoneBeneficiario</div>
+                                }
+                            </div>
+                            <div class="col-auto text-end">
+                                <div class="d-flex gap-3 align-items-start justify-content-end">
+                                    <div>
+                                        <div class="info-label">Retirada de</div>
+                                        <div class="info-value">@rep.DataRetiradaInicio?.ToString("dd/MM/yyyy")</div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Retirada até</div>
+                                        <div class="info-value">@rep.DataRetiradaFim?.ToString("dd/MM/yyyy")</div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Pedido</div>
+                                        <div class="info-value">#@rep.IdPedido</div>
+                                    </div>
+                                </div>
+                                @if (retiradaProxima)
                                 {
                                     <span class="badge bg-warning text-dark mt-1" style="font-size:.75rem;">
-                                        <i class="bi bi-clock me-1"></i> Retirada proxima!
+                                        <i class="bi bi-clock me-1"></i>Retirada próxima!
                                     </span>
                                 }
                             </div>
                         </div>
 
-                        @* Informacoes *@
-                        <div class="row g-1 mb-2 px-1">
-                            <div class="col-6">
-                                <div class="info-label">Beneficiario</div>
-                                <div class="info-value">
-                                    <a asp-controller="Usuarios" asp-action="PerfilPublico"
-                                       asp-route-id="@r.IdUsuarioBeneficiario"
-                                       class="text-decoration-none text-dark fw-bold"
-                                       title="Ver perfil do beneficiario">
-                                        @r.NomeBeneficiario
-                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.6;"></i>
-                                    </a>
-                                    @if (r.EhOng) { <span class="badge bg-info ms-1" style="font-size:.7rem;">ONG</span> }
-                                </div>
-                                @if (!string.IsNullOrEmpty(r.TelefoneBeneficiario))
-                                {
-                                    <div class="text-muted small">
-                                        <i class="bi bi-telephone me-1"></i>@r.TelefoneBeneficiario
+                        @* Produtos *@
+                        <div class="mb-3">
+                            @foreach (var r in grupo)
+                            {
+                                <div class="produto-row py-2">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                            @if (!string.IsNullOrEmpty(r.FotoProduto))
+                                            {
+                                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
+                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                                     style="width:48px;height:48px;font-size:1.2rem;">&#127857;</div>
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
+                                            <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
+                                            <div class="d-flex flex-wrap gap-3 mt-1" style="font-size:.82rem;">
+                                                <div>
+                                                    <div class="info-label">Qtd.</div>
+                                                    <div class="info-value small">@r.QuantidadeReservada @r.UnidadeMedidaProduto</div>
+                                                </div>
+                                                <div>
+                                                    <div class="info-label">Lote</div>
+                                                    <div class="info-value small">@r.NumeroLote</div>
+                                                </div>
+                                                <div>
+                                                    <div class="info-label">Validade</div>
+                                                    <div class="info-value small">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                }
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Quantidade</div>
-                                <div class="info-value">@r.QuantidadeReservada <small class="text-muted fw-normal">@r.UnidadeMedidaProduto</small></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Retirada de</div>
-                                <div class="info-value">@r.DataRetiradaInicio?.ToString("dd/MM/yyyy")</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-label">Retirada ate</div>
-                                <div class="info-value">@r.DataRetiradaFim?.ToString("dd/MM/yyyy")</div>
-                            </div>
+                                </div>
+                            }
                         </div>
 
                         @* Confirmar entrega *@
-                        @if (r.PodeConfirmarEntrega)
+                        @if (rep.PodeConfirmarEntrega)
                         {
-                            <button class="btn btn-primary btn-sm rounded-pill px-3"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#entregar-@r.IdReserva">
-                                <i class="bi bi-box-arrow-in-down me-1"></i> Confirmar entrega
+                            <button class="btn btn-primary btn-sm rounded-pill px-3" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#entregar-@grupoId">
+                                <i class="bi bi-box-arrow-in-down me-1"></i>Confirmar entrega
                             </button>
-
-                            <div class="collapse mt-3" id="entregar-@r.IdReserva">
+                            <div class="collapse mt-3" id="entregar-@grupoId">
                                 <div class="card card-body rounded-3 bg-primary bg-opacity-10 border-primary">
-                                    <h6 class="mb-3 text-primary">
-                                        <i class="bi bi-shield-check me-1"></i> Token informado pelo beneficiario
+                                    <h6 class="mb-2 text-primary">
+                                        <i class="bi bi-shield-check me-1"></i>Token informado pelo beneficiário
                                     </h6>
                                     <form asp-controller="Produtos" asp-action="ConfirmarEntrega" method="post">
                                         @Html.AntiForgeryToken()
-                                        <input type="hidden" name="idReserva" value="@r.IdReserva" />
-                                        <div class="d-flex gap-2">
-                                            <input type="text" name="tokenInformado"
-                                                   class="form-control form-control-sm font-monospace text-uppercase"
-                                                   placeholder="Ex: A1B2C3D4"
-                                                   maxlength="8"
-                                                   autocomplete="off"
-                                                   required />
-                                            <button type="submit" class="btn btn-primary btn-sm flex-shrink-0 rounded-pill px-3">
-                                                <i class="bi bi-check2-circle me-1"></i> Confirmar
-                                            </button>
+                                        <input type="hidden" name="idReserva" value="@rep.IdReserva" />
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col">
+                                                <input type="text" name="tokenInformado"
+                                                       class="form-control form-control-sm font-monospace text-uppercase"
+                                                       placeholder="Ex: A1B2C3D4" maxlength="8"
+                                                       autocomplete="off" required />
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">
+                                                    <i class="bi bi-check2-circle me-1"></i>Confirmar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="text-muted small mt-1">
-                                            O token e informado presencialmente pelo beneficiario no momento da retirada.
-                                        </div>
+                                        <div class="text-muted small mt-1">Token informado presencialmente pelo beneficiário.</div>
                                     </form>
                                 </div>
                             </div>
@@ -387,100 +502,113 @@
     </div>
 }
 
-@* ──────── AVALIACOES PENDENTES (entregas concluidas) ──────── *@
-@if (paraAvaliar.Any())
+@* ──────── RETIRADAS — avaliação pendente ──────── *@
+@if (retiradas.Any())
 {
-    <div class="section-header bg-primary bg-opacity-10 border border-primary mb-3">
-        <span class="badge bg-primary fs-6">@paraAvaliar.Count</span>
-        <span class="fw-bold text-primary">
-            <i class="bi bi-star-fill me-1"></i>Entregas concluidas — avalie os beneficiarios
+    <div class="section-header bg-primary bg-opacity-10 border border-primary mb-2">
+        <span class="badge bg-primary">@retiradas.GroupBy(r => r.IdPedido).Count()</span>
+        <span class="fw-semibold text-primary">
+            <i class="bi bi-bag-check-fill me-1"></i>Entregas concluídas — avalie os beneficiários
         </span>
     </div>
 
     <div class="row g-3 mb-5">
-        @foreach (var r in paraAvaliar)
+        @foreach (var grupo in retiradas.GroupBy(r => r.IdPedido))
         {
-            <div class="col-md-6 col-lg-4" id="avaliacao-card-@r.IdReserva">
-                <div class="card reserva-card-doador shadow-sm">
+            var rep = grupo.First();
+
+            <div class="col-12 col-md-6" id="avaliacao-card-pedido-@rep.IdPedido">
+                <div class="card reserva-card-doador shadow-sm h-100">
                     <div class="top-strip bg-primary"></div>
-                    <div class="card-body p-2">
+                    <div class="card-body p-3">
 
-                        <div class="d-flex gap-2 mb-2">
-                            @if (!string.IsNullOrEmpty(r.FotoProduto))
-                            {
-                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                     class="rounded flex-shrink-0"
-                                     style="width:44px;height:44px;object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0"
-                                     style="width:44px;height:44px;font-size:1.3rem;">&#127857;</div>
-                            }
-                            <div class="flex-grow-1 min-w-0">
-                                <div class="fw-bold text-dark" style="font-size:.88rem;">@r.NomeProduto</div>
-                                <div class="text-muted" style="font-size:.75rem;">
-                                    @r.MarcaProduto &bull; @r.CategoriaProduto
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-1 mb-2 px-1">
-                            <div class="col-12">
-                                <div class="info-label">Beneficiario</div>
+                        @* Cabeçalho *@
+                        <div class="row g-2 align-items-center mb-3">
+                            <div class="col">
+                                <div class="info-label">Beneficiário</div>
                                 <div class="info-value">
                                     <a asp-controller="Usuarios" asp-action="PerfilPublico"
-                                       asp-route-id="@r.IdUsuarioBeneficiario"
-                                       class="text-decoration-none text-dark"
-                                       title="Ver perfil">
-                                        @r.NomeBeneficiario
-                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.65rem; opacity:.6;"></i>
+                                       asp-route-id="@rep.IdUsuarioBeneficiario"
+                                       class="text-decoration-none text-dark fw-bold">
+                                        @rep.NomeBeneficiario
+                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.6;"></i>
                                     </a>
-                                    @if (r.EhOng) { <span class="badge bg-info ms-1" style="font-size:.65rem;">ONG</span> }
+                                    @if (rep.EhOng) { <span class="badge bg-info ms-1" style="font-size:.7rem;">ONG</span> }
                                 </div>
+                                @if (!string.IsNullOrEmpty(rep.TelefoneBeneficiario))
+                                {
+                                    <div class="text-muted small"><i class="bi bi-telephone me-1"></i>@rep.TelefoneBeneficiario</div>
+                                }
                             </div>
-                            <div class="col-6">
-                                <div class="info-label">Entregue em</div>
-                                <div class="info-value" style="font-size:.82rem;">@r.DataReserva.ToString("dd/MM/yy")</div>
-                            </div>
-                            <div class="col-6">
+                            <div class="col-auto text-end">
                                 <div class="info-label">Pedido</div>
-                                <div class="info-value">#@r.IdPedido</div>
+                                <div class="info-value">#@rep.IdPedido</div>
+                                <div class="text-muted" style="font-size:.75rem;">
+                                    @rep.DataRetiradaInicio?.ToString("dd/MM") – @rep.DataRetiradaFim?.ToString("dd/MM/yyyy")
+                                </div>
                             </div>
                         </div>
 
-                        <div class="border-top pt-2">
-                            <div class="info-label mb-1">
-                                <i class="bi bi-star me-1"></i>Avaliar beneficiario
-                            </div>
+                        @* Produtos entregues *@
+                        <div class="mb-3">
+                            @foreach (var r in grupo)
+                            {
+                                <div class="produto-row py-2">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                            @if (!string.IsNullOrEmpty(r.FotoProduto))
+                                            {
+                                                <img src="@r.FotoProduto" alt="@r.NomeProduto"
+                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                                     style="width:48px;height:48px;font-size:1.2rem;">&#127857;</div>
+                                            }
+                                        </div>
+                                        <div class="col">
+                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
+                                            <div class="text-muted small">
+                                                @r.QuantidadeReservada @r.UnidadeMedidaProduto &bull; Lote @r.NumeroLote
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @* Avaliação inline — uma por pedido, usando o rep *@
+                        <div class="border-top pt-3">
+                            <div class="info-label mb-2"><i class="bi bi-star me-1"></i>Avaliar beneficiário</div>
                             <form method="post" asp-controller="Usuarios" asp-action="AvaliarUsuario"
                                   class="avaliacao-form d-flex align-items-center gap-2 mb-1">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="idReserva" value="@r.IdReserva" />
+                                <input type="hidden" name="idReserva" value="@rep.IdReserva" />
                                 <div class="star-group d-flex gap-1">
                                     @for (int i = 1; i <= 5; i++)
                                     {
                                         <button type="button"
                                                 class="btn-star p-0 border-0 bg-transparent text-secondary"
                                                 data-nota="@i" title="@i estrela(s)">
-                                            <i class="bi bi-star" style="font-size:1.25rem;"></i>
+                                            <i class="bi bi-star" style="font-size:1.4rem;"></i>
                                         </button>
                                     }
                                 </div>
                                 <input type="hidden" name="nota" class="nota-input" value="0" />
                                 <button type="button"
-                                        class="btn btn-warning btn-sm rounded-pill px-2 py-1 submit-btn"
-                                        disabled title="Selecione uma nota primeiro"
+                                        class="btn btn-warning btn-sm rounded-pill px-3 submit-btn"
+                                        disabled title="Selecione uma nota"
                                         data-bs-toggle="modal" data-bs-target="#modalConfirmarAvaliacao">
-                                    <i class="bi bi-check2"></i>
+                                    <i class="bi bi-check2 me-1"></i>Avaliar
                                 </button>
                             </form>
                             <button type="button"
                                     class="btn btn-link btn-sm text-muted p-0 btn-pular-avaliacao"
-                                    style="font-size:.75rem;"
-                                    data-reserva="@r.IdReserva"
-                                    data-alvo="avaliacao-card-@r.IdReserva">
-                                <i class="bi bi-x me-1"></i>Nao quero avaliar
+                                    style="font-size:.78rem;"
+                                    data-pedido="@rep.IdPedido"
+                                    data-alvo="avaliacao-card-pedido-@rep.IdPedido">
+                                <i class="bi bi-x me-1"></i>Não quero avaliar
                             </button>
                         </div>
 
@@ -491,7 +619,7 @@
     </div>
 }
 
-@* Modal de confirmacao de avaliacao *@
+@* Modal de confirmação de avaliação *@
 <div class="modal fade" id="modalConfirmarAvaliacao" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow rounded-4">
@@ -500,17 +628,17 @@
                             justify-content-center mb-3" style="width:56px;height:56px;">
                     <i class="bi bi-star-fill text-warning" style="font-size:1.6rem;"></i>
                 </div>
-                <h6 class="fw-bold mb-1">Confirmar avaliacao?</h6>
+                <h6 class="fw-bold mb-1">Confirmar avaliação?</h6>
                 <p class="text-muted small mb-4">
-                    Voce selecionou <strong id="textoNotaModal"></strong> estrela(s).<br>
-                    <span class="text-danger fw-semibold">Esta avaliacao nao podera ser alterada.</span>
+                    Você selecionou <strong id="textoNotaModal"></strong> estrela(s).<br>
+                    <span class="text-danger fw-semibold">Esta avaliação não poderá ser alterada.</span>
                 </p>
                 <div class="d-flex justify-content-center gap-2">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
                             data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-warning rounded-pill px-4 fw-semibold"
                             id="btnConfirmarAvaliacao">
-                        <i class="bi bi-check2-circle me-1"></i> Confirmar
+                        <i class="bi bi-check2-circle me-1"></i>Confirmar
                     </button>
                 </div>
             </div>
@@ -520,29 +648,56 @@
 
 @section Scripts {
 <script>
-    var formAvaliacaoPendente = null;
-    var SKIP_PREFIX = 'doalim_skip_aval_doador_';
+    // ── Aprovar / Rejeitar mutuamente exclusivos ──────────────────────
+    document.querySelectorAll('[id^="aprovar-"]').forEach(function (el) {
+        el.addEventListener('show.bs.collapse', function () {
+            var sufixo = this.id.replace('aprovar-', '');
+            var outro = document.getElementById('rejeitar-' + sufixo);
+            if (outro && outro.classList.contains('show')) {
+                bootstrap.Collapse.getOrCreateInstance(outro).hide();
+            }
+        });
+    });
+    document.querySelectorAll('[id^="rejeitar-"]').forEach(function (el) {
+        el.addEventListener('show.bs.collapse', function () {
+            var sufixo = this.id.replace('rejeitar-', '');
+            var outro = document.getElementById('aprovar-' + sufixo);
+            if (outro && outro.classList.contains('show')) {
+                bootstrap.Collapse.getOrCreateInstance(outro).hide();
+            }
+        });
+    });
 
-    // Oculta cards ja ignorados pelo doador
+    // ── Marcar / desmarcar checkboxes de rejeição ─────────────────────
+    function toggleTodos(grupoId, marcar) {
+        document.querySelectorAll('.chk-rejeitar-' + grupoId).forEach(function (chk) {
+            chk.checked = marcar;
+        });
+    }
+
+    // ── Pular avaliação (localStorage por pedido) ─────────────────────
+    var SKIP_PREFIX = 'doalim_skip_aval_doador_pedido_';
+
     document.querySelectorAll('.btn-pular-avaliacao').forEach(function (btn) {
-        var idReserva = btn.dataset.reserva;
-        if (localStorage.getItem(SKIP_PREFIX + idReserva) === '1') {
+        var idPedido = btn.dataset.pedido;
+        if (localStorage.getItem(SKIP_PREFIX + idPedido) === '1') {
             var card = document.getElementById(btn.dataset.alvo);
             if (card) card.style.display = 'none';
         }
     });
 
-    // Clique em "Nao quero avaliar"
     document.querySelectorAll('.btn-pular-avaliacao').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            var idReserva = btn.dataset.reserva;
-            localStorage.setItem(SKIP_PREFIX + idReserva, '1');
+            var idPedido = btn.dataset.pedido;
+            localStorage.setItem(SKIP_PREFIX + idPedido, '1');
             var card = document.getElementById(btn.dataset.alvo);
             if (card) card.style.display = 'none';
         });
     });
 
-    // Interatividade das estrelas de avaliacao
+    // ── Interatividade das estrelas ───────────────────────────────────
+    var formAvaliacaoPendente = null;
+
     document.querySelectorAll('.star-group').forEach(function (group) {
         var form      = group.closest('form');
         var notaInput = form.querySelector('.nota-input');
@@ -581,10 +736,13 @@
         });
     });
 
-    document.getElementById('btnConfirmarAvaliacao').addEventListener('click', function () {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarAvaliacao'));
-        if (modal) modal.hide();
-        if (formAvaliacaoPendente) formAvaliacaoPendente.submit();
-    });
+    var btnConfirmar = document.getElementById('btnConfirmarAvaliacao');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', function () {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarAvaliacao'));
+            if (modal) modal.hide();
+            if (formAvaliacaoPendente) formAvaliacaoPendente.submit();
+        });
+    }
 </script>
 }

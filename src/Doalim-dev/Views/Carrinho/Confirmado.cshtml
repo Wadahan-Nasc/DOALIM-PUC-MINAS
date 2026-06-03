@@ -2,84 +2,185 @@
 
 @{
     ViewData["Title"] = "Pedido Confirmado";
+    var reservasPorDoador = Model.Reservas.GroupBy(r => r.NomeDoador).ToList();
+    var totalSucesso = Model.Reservas.Count(r => r.Sucesso);
+    var totalFalha   = Model.Reservas.Count(r => !r.Sucesso);
 }
 
-<div class="text-center mb-5">
-    <i class="bi bi-check-circle-fill text-success" style="font-size:3.5rem;"></i>
-    <h2 class="mt-3">Pedido #@Model.IdPedido realizado com sucesso!</h2>
-    <p class="text-muted">
-        Realizado em @Model.DataPedido.ToString("dd/MM/yyyy") às @Model.DataPedido.ToString("HH:mm")
+<style>
+    .confirmado-header {
+        background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+        border-radius: 16px;
+        border: 1px solid #c8e6c9;
+    }
+    .confirmado-group-card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+    }
+    .confirmado-product-row {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .confirmado-product-row:last-child {
+        border-bottom: none;
+    }
+    .confirmado-product-row.falhou {
+        background: #fff5f5;
+        opacity: .85;
+    }
+</style>
+
+@* ── Cabeçalho de sucesso ──────────────────────────────────────── *@
+<div class="confirmado-header p-4 mb-4 text-center">
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 mb-3"
+         style="width:72px;height:72px;">
+        <i class="bi bi-check-circle-fill text-success" style="font-size:2.2rem;"></i>
+    </div>
+    <h2 class="fw-bold mb-1" style="font-size:1.6rem;">Pedido #@Model.IdPedido realizado!</h2>
+    <p class="text-muted mb-3" style="font-size:.95rem;">
+        @Model.DataPedido.ToString("dd/MM/yyyy") às @Model.DataPedido.ToString("HH:mm")
     </p>
-    <p class="mb-0">
-        Suas <strong>@Model.TotalReservas reserva(s)</strong> foram criadas com status
-        <span class="badge bg-warning text-dark">Pendente</span>.
-        O doador será notificado e aprovará em breve.
-    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        @if (totalSucesso > 0)
+        {
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill" style="font-size:.9rem;">
+                <i class="bi bi-hourglass-split me-1"></i>@totalSucesso reserva(s) pendente(s)
+            </span>
+        }
+        @if (totalFalha > 0)
+        {
+            <span class="badge bg-danger px-3 py-2 rounded-pill" style="font-size:.9rem;">
+                <i class="bi bi-exclamation-circle me-1"></i>@totalFalha item(ns) com falha
+            </span>
+        }
+    </div>
 </div>
 
-<h5 class="mb-3">Itens reservados</h5>
-<div class="row g-3 mb-4">
-    @foreach (var reserva in Model.Reservas)
+@* ── Grupos por doador ─────────────────────────────────────────── *@
+<div class="d-flex flex-column gap-3 mb-4">
+    @foreach (var grupo in reservasPorDoador)
     {
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm @(!reserva.Sucesso ? "border-danger" : "")">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
-                        <h6 class="card-title mb-0">@reserva.NomeProduto</h6>
-                        @if (reserva.Sucesso)
-                        {
-                            <span class="badge bg-warning text-dark flex-shrink-0">@reserva.StatusReserva</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger flex-shrink-0">Falhou</span>
-                        }
+        var nomeDoador = grupo.Key;
+        var itens      = grupo.ToList();
+
+        <div class="card confirmado-group-card shadow-sm">
+            @* Faixa colorida topo *@
+            <div style="height:4px; background:#198754;"></div>
+
+            @* Cabeçalho do grupo *@
+            <div class="card-header d-flex align-items-center gap-2 py-2 px-3"
+                 style="background:#fafafa;">
+                <i class="bi bi-person-circle text-success" style="font-size:1.2rem;"></i>
+                <span class="fw-bold" style="font-size:1rem;">@nomeDoador</span>
+                <span class="text-muted ms-auto" style="font-size:.85rem;">
+                    @itens.Count item(ns)
+                </span>
+            </div>
+
+            @* Lista de produtos *@
+            <div class="list-group list-group-flush">
+                @foreach (var item in itens)
+                {
+                    <div class="list-group-item px-3 py-3 confirmado-product-row @(!item.Sucesso ? "falhou" : "")">
+                        <div class="row g-3 align-items-center">
+
+                            @* Foto do produto *@
+                            <div class="col-auto">
+                                @if (!string.IsNullOrEmpty(item.FotoProduto))
+                                {
+                                    <img src="@item.FotoProduto" alt="@item.NomeProduto"
+                                         class="rounded"
+                                         style="width:64px;height:64px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                         style="width:64px;height:64px;font-size:1.8rem;">&#127857;</div>
+                                }
+                            </div>
+
+                            @* Nome + marca/cat *@
+                            <div class="col-md-4">
+                                <div class="fw-semibold" style="font-size:.97rem; color:#1a2e1a;">@item.NomeProduto</div>
+                                <div class="text-muted" style="font-size:.82rem;">
+                                    @item.MarcaProduto &bull; @item.CategoriaProduto
+                                </div>
+                                @if (!item.Sucesso && !string.IsNullOrEmpty(item.MotivoFalha))
+                                {
+                                    <div class="text-danger mt-1" style="font-size:.8rem;">
+                                        <i class="bi bi-x-circle me-1"></i>@item.MotivoFalha
+                                    </div>
+                                }
+                            </div>
+
+                            @* Qty / Lote / Validade / Reserva# *@
+                            <div class="col-md-4">
+                                <div class="d-flex flex-wrap gap-3" style="font-size:.85rem; color:#555;">
+                                    <div>
+                                        <div class="text-muted" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600;">Quantidade</div>
+                                        <div class="fw-semibold">@item.QuantidadeDesejada @item.UnidadeProduto</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600;">Lote</div>
+                                        <div class="fw-semibold">@item.NumeroLote</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600;">Validade</div>
+                                        <div class="fw-semibold">@item.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                    </div>
+                                    @if (item.IdReserva > 0)
+                                    {
+                                        <div>
+                                            <div class="text-muted" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:600;">Reserva</div>
+                                            <div class="fw-semibold">#@item.IdReserva</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Badge status *@
+                            <div class="col-md-auto ms-md-auto">
+                                @if (item.Sucesso)
+                                {
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2" style="font-size:.85rem;">
+                                        <i class="bi bi-hourglass-split me-1"></i>Pendente
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger rounded-pill px-3 py-2" style="font-size:.85rem;">
+                                        <i class="bi bi-x-circle me-1"></i>Falhou
+                                    </span>
+                                }
+                            </div>
+                        </div>
                     </div>
-
-                    <p class="text-muted small mb-2">@reserva.MarcaProduto &bull; @reserva.CategoriaProduto</p>
-
-                    @if (!reserva.Sucesso && !string.IsNullOrEmpty(reserva.MotivoFalha))
-                    {
-                        <div class="alert alert-danger py-1 px-2 small mb-2">@reserva.MotivoFalha</div>
-                    }
-
-                    <dl class="row small mb-0">
-                        <dt class="col-5">Quantidade</dt>
-                        <dd class="col-7">@reserva.QuantidadeDesejada</dd>
-
-                        <dt class="col-5">Unid. medida</dt>
-                        <dd class="col-7">@reserva.UnidadeProduto</dd>
-
-                        <dt class="col-5">Lote</dt>
-                        <dd class="col-7">@reserva.NumeroLote</dd>
-
-                        <dt class="col-5">Validade</dt>
-                        <dd class="col-7">@reserva.DataValidadeLote.ToString("dd/MM/yyyy")</dd>
-
-                        @if (!string.IsNullOrEmpty(reserva.NomeDoador))
-                        {
-                            <dt class="col-5">Doador</dt>
-                            <dd class="col-7">@reserva.NomeDoador</dd>
-                        }
-                    </dl>
-                </div>
+                }
             </div>
         </div>
     }
 </div>
 
-<div class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>
-    Acompanhe o status das suas reservas em <strong>Minhas Reservas</strong>.
-    Quando o doador aprovar, você receberá o <strong>token de confirmação</strong>
-    e o intervalo de datas para retirada.
+@* ── Aviso e ações ──────────────────────────────────────────────── *@
+<div class="card border-0 shadow-sm rounded-4 mb-4 p-3" style="background:#f0f7ff;">
+    <div class="d-flex gap-3 align-items-start">
+        <i class="bi bi-info-circle-fill text-primary mt-1 flex-shrink-0" style="font-size:1.3rem;"></i>
+        <div style="font-size:.9rem;">
+            <p class="mb-1 fw-semibold">O que acontece agora?</p>
+            <p class="mb-0 text-muted">
+                Suas reservas estão com status <strong>Pendente</strong>. O doador será notificado e, ao aprovar,
+                você receberá o <strong>token de confirmação</strong> e o intervalo de datas para retirada —
+                visíveis em <strong>Minhas Reservas</strong>.
+            </p>
+        </div>
+    </div>
 </div>
 
-<div class="d-flex gap-2 justify-content-center">
-    <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-primary">
+<div class="d-flex gap-2 justify-content-center flex-wrap">
+    <a asp-controller="Reservas" asp-action="MinhasReservas" class="btn btn-primary rounded-pill px-4">
         <i class="bi bi-list-check me-1"></i> Ver minhas reservas
     </a>
-    <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success">
+    <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-outline-success rounded-pill px-4">
         <i class="bi bi-shop me-1"></i> Continuar na vitrine
     </a>
 </div>

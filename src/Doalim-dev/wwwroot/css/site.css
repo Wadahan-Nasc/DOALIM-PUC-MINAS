@@ -12,14 +12,7 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
+/* Footer sticky — substituído por flexbox no body */
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
@@ -915,10 +908,16 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Layout polish */
 body {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     background:
         linear-gradient(180deg, #f7fbf4 0, #ffffff 240px);
     color: #263322;
+}
+
+.app-main-container {
+    flex: 1;
 }
 
 .app-main-container > main {
