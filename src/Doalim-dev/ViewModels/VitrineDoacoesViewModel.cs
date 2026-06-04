@@ -10,6 +10,7 @@
         public string TipoArmazenamento { get; set; }
         public string FotoProduto { get; set; }
         public int QuantidadeDisponivel { get; set; }
+        public int IdDoador { get; set; }
         public string NomeDoador { get; set; }
 
         // Limites de quantidade por tipo de beneficiário (0 = sem limite definido)

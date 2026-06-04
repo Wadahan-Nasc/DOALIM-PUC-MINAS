@@ -267,11 +267,9 @@ else
                 <div class="card-header d-flex justify-content-between align-items-center py-2 px-3"
                      style="background:#fafafa;">
                     <div>
-                        <a asp-controller="Usuarios" asp-action="PerfilPublico"
-                           asp-route-id="@rep.IdUsuarioDoador"
+                        <a href="#" onclick="abrirPerfilModal(@rep.IdUsuarioDoador); return false;"
                            class="fw-bold text-dark text-decoration-none">
                             <i class="bi bi-person-circle me-1 text-success"></i>@rep.NomeDoador
-                            <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.5;"></i>
                         </a>
                         <div class="text-muted" style="font-size:.77rem;">
                             Pedido #@rep.IdPedido &bull; Reservado em @rep.DataReserva.ToString("dd/MM/yyyy HH:mm")
@@ -289,6 +287,70 @@ else
                         }
                     </div>
                 </div>
+
+                @* ── Avaliação por grupo — topo do card (status Retirada) ── *@
+                @if (grpStatus == "Retirada")
+                {
+                    @if (rep.PodeAvaliar && !rep.JaAvaliou)
+                    {
+                        <div class="border-bottom px-3 py-2" style="background:#fffef5;">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="text-muted small fw-semibold">
+                                    <i class="bi bi-star me-1 text-warning"></i>Avaliar doador:
+                                </span>
+                                <div id="avaliacao-bloco-grp-@rep.IdPedido" class="d-flex align-items-center gap-2 flex-wrap">
+                                    <form method="post" asp-controller="Usuarios" asp-action="AvaliarUsuario"
+                                          class="avaliacao-form d-flex align-items-center gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="idReserva" value="@rep.IdReserva" />
+                                        <div class="star-group d-flex gap-1">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <button type="button"
+                                                        class="btn-star p-0 border-0 bg-transparent text-secondary"
+                                                        data-nota="@i" title="@i estrela(s)">
+                                                    <i class="bi bi-star" style="font-size:1.1rem;"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                        <input type="hidden" name="nota" class="nota-input" value="0" />
+                                        <button type="button"
+                                                class="btn btn-warning btn-sm rounded-pill px-2 py-1 submit-btn"
+                                                disabled title="Selecione uma nota"
+                                                data-bs-toggle="modal" data-bs-target="#modalConfirmarAvaliacao">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </form>
+                                    <button type="button"
+                                            class="btn btn-link btn-sm text-muted p-0 btn-pular-avaliacao"
+                                            style="font-size:.72rem;"
+                                            data-reserva="@rep.IdReserva"
+                                            data-alvo="avaliacao-bloco-grp-@rep.IdPedido">
+                                        <i class="bi bi-x me-1"></i>Pular
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (rep.JaAvaliou)
+                    {
+                        <div class="border-bottom px-3 py-2" style="background:#f8fff8;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small fw-semibold">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>Sua avaliação:
+                                </span>
+                                <div class="d-flex gap-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= (rep.NotaAvaliacao ?? 0) ? "bi-star-fill text-warning" : "bi-star text-secondary")"
+                                           style="font-size:.85rem;"></i>
+                                    }
+                                </div>
+                                <span class="text-muted" style="font-size:.72rem;">Avaliado</span>
+                            </div>
+                        </div>
+                    }
+                }
 
                 @* Lista de produtos do grupo *@
                 <div class="list-group list-group-flush">
@@ -345,12 +407,10 @@ else
                                     </div>
                                 </div>
 
-                                @* Col 4: Ações — cancelar / avaliar *@
-                                <div class="col-md-auto ms-md-auto d-flex flex-column align-items-end gap-2">
-
-                                    @* Botão cancelar por produto (apenas Pendente) *@
-                                    @if (item.PodeSerCancelada)
-                                    {
+                                @* Col 4: Botão cancelar (apenas Pendente) *@
+                                @if (item.PodeSerCancelada)
+                                {
+                                    <div class="col-md-auto ms-md-auto">
                                         <button type="button"
                                                 class="btn btn-outline-danger btn-sm rounded-pill"
                                                 data-bs-toggle="modal"
@@ -360,57 +420,8 @@ else
                                                 title="Cancelar este produto">
                                             <i class="bi bi-x-circle me-1"></i>Cancelar
                                         </button>
-                                    }
-
-                                    @* Estrelas de avaliação — visível apenas Retiradas não avaliadas *@
-                                    @if (item.PodeAvaliar && !item.JaAvaliou)
-                                    {
-                                        <div id="avaliacao-bloco-@item.IdReserva">
-                                            <form method="post" asp-controller="Usuarios" asp-action="AvaliarUsuario"
-                                                  class="avaliacao-form d-flex align-items-center gap-2">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="idReserva" value="@item.IdReserva" />
-                                                <div class="star-group d-flex gap-1">
-                                                    @for (int i = 1; i <= 5; i++)
-                                                    {
-                                                        <button type="button"
-                                                                class="btn-star p-0 border-0 bg-transparent text-secondary"
-                                                                data-nota="@i" title="@i estrela(s)">
-                                                            <i class="bi bi-star" style="font-size:1.1rem;"></i>
-                                                        </button>
-                                                    }
-                                                </div>
-                                                <input type="hidden" name="nota" class="nota-input" value="0" />
-                                                <button type="button"
-                                                        class="btn btn-warning btn-sm rounded-pill px-2 py-1 submit-btn"
-                                                        disabled title="Selecione uma nota"
-                                                        data-bs-toggle="modal" data-bs-target="#modalConfirmarAvaliacao">
-                                                    <i class="bi bi-check2"></i>
-                                                </button>
-                                            </form>
-                                            <button type="button"
-                                                    class="btn btn-link btn-sm text-muted p-0 btn-pular-avaliacao"
-                                                    style="font-size:.72rem;"
-                                                    data-reserva="@item.IdReserva"
-                                                    data-alvo="avaliacao-bloco-@item.IdReserva">
-                                                <i class="bi bi-x me-1"></i>Pular avaliação
-                                            </button>
-                                        </div>
-                                    }
-                                    else if (item.PodeAvaliar && item.JaAvaliou)
-                                    {
-                                        <div class="text-center" style="min-width:80px;">
-                                            <div class="d-flex gap-1 justify-content-end">
-                                                @for (int i = 1; i <= 5; i++)
-                                                {
-                                                    <i class="bi @(i <= item.NotaAvaliacao ? "bi-star-fill text-warning" : "bi-star text-secondary")"
-                                                       style="font-size:.85rem;"></i>
-                                                }
-                                            </div>
-                                            <div class="text-muted" style="font-size:.68rem;">Avaliado</div>
-                                        </div>
-                                    }
-                                </div>
+                                    </div>
+                                }
                             </div>
 
                             @* Motivo de rejeição — por produto, se rejeitada *@
@@ -493,6 +504,23 @@ else
     </div>
 }
 
+@* ── Modal de perfil público ─────────────────────────────────────────── *@
+<div class="modal fade" id="modalPerfilPublico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="modalPerfilNomeTitle">Perfil</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2" id="modalPerfilConteudo">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* Modal de cancelamento — único, populado via JS *@
 <div class="modal fade" id="modalCancelar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -554,6 +582,52 @@ else
 
 @section Scripts {
 <script>
+    // ── Modal de perfil público ───────────────────────────────────────────
+    function abrirPerfilModal(id) {
+        var modalEl  = document.getElementById('modalPerfilPublico');
+        var modal    = bootstrap.Modal.getOrCreateInstance(modalEl);
+        var conteudo = document.getElementById('modalPerfilConteudo');
+        var titulo   = document.getElementById('modalPerfilNomeTitle');
+
+        conteudo.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+        titulo.textContent = 'Carregando...';
+        modal.show();
+
+        fetch('/Usuarios/PerfilPublicoJson?id=' + id)
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (d) {
+                titulo.textContent = d.nome;
+                var estrelas = '';
+                if (d.notaMedia) {
+                    for (var i = 1; i <= 5; i++) {
+                        if (i <= Math.floor(d.notaMedia))       estrelas += '<i class="bi bi-star-fill"></i>';
+                        else if (i - d.notaMedia < 1)           estrelas += '<i class="bi bi-star-half"></i>';
+                        else                                     estrelas += '<i class="bi bi-star"></i>';
+                    }
+                }
+                var fotoHtml = d.temFoto
+                    ? '<img src="' + d.fotoUrl + '" class="rounded-circle object-fit-cover flex-shrink-0" style="width:72px;height:72px;" alt="" />'
+                    : '<div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-success fs-4" style="width:72px;height:72px;">' + d.iniciais + '</div>';
+                var verificadoHtml = d.verificado
+                    ? '<span class="badge rounded-pill text-success bg-success bg-opacity-10"><i class="bi bi-patch-check-fill me-1"></i>Verificado</span>' : '';
+                var bioHtml = (d.bio && d.bio.trim())
+                    ? '<p class="mt-2 mb-0 text-secondary" style="font-size:14px;line-height:1.6;">' + d.bio + '</p>'
+                    : '<p class="mt-2 mb-0 text-muted fst-italic" style="font-size:14px;">Sem bio cadastrada.</p>';
+                var avaliacaoHtml = (d.notaMedia && d.totalAvaliacoes > 0)
+                    ? '<hr class="my-3"/><div class="row g-2 text-center"><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Nota média</div><div class="fw-bold fs-5">' + d.notaMedia.toFixed(1) + '</div><div class="text-warning small">' + estrelas + '</div></div></div><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Avaliações</div><div class="fw-bold fs-5">' + d.totalAvaliacoes + '</div><div class="text-muted small">recebidas</div></div></div></div>'
+                    : '<hr class="my-3"/><div class="border rounded-3 p-3 text-center text-muted small"><i class="bi bi-star me-1"></i>Ainda sem avaliações.</div>';
+                conteudo.innerHTML =
+                    '<div class="d-flex gap-3 align-items-start">' + fotoHtml +
+                    '<div class="flex-grow-1"><div class="d-flex flex-wrap align-items-center gap-2 mb-1">' + verificadoHtml +
+                    '<span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">' + d.tipoLabel + '</span></div>' +
+                    '<p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i>Membro desde ' + d.membroDesde + '</p>' +
+                    bioHtml + '</div></div>' + avaliacaoHtml;
+            })
+            .catch(function () {
+                conteudo.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-exclamation-circle me-2"></i>Não foi possível carregar o perfil.</div>';
+            });
+    }
+
     // ── Copiar token ──────────────────────────────────────────────────
     function copiarToken(token, btn) {
         navigator.clipboard.writeText(token).then(function () {

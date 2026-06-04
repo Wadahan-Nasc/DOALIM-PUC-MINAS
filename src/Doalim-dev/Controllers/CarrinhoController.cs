@@ -367,6 +367,23 @@ namespace Doalim_dev.Controllers
                 _context.CarrinhoItens.RemoveRange(itensNoCarrinho);
                 await _context.SaveChangesAsync();
 
+                // Notifica cada doador único sobre a nova reserva pendente
+                var doadoresNotificados = new HashSet<int>();
+                foreach (var item in itensNoCarrinho)
+                {
+                    var idDoador = item.Produto?.IdDoador ?? 0;
+                    if (idDoador > 0 && doadoresNotificados.Add(idDoador))
+                    {
+                        await CriarNotificacaoAsync(
+                            idUsuario  : idDoador,
+                            titulo     : "Nova reserva pendente 🛒",
+                            mensagem   : $"Você tem uma nova reserva pendente no pedido #{pedido.IdPedido}. Acesse Gerenciar Reservas para aprovar ou rejeitar.",
+                            tipo       : TipoNotificacao.ReservaPendente,
+                            url        : "/Produtos/GerenciarReservas");
+                    }
+                }
+                await _context.SaveChangesAsync();
+
                 // Após o save, os IdReserva gerados pelo banco já estão nos objetos EF
                 foreach (var (r, v) in pares)
                     v.IdReserva = r.IdReserva;

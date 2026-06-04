@@ -310,6 +310,7 @@ namespace Doalim_dev.Controllers
                         TipoArmazenamento = p.TipoArmazenamento ?? "",
                         FotoProduto = ObterFotoProdutoDataUrl(p.FotoProduto),
                         QuantidadeDisponivel = lotesAtivos.Sum(l => l.Quantidade),
+                        IdDoador = p.IdDoador,
                         NomeDoador = nomeDoador ?? "Doador",
                         LimitePF = p.QuantidadePessoaFisica,
                         LimitePJ = p.QuantidadePessoaJuridica
@@ -904,6 +905,14 @@ namespace Doalim_dev.Controllers
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(reserva.IdPedido);
 
+            // Notifica o beneficiário sobre a aprovação
+            await CriarNotificacaoAsync(
+                idUsuario  : reserva.IdBeneficiario,
+                titulo     : "Reserva aprovada! ✅",
+                mensagem   : $"Seu pedido #{reserva.IdPedido} foi aprovado. Retirada de {viewModel.DataRetiradaInicio:dd/MM} a {viewModel.DataRetiradaFim:dd/MM/yyyy}.",
+                tipo       : TipoNotificacao.ReservaAprovada,
+                url        : "/Reservas/MinhasReservas");
+
             await _context.SaveChangesAsync();
 
             TempData["Sucesso"] = $"Reserva #{reserva.IdReserva} aprovada com sucesso!";
@@ -971,6 +980,16 @@ namespace Doalim_dev.Controllers
 
             // Atualiza o status do pedido
             await AtualizarStatusPedidoAsync(idPedido);
+
+            // Notifica o beneficiário sobre a rejeição
+            var idBeneficiario = reservas.First().IdBeneficiario;
+            await CriarNotificacaoAsync(
+                idUsuario  : idBeneficiario,
+                titulo     : "Reserva rejeitada ❌",
+                mensagem   : $"Pedido #{idPedido}: {reservas.Count} item(ns) rejeitado(s). Motivo: {motivoRejeicao?.Trim()}",
+                tipo       : TipoNotificacao.ReservaRejeitada,
+                url        : "/Reservas/MinhasReservas");
+
             await _context.SaveChangesAsync();
 
             TempData["Sucesso"] = reservas.Count == 1

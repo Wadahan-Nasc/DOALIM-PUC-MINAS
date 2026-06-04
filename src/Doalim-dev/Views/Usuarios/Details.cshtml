@@ -95,7 +95,7 @@
                     </dd>
                 </dl>
 
-                @if (!ehAdmin && Model.ArquivoComprovacao != null && Model.ArquivoComprovacao.Length > 0)
+                @if (!ehAdmin)
                 {
                     <div class="admin-detail-actions">
                         @if (Model.StatusVerificacao != StatusVerificacao.Aprovado)
@@ -119,6 +119,18 @@
                                 <button type="submit" class="btn btn-outline-danger">
                                     <i class="bi bi-x-lg"></i>
                                     Rejeitar
+                                </button>
+                            </form>
+                        }
+                        @if (Model.StatusVerificacao != StatusVerificacao.Pendente)
+                        {
+                            <form asp-action="AtualizarStatusVerificacao" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.IdUsuario" />
+                                <input type="hidden" name="status" value="@StatusVerificacao.Pendente" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Voltar a Pendente
                                 </button>
                             </form>
                         }

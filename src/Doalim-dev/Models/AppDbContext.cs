@@ -20,6 +20,7 @@ namespace Doalim_dev.Models
         public DbSet<CarrinhoItem> CarrinhoItens { get; set; }
         public DbSet<ValorLookup> ValoresLookup { get; set; }
         public DbSet<Avaliacao> Avaliacoes { get; set; }
+        public DbSet<Notificacao> Notificacoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -198,6 +199,19 @@ namespace Doalim_dev.Models
                 .WithMany()
                 .HasForeignKey(a => a.IdReserva)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Notificações: FK para Usuario com cascade delete
+            modelBuilder.Entity<Notificacao>()
+                .HasOne(n => n.Usuario)
+                .WithMany()
+                .HasForeignKey(n => n.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ChaveDuplicacao é único por usuário (índice parcial filtrando nulos)
+            modelBuilder.Entity<Notificacao>()
+                .HasIndex(n => new { n.IdUsuario, n.ChaveDuplicacao })
+                .IsUnique()
+                .HasFilter("[ChaveDuplicacao] IS NOT NULL");
         }
     }
 }

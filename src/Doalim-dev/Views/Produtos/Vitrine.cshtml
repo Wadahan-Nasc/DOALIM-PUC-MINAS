@@ -170,7 +170,11 @@
 
                         <div class="vitrine-card-facts">
                             <div>
-                                <strong>@alimento.NomeDoador</strong>
+                                <a href="#" onclick="abrirPerfilModal(@alimento.IdDoador); return false;"
+                                   class="text-decoration-none text-dark fw-bold" title="Ver perfil do doador">
+                                    @alimento.NomeDoador
+                                    <i class="bi bi-person-circle ms-1 text-success" style="font-size:.85rem;"></i>
+                                </a>
                                 <span>doador</span>
                             </div>
                         </div>
@@ -223,6 +227,23 @@
     }
 </section>
 
+@* ── Modal de perfil público ─────────────────────────────────────────── *@
+<div class="modal fade" id="modalPerfilPublico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="modalPerfilNomeTitle">Perfil</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2" id="modalPerfilConteudo">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         function atualizarFiltroCidade(ativo) {
@@ -240,6 +261,70 @@
                 // Limpa bairro do modo automático
                 proximo.querySelectorAll('input').forEach(function(i){ i.value = ''; });
             }
+        }
+
+        // ── Modal de perfil público ───────────────────────────────────────────
+        function abrirPerfilModal(id) {
+            var modalEl  = document.getElementById('modalPerfilPublico');
+            var modal    = bootstrap.Modal.getOrCreateInstance(modalEl);
+            var conteudo = document.getElementById('modalPerfilConteudo');
+            var titulo   = document.getElementById('modalPerfilNomeTitle');
+
+            conteudo.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+            titulo.textContent = 'Carregando...';
+            modal.show();
+
+            fetch('/Usuarios/PerfilPublicoJson?id=' + id)
+                .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+                .then(function (d) {
+                    titulo.textContent = d.nome;
+
+                    // Estrelas
+                    var estrelas = '';
+                    if (d.notaMedia) {
+                        for (var i = 1; i <= 5; i++) {
+                            if (i <= Math.floor(d.notaMedia))
+                                estrelas += '<i class="bi bi-star-fill"></i>';
+                            else if (i - d.notaMedia < 1)
+                                estrelas += '<i class="bi bi-star-half"></i>';
+                            else
+                                estrelas += '<i class="bi bi-star"></i>';
+                        }
+                    }
+
+                    var fotoHtml = d.temFoto
+                        ? '<img src="' + d.fotoUrl + '" class="rounded-circle object-fit-cover flex-shrink-0" style="width:72px;height:72px;" alt="" />'
+                        : '<div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-success fs-4" style="width:72px;height:72px;">' + d.iniciais + '</div>';
+
+                    var verificadoHtml = d.verificado
+                        ? '<span class="badge rounded-pill text-success bg-success bg-opacity-10"><i class="bi bi-patch-check-fill me-1"></i>Verificado</span>'
+                        : '';
+
+                    var bioHtml = (d.bio && d.bio.trim())
+                        ? '<p class="mt-2 mb-0 text-secondary" style="font-size:14px;line-height:1.6;">' + d.bio + '</p>'
+                        : '<p class="mt-2 mb-0 text-muted fst-italic" style="font-size:14px;">Sem bio cadastrada.</p>';
+
+                    var avaliacaoHtml = (d.notaMedia && d.totalAvaliacoes > 0)
+                        ? '<hr class="my-3"/><div class="row g-2 text-center"><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Nota média</div><div class="fw-bold fs-5">' + d.notaMedia.toFixed(1) + '</div><div class="text-warning small">' + estrelas + '</div></div></div><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Avaliações</div><div class="fw-bold fs-5">' + d.totalAvaliacoes + '</div><div class="text-muted small">recebidas</div></div></div></div>'
+                        : '<hr class="my-3"/><div class="border rounded-3 p-3 text-center text-muted small"><i class="bi bi-star me-1"></i>Ainda sem avaliações.</div>';
+
+                    conteudo.innerHTML =
+                        '<div class="d-flex gap-3 align-items-start">' +
+                            fotoHtml +
+                            '<div class="flex-grow-1">' +
+                                '<div class="d-flex flex-wrap align-items-center gap-2 mb-1">' +
+                                    verificadoHtml +
+                                    '<span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">' + d.tipoLabel + '</span>' +
+                                '</div>' +
+                                '<p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i>Membro desde ' + d.membroDesde + '</p>' +
+                                bioHtml +
+                            '</div>' +
+                        '</div>' +
+                        avaliacaoHtml;
+                })
+                .catch(function () {
+                    conteudo.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-exclamation-circle me-2"></i>Não foi possível carregar o perfil.</div>';
+                });
         }
 
         document.addEventListener('DOMContentLoaded', function () {

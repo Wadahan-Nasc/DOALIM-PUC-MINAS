@@ -69,6 +69,18 @@
         padding: 14px 16px;
         background: #f8f9fa;
     }
+    .comprovacao-upload-area {
+        border: 2px dashed #a5d6a7;
+        border-radius: 10px;
+        background: #f8fbf6;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: border-color .15s, background .15s;
+    }
+    .comprovacao-upload-area:hover {
+        border-color: #198754;
+        background: #f0faf0;
+    }
 </style>
 
 <section class="profile-shell">
@@ -100,25 +112,74 @@
         @* ── Foto de perfil – estilo rede social ── *@
         <div class="admin-form-section">
             <h2>Foto de perfil</h2>
-            <div class="d-flex align-items-center gap-4">
-                <div class="profile-avatar-wrapper" onclick="document.getElementById('arquivoFotoPerfil').click()" title="Clique para alterar a foto">
-                    @if (!string.IsNullOrEmpty(foto))
+            <div class="d-flex align-items-start gap-4 flex-wrap justify-content-between">
+
+                @* Lado esquerdo: avatar + nome *@
+                <div class="d-flex align-items-center gap-4">
+                    <div class="profile-avatar-wrapper" onclick="document.getElementById('arquivoFotoPerfil').click()" title="Clique para alterar a foto">
+                        @if (!string.IsNullOrEmpty(foto))
+                        {
+                            <img id="fotoPreview" src="@foto" alt="Foto de perfil" class="profile-avatar-img" />
+                        }
+                        else
+                        {
+                            <div id="fotoPreview" class="profile-avatar-placeholder">@inicialNome</div>
+                        }
+                        <span class="profile-avatar-edit-btn">
+                            <i class="bi bi-camera-fill"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <div class="fw-semibold fs-5">@Model.Nome</div>
+                        <div class="text-muted small mt-1">Clique na foto para selecionar uma nova imagem.</div>
+                        <div class="text-muted small">PNG, JPG ou JPEG até 2 MB.</div>
+                    </div>
+                </div>
+
+                @* Lado direito: avaliações recebidas *@
+                @if (!ehAdmin)
+                {
+                    var notaMedia       = ViewBag.NotaMedia as double?;
+                    var totalAvaliacoes = (int)(ViewBag.TotalAvaliacoes ?? 0);
+
+                    @if (notaMedia.HasValue && totalAvaliacoes > 0)
                     {
-                        <img id="fotoPreview" src="@foto" alt="Foto de perfil" class="profile-avatar-img" />
+                        <div class="row g-2 text-center" style="max-width:260px;">
+                            <div class="col">
+                                <div class="bg-light rounded-3 p-3">
+                                    <div class="text-muted small">Nota média</div>
+                                    <div class="fw-bold fs-4">@notaMedia.Value.ToString("0.0")</div>
+                                    <div class="text-warning small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Floor(notaMedia.Value))
+                                            { <i class="bi bi-star-fill"></i> }
+                                            else if (i - notaMedia.Value < 1)
+                                            { <i class="bi bi-star-half"></i> }
+                                            else
+                                            { <i class="bi bi-star"></i> }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="bg-light rounded-3 p-3">
+                                    <div class="text-muted small">Avaliações</div>
+                                    <div class="fw-bold fs-4">@totalAvaliacoes</div>
+                                    <div class="text-muted small">recebidas</div>
+                                </div>
+                            </div>
+                        </div>
                     }
                     else
                     {
-                        <div id="fotoPreview" class="profile-avatar-placeholder">@inicialNome</div>
+                        <div class="border rounded-3 p-3 text-center text-muted small align-self-center" style="max-width:220px;">
+                            <i class="bi bi-star me-1"></i>
+                            Ainda sem avaliações recebidas.
+                        </div>
                     }
-                    <span class="profile-avatar-edit-btn">
-                        <i class="bi bi-camera-fill"></i>
-                    </span>
-                </div>
-                <div>
-                    <div class="fw-semibold fs-5">@Model.Nome</div>
-                    <div class="text-muted small mt-1">Clique na foto para selecionar uma nova imagem.</div>
-                    <div class="text-muted small">PNG, JPG ou JPEG até 2 MB.</div>
-                </div>
+                }
+
             </div>
             <input type="file" id="arquivoFotoPerfil" name="arquivoFotoPerfil" class="d-none" accept=".png,.jpg,.jpeg" />
         </div>
@@ -227,15 +288,47 @@
 
                         <div id="novoArquivoArea" class="mt-3" style="display:none;">
                             <input type="hidden" name="removerComprovacao" value="true" />
-                            <label class="form-label small">Novo arquivo de comprovação</label>
-                            <input type="file" name="arquivoComprovacao" class="form-control" accept=".png,.jpg,.jpeg,.pdf" />
-                            <div class="form-text">PNG, JPG, JPEG ou PDF até 5 MB.</div>
+                            <label class="form-label small fw-semibold mb-2">Novo arquivo de comprovação</label>
+                            <div class="comprovacao-upload-area" onclick="document.getElementById('inputNovaComprovacao').click()">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="d-flex align-items-center justify-content-center rounded flex-shrink-0"
+                                         style="width:44px;height:44px;background:#e8f5e9;">
+                                        <i class="bi bi-file-earmark-arrow-up text-success" style="font-size:1.4rem;"></i>
+                                    </div>
+                                    <div>
+                                        <div id="novaComprovacaoNomeLabel" class="fw-semibold small" style="color:#2e7d32;">
+                                            Clique para anexar um documento
+                                        </div>
+                                        <div class="text-muted" style="font-size:.78rem;">
+                                            Formatos aceitos: PDF, JPG, PNG &bull; Máx. 5 MB
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" id="inputNovaComprovacao" name="arquivoComprovacao"
+                                   class="d-none" accept=".png,.jpg,.jpeg,.pdf" />
                         </div>
                     }
                     else
                     {
-                        <input type="file" name="arquivoComprovacao" class="form-control" accept=".png,.jpg,.jpeg,.pdf" />
-                        <div class="form-text">PNG, JPG, JPEG ou PDF até 5 MB.</div>
+                        <div class="comprovacao-upload-area" onclick="document.getElementById('inputComprovacao').click()">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex align-items-center justify-content-center rounded flex-shrink-0"
+                                     style="width:44px;height:44px;background:#e8f5e9;">
+                                    <i class="bi bi-file-earmark-arrow-up text-success" style="font-size:1.4rem;"></i>
+                                </div>
+                                <div>
+                                    <div id="comprovacaoNomeLabel" class="fw-semibold small" style="color:#2e7d32;">
+                                        Clique para anexar um documento
+                                    </div>
+                                    <div class="text-muted" style="font-size:.78rem;">
+                                        Formatos aceitos: PDF, JPG, PNG &bull; Máx. 5 MB
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" id="inputComprovacao" name="arquivoComprovacao"
+                               class="d-none" accept=".png,.jpg,.jpeg,.pdf" />
                     }
                 </div>
             </div>
@@ -342,6 +435,28 @@
             btnConfirmar.addEventListener('click', function () {
                 document.getElementById('comprovacaoExistente').style.display = 'none';
                 novoArquivo.style.display = 'block';
+            });
+        }
+
+        // Exibe nome do arquivo de comprovação ao selecionar
+        var inputComprovacao = document.getElementById('inputComprovacao');
+        if (inputComprovacao) {
+            inputComprovacao.addEventListener('change', function () {
+                var label = document.getElementById('comprovacaoNomeLabel');
+                if (label && this.files && this.files[0]) {
+                    label.innerHTML = '<i class="bi bi-file-earmark-check me-1"></i>' + this.files[0].name;
+                    label.style.color = '#198754';
+                }
+            });
+        }
+        var inputNovaComprovacao = document.getElementById('inputNovaComprovacao');
+        if (inputNovaComprovacao) {
+            inputNovaComprovacao.addEventListener('change', function () {
+                var label = document.getElementById('novaComprovacaoNomeLabel');
+                if (label && this.files && this.files[0]) {
+                    label.innerHTML = '<i class="bi bi-file-earmark-check me-1"></i>' + this.files[0].name;
+                    label.style.color = '#198754';
+                }
             });
         }
 

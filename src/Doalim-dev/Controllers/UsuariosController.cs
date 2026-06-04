@@ -484,6 +484,61 @@ namespace Doalim_dev.Controllers
         }
 
         // -----------------------------------------------------------------------------------------
+        // GET: /Usuarios/PerfilPublicoJson?id=X
+        // Retorna os dados públicos de um usuário em JSON — usado pelo modal de perfil.
+        // -----------------------------------------------------------------------------------------
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> PerfilPublicoJson(int id)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.IdUsuario == id && u.Ativo);
+
+            if (usuario == null)
+                return NotFound();
+
+            var stats = await _context.Avaliacoes
+                .Where(a => a.IdAvaliado == id)
+                .GroupBy(a => a.IdAvaliado)
+                .Select(g => new { NotaMedia = g.Average(a => (double)a.Nota), Total = g.Count() })
+                .FirstOrDefaultAsync();
+
+            var tipoLabel = usuario.TipoUsuario switch
+            {
+                TipoUsuario.DoadorPF       => "Doador PF",
+                TipoUsuario.DoadorPJ       => "Doador PJ",
+                TipoUsuario.BeneficiarioPF => "Beneficiário PF",
+                TipoUsuario.BeneficiarioPJ => "Beneficiário PJ",
+                _                          => "Usuário"
+            };
+
+            var iniciais = string.Concat(
+                usuario.Nome.Split(' ')
+                    .Where(p => p.Length > 0)
+                    .Take(2)
+                    .Select(p => p[0].ToString().ToUpper()));
+
+            return Json(new
+            {
+                idUsuario       = usuario.IdUsuario,
+                nome            = usuario.Nome,
+                iniciais        = iniciais,
+                bio             = usuario.Bio,
+                tipoLabel       = tipoLabel,
+                verificado      = UsuarioRegras.TemComprovacaoAprovada(usuario),
+                membroDesde     = usuario.DataCadastro.ToString("MMMM 'de' yyyy",
+                                      new System.Globalization.CultureInfo("pt-BR")),
+                notaMedia       = stats?.NotaMedia,
+                totalAvaliacoes = stats?.Total ?? 0,
+                temFoto         = usuario.FotoPerfil != null && usuario.FotoPerfil.Length > 0,
+                fotoUrl         = usuario.FotoPerfil != null && usuario.FotoPerfil.Length > 0
+                                    ? $"data:image/jpeg;base64,{Convert.ToBase64String(usuario.FotoPerfil)}"
+                                    : null
+            });
+        }
+
+        // -----------------------------------------------------------------------------------------
         // POST: /Usuarios/AvaliarUsuario
         // Registra ou atualiza a avaliacao do usuario logado para a reserva informada.
         // O "avaliado" e determinado automaticamente a partir da reserva (nao precisa ser enviado
@@ -702,6 +757,15 @@ namespace Doalim_dev.Controllers
         {
             ViewBag.EhDoador = await _context.Doadores.AsNoTracking().AnyAsync(d => d.IdUsuario == usuarioId);
             ViewBag.EhBeneficiario = await _context.Beneficiarios.AsNoTracking().AnyAsync(b => b.IdUsuario == usuarioId);
+
+            var stats = await _context.Avaliacoes
+                .Where(a => a.IdAvaliado == usuarioId)
+                .GroupBy(a => a.IdAvaliado)
+                .Select(g => new { NotaMedia = g.Average(a => (double)a.Nota), Total = g.Count() })
+                .FirstOrDefaultAsync();
+
+            ViewBag.NotaMedia       = stats?.NotaMedia;
+            ViewBag.TotalAvaliacoes = stats?.Total ?? 0;
         }
     }
 }
