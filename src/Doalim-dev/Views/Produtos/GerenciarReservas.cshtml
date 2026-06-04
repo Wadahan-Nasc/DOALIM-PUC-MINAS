@@ -176,43 +176,64 @@
                             @foreach (var r in grupo)
                             {
                                 <div class="produto-row py-2">
-                                    <div class="row g-2 align-items-center">
+                                    <div class="row gx-5 gy-2 align-items-center">
+
+                                        @* Foto *@
                                         <div class="col-auto">
                                             @if (!string.IsNullOrEmpty(r.FotoProduto))
                                             {
                                                 <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                                     class="rounded" style="width:44px;height:44px;object-fit:cover;" />
                                             }
                                             else
                                             {
                                                 <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                                                     style="width:48px;height:48px;font-size:1.3rem;">&#127857;</div>
+                                                     style="width:44px;height:44px;font-size:1.2rem;">&#127857;</div>
                                             }
                                         </div>
-                                        <div class="col">
-                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
-                                            <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
-                                            <div class="d-flex flex-wrap gap-3 mt-1" style="font-size:.82rem;">
-                                                <div>
-                                                    <div class="info-label">Qtd.</div>
-                                                    <div class="info-value small">@r.QuantidadeReservada @r.UnidadeMedidaProduto</div>
-                                                </div>
-                                                <div>
-                                                    <div class="info-label">Lote</div>
-                                                    <div class="info-value small">@r.NumeroLote</div>
-                                                </div>
-                                                <div>
-                                                    <div class="info-label">Validade</div>
-                                                    <div class="info-value small">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
-                                                </div>
-                                            </div>
+
+                                        @* Nome *@
+                                        <div class="col-md-3">
+                                            <div class="fw-semibold text-dark" style="font-size:.88rem;">@r.NomeProduto</div>
+                                            <div class="text-muted" style="font-size:.78rem;">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
                                             @if (r.LoteProximoVencimento)
                                             {
-                                                <span class="badge bg-warning text-dark mt-1" style="font-size:.72rem;">
+                                                <span class="badge bg-warning text-dark mt-1" style="font-size:.68rem;">
                                                     <i class="bi bi-exclamation-triangle me-1"></i>Vence em breve
                                                 </span>
                                             }
                                         </div>
+
+                                        @* Qtd. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Qtd.</div>
+                                            <div class="info-value">@r.QuantidadeReservada</div>
+                                        </div>
+
+                                        @* U.M. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">U.M.</div>
+                                            <div class="info-value">@r.UnidadeMedidaProduto</div>
+                                        </div>
+
+                                        @* Lote *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Lote</div>
+                                            <div class="info-value">@r.NumeroLote</div>
+                                        </div>
+
+                                        @* Validade *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Validade</div>
+                                            <div class="info-value">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                        </div>
+
+                                        @* Reserva *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Reserva</div>
+                                            <div class="info-value text-success">#@r.IdReserva</div>
+                                        </div>
+
                                     </div>
                                 </div>
                             }
@@ -423,37 +444,58 @@
                             @foreach (var r in grupo)
                             {
                                 <div class="produto-row py-2">
-                                    <div class="row g-2 align-items-center">
+                                    <div class="row gx-5 gy-2 align-items-center">
+
+                                        @* Foto *@
                                         <div class="col-auto">
                                             @if (!string.IsNullOrEmpty(r.FotoProduto))
                                             {
                                                 <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                                     class="rounded" style="width:44px;height:44px;object-fit:cover;" />
                                             }
                                             else
                                             {
                                                 <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                                                     style="width:48px;height:48px;font-size:1.2rem;">&#127857;</div>
+                                                     style="width:44px;height:44px;font-size:1.2rem;">&#127857;</div>
                                             }
                                         </div>
-                                        <div class="col">
-                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
-                                            <div class="text-muted small">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
-                                            <div class="d-flex flex-wrap gap-3 mt-1" style="font-size:.82rem;">
-                                                <div>
-                                                    <div class="info-label">Qtd.</div>
-                                                    <div class="info-value small">@r.QuantidadeReservada @r.UnidadeMedidaProduto</div>
-                                                </div>
-                                                <div>
-                                                    <div class="info-label">Lote</div>
-                                                    <div class="info-value small">@r.NumeroLote</div>
-                                                </div>
-                                                <div>
-                                                    <div class="info-label">Validade</div>
-                                                    <div class="info-value small">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
-                                                </div>
-                                            </div>
+
+                                        @* Nome *@
+                                        <div class="col-md-3">
+                                            <div class="fw-semibold text-dark" style="font-size:.88rem;">@r.NomeProduto</div>
+                                            <div class="text-muted" style="font-size:.78rem;">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
                                         </div>
+
+                                        @* Qtd. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Qtd.</div>
+                                            <div class="info-value">@r.QuantidadeReservada</div>
+                                        </div>
+
+                                        @* U.M. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">U.M.</div>
+                                            <div class="info-value">@r.UnidadeMedidaProduto</div>
+                                        </div>
+
+                                        @* Lote *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Lote</div>
+                                            <div class="info-value">@r.NumeroLote</div>
+                                        </div>
+
+                                        @* Validade *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Validade</div>
+                                            <div class="info-value">@r.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                        </div>
+
+                                        @* Reserva *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Reserva</div>
+                                            <div class="info-value text-success">#@r.IdReserva</div>
+                                        </div>
+
                                     </div>
                                 </div>
                             }
@@ -551,25 +593,52 @@
                             @foreach (var r in grupo)
                             {
                                 <div class="produto-row py-2">
-                                    <div class="row g-2 align-items-center">
+                                    <div class="row gx-5 gy-2 align-items-center">
+
+                                        @* Foto *@
                                         <div class="col-auto">
                                             @if (!string.IsNullOrEmpty(r.FotoProduto))
                                             {
                                                 <img src="@r.FotoProduto" alt="@r.NomeProduto"
-                                                     class="rounded" style="width:48px;height:48px;object-fit:cover;" />
+                                                     class="rounded" style="width:44px;height:44px;object-fit:cover;" />
                                             }
                                             else
                                             {
                                                 <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                                                     style="width:48px;height:48px;font-size:1.2rem;">&#127857;</div>
+                                                     style="width:44px;height:44px;font-size:1.2rem;">&#127857;</div>
                                             }
                                         </div>
-                                        <div class="col">
-                                            <div class="fw-semibold text-dark" style="font-size:.9rem;">@r.NomeProduto</div>
-                                            <div class="text-muted small">
-                                                @r.QuantidadeReservada @r.UnidadeMedidaProduto &bull; Lote @r.NumeroLote
-                                            </div>
+
+                                        @* Nome *@
+                                        <div class="col-md-3">
+                                            <div class="fw-semibold text-dark" style="font-size:.88rem;">@r.NomeProduto</div>
+                                            <div class="text-muted" style="font-size:.78rem;">@r.MarcaProduto &bull; @r.CategoriaProduto</div>
                                         </div>
+
+                                        @* Qtd. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Qtd.</div>
+                                            <div class="info-value">@r.QuantidadeReservada</div>
+                                        </div>
+
+                                        @* U.M. *@
+                                        <div class="col-auto">
+                                            <div class="info-label">U.M.</div>
+                                            <div class="info-value">@r.UnidadeMedidaProduto</div>
+                                        </div>
+
+                                        @* Lote *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Lote</div>
+                                            <div class="info-value">@r.NumeroLote</div>
+                                        </div>
+
+                                        @* Reserva *@
+                                        <div class="col-auto">
+                                            <div class="info-label">Reserva</div>
+                                            <div class="info-value text-success">#@r.IdReserva</div>
+                                        </div>
+
                                     </div>
                                 </div>
                             }

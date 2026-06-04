@@ -5,7 +5,11 @@
     var alimentosDisponiveis = ViewBag.AlimentosDisponiveis ?? 0;
     var produtosDisponiveis = ViewBag.ProdutosDisponiveis ?? 0;
     var doacoesReservadas = ViewBag.DoacoesReservadas ?? 0;
+    var reservasRetiradas = ViewBag.ReservasRetiradas ?? 0;
     var totalDoadores = ViewBag.TotalDoadores ?? 0;
+    var totalBeneficiariosAtendidos = ViewBag.TotalBeneficiariosAtendidos ?? 0;
+    var totalItensDoados = ViewBag.TotalItensDoados ?? 0;
+    var totalBeneficiarios = ViewBag.TotalBeneficiarios ?? 0;
     var isLogged = User.Identity?.IsAuthenticated == true;
     var isDoador = User.IsInRole("DoadorPF") || User.IsInRole("DoadorPJ");
     var isBeneficiario = User.IsInRole("BeneficiarioPF") || User.IsInRole("BeneficiarioPJ");
@@ -21,7 +25,7 @@
                 Uma plataforma para cadastrar doações, validar perfis e reservar alimentos com mais controle, privacidade e confiança.
             </p>
             <div class="home-hero-actions">
-                <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-success btn-lg">
+                <a asp-controller="Produtos" asp-action="Vitrine" class="btn btn-home-vitrine btn-lg">
                     <i class="bi bi-shop"></i>
                     Ver vitrine
                 </a>
@@ -67,12 +71,8 @@
         </div>
 
         <div class="home-hero-insight home-hero-insight-v2" aria-label="Resumo da plataforma">
-            <div class="home-preview-top">
+            <div class="home-preview-top home-preview-top-logo">
                 <img src="~/images/logo.png" alt="Doalim" />
-                <div>
-                    <span>Plataforma ativa</span>
-                    <strong>@alimentosDisponiveis alimento(s)</strong>
-                </div>
             </div>
             <div class="home-preview-panel">
                 <div class="home-preview-row is-live">
@@ -90,22 +90,43 @@
                     </div>
                 </div>
                 <div class="home-preview-row">
-                    <i class="bi bi-shield-check"></i>
+                    <i class="bi bi-bag-heart"></i>
                     <div>
-                        <strong>Fluxo protegido</strong>
-                        <span>Comprovação antes de doar ou reservar</span>
+                        <strong>Doadores ativos</strong>
+                        <span>@totalDoadores doador(es) cadastrado(s)</span>
+                    </div>
+                </div>
+                <div class="home-preview-row">
+                    <i class="bi bi-person-heart"></i>
+                    <div>
+                        <strong>Beneficiários ativos</strong>
+                        <span>@totalBeneficiarios beneficiário(s) cadastrado(s)</span>
+                    </div>
+                </div>
+                <div class="home-preview-row">
+                    <i class="bi bi-cart-check"></i>
+                    <div>
+                        <strong>Reservas retiradas</strong>
+                        <span>@reservasRetiradas retirada(s) concluída(s)</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="home-impact-strip home-impact-strip-v2" aria-label="Indicadores da plataforma">
-        <div><span>Alimentos</span><strong>@alimentosDisponiveis</strong><small>na vitrine</small></div>
-        <div><span>Produtos</span><strong>@produtosDisponiveis</strong><small>com lotes ativos</small></div>
-        <div><span>Doadores</span><strong>@totalDoadores</strong><small>cadastrados</small></div>
-        <div><span>Reservas</span><strong>@doacoesReservadas</strong><small>registradas</small></div>
-        <div><span>Usuários</span><strong>@totalUsuarios</strong><small>na rede</small></div>
+    <section class="home-impact-strip home-impact-strip-v2 home-impact-strip-impact" aria-label="Impacto da plataforma">
+        <div>
+            <i class="bi bi-people-fill"></i>
+            <span>Beneficiários atendidos</span>
+            <strong>@totalBeneficiariosAtendidos</strong>
+            <small>já retiraram doações</small>
+        </div>
+        <div>
+            <i class="bi bi-box-seam-fill"></i>
+            <span>Itens retirados</span>
+            <strong>@totalItensDoados</strong>
+            <small>unidades entregues</small>
+        </div>
     </section>
 
     <section class="home-feature-band">
@@ -157,10 +178,9 @@
     </section>
 
     <section class="home-action-band home-action-band-v2">
-        <div class="home-action-copy">
+        <div class="home-section-heading home-action-copy">
             <span class="home-kicker">Vitrine aberta</span>
             <h2>Veja o que já pode virar ajuda.</h2>
-            <p>Reservas exigem conta aprovada, mas a vitrine pública mostra os alimentos disponíveis e ajuda a rede a se organizar.</p>
         </div>
         <div class="home-action-grid">
             <a asp-controller="Produtos" asp-action="Vitrine" class="home-action-card">

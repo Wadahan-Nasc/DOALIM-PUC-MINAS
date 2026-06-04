@@ -58,6 +58,18 @@
         opacity: .65;
         background: #fafafa;
     }
+    .info-label {
+        font-size: .70rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #888;
+        font-weight: 700;
+    }
+    .info-value {
+        font-size: .88rem;
+        font-weight: 600;
+        color: #333;
+    }
     /* Divisor vertical no rodapé de contato */
     @@media (min-width: 768px) {
         .footer-contato-divider {
@@ -358,10 +370,10 @@ else
                     {
                         var isCancelado = item.StatusReserva == "Cancelada";
 
-                        <div class="list-group-item px-3 py-2 produto-row @(statusMisto && isCancelado ? "item-cancelado" : "")">
-                            <div class="row g-2 align-items-center">
+                        <div class="list-group-item px-3 py-3 produto-row @(statusMisto && isCancelado ? "item-cancelado" : "")">
+                            <div class="row gx-5 gy-2 align-items-center">
 
-                                @* Col 1: Foto (fixo) *@
+                                @* Foto *@
                                 <div class="col-auto">
                                     @if (!string.IsNullOrEmpty(item.FotoProduto))
                                     {
@@ -376,8 +388,8 @@ else
                                     }
                                 </div>
 
-                                @* Col 2: Nome / marca / categoria + badge de status misto *@
-                                <div class="col-md-4">
+                                @* Nome + marca + badge status misto *@
+                                <div class="col-md-3">
                                     <div class="fw-semibold d-flex align-items-center gap-2" style="font-size:.9rem; color:#1a2e1a;">
                                         @item.NomeProduto
                                         @if (statusMisto)
@@ -389,28 +401,43 @@ else
                                             <span class="badge @iBadge" style="font-size:.68rem;">@item.StatusReserva</span>
                                         }
                                     </div>
-                                    <div class="text-muted small">
-                                        @item.MarcaProduto &bull; @item.CategoriaProduto
-                                    </div>
+                                    <div class="text-muted small">@item.MarcaProduto &bull; @item.CategoriaProduto</div>
                                 </div>
 
-                                @* Col 3: Quantidade / Lote / Validade / Reserva# *@
-                                <div class="col-md-4">
-                                    <div class="d-flex flex-wrap gap-3" style="font-size:.82rem; color:#555;">
-                                        <span>
-                                            <i class="bi bi-box me-1 text-secondary"></i>
-                                            @item.QuantidadeReservada @item.UnidadeMedidaProduto
-                                        </span>
-                                        <span>Lote @item.NumeroLote</span>
-                                        <span>Val. @item.DataValidadeLote.ToString("dd/MM/yyyy")</span>
-                                        <span class="text-secondary fw-semibold">Reserva #@item.IdReserva</span>
-                                    </div>
+                                @* Qtd. *@
+                                <div class="col-auto">
+                                    <div class="info-label">Qtd.</div>
+                                    <div class="info-value">@item.QuantidadeReservada</div>
                                 </div>
 
-                                @* Col 4: Botão cancelar (apenas Pendente) *@
+                                @* U.M. *@
+                                <div class="col-auto">
+                                    <div class="info-label">U.M.</div>
+                                    <div class="info-value">@item.UnidadeMedidaProduto</div>
+                                </div>
+
+                                @* Lote *@
+                                <div class="col-auto">
+                                    <div class="info-label">Lote</div>
+                                    <div class="info-value">@item.NumeroLote</div>
+                                </div>
+
+                                @* Validade *@
+                                <div class="col-auto">
+                                    <div class="info-label">Validade</div>
+                                    <div class="info-value">@item.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                </div>
+
+                                @* Reserva *@
+                                <div class="col-auto">
+                                    <div class="info-label">Reserva</div>
+                                    <div class="info-value text-success">#@item.IdReserva</div>
+                                </div>
+
+                                @* Botão cancelar *@
                                 @if (item.PodeSerCancelada)
                                 {
-                                    <div class="col-md-auto ms-md-auto">
+                                    <div class="col-auto ms-auto">
                                         <button type="button"
                                                 class="btn btn-outline-danger btn-sm rounded-pill"
                                                 data-bs-toggle="modal"
@@ -422,9 +449,10 @@ else
                                         </button>
                                     </div>
                                 }
+
                             </div>
 
-                            @* Motivo de rejeição — por produto, se rejeitada *@
+                            @* Motivo de rejeição *@
                             @if (grpStatus == "Rejeitada" && !string.IsNullOrEmpty(item.MotivoRejeicao))
                             {
                                 <div class="alert alert-danger py-1 px-2 mt-2 mb-0 rounded-3" style="font-size:.82rem;">
