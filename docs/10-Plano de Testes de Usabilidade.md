@@ -95,98 +95,86 @@ As seguintes tarefas devem ser realizadas pelos participantes:
 | Caso de Teste | CTU-05 – Solicitar Reserva de Doação |
 |:---:	|:---:	|
 |	Perfil 	| Beneficiário |
-| Objetivo do Teste 	| Verificar a facilidade do fluxo de solicitação e a clareza da alteração de status do item para "reservado". |
-| Ações necessárias 	| - Na vitrine, selecionar um produto disponível. <br> - Clicar em "Solicitar Reserva" <br> - Informar a quantidade desejada no modal <br> - Clicar em "Reservar" e verificar a confirmação e atualização de status. |
+| Objetivo do Teste 	| Verificar a facilidade do fluxo de solicitação e a clareza da confirmação do envio do pedido de reserva. |
+| Ações necessárias 	| - Na vitrine, selecionar um produto disponível. <br> - Clicar em "Solicitar Reserva" <br> - Informar a quantidade desejada <br> - Clicar em "Reservar" e verificar se o pedido consta no "Minhas Reservas". |
 
 | Caso de Teste | CTU-06 – Confirmar Data de Retirada |
 |:---:	|:---:	|
 |	Perfil 	| Doador |
 | Objetivo do Teste 	| Analisar a usabilidade do painel de aprovação de reservas recebidas e clareza do fluxo de confirmação. |
-| Ações necessárias 	| - Acessar a notificação ou histórico de propostas recebidas. <br> - Clicar em uma solicitação pendente <br> - Clicar em "Confirmar Reserva" <br> - Informar a data e horário disponíveis para retirada e notificar o beneficiário. |
+| Ações necessárias 	| - Acessar a notificação ou histórico de propostas recebidas. <br> - Clicar em uma solicitação pendente <br> - Clicar em "Confirmar Reserva" <br> - Informar as datas disponíveis para retirada e notificar o beneficiário. |
 
-| Caso de Teste | CTU-07 – Validar Entrega com Código/QR Code |
+| Caso de Teste | CTU-07 – Validar Entrega com Código |
 |:---:	|:---:	|
 |	Perfil 	| Doador |
-| Objetivo do Teste 	| Verificar se o fluxo de conclusão da entrega por código numérico ou QR Code é compreensível e rápido. |
-| Ações necessárias 	| - Acessar a reserva aprovada <br> - Clicar em "Concluir Doação" <br> - Inserir o código numérico ou escanear o QR Code fornecido pelo beneficiário. <br> - Verificar a mensagem de conclusão e atualização de status. |
+| Objetivo do Teste 	| Verificar se o fluxo de conclusão da entrega por código numérico é compreensível e rápido. |
+| Ações necessárias 	| - Acessar a reserva aprovada <br> - Clicar em "Confirmar entrega" <br> - Inserir o código numérico fornecido pelo beneficiário. <br> - Verificar a mensagem de conclusão e atualização de status. |
 
 | Caso de Teste | CTU-08 – Moderação de Usuários e Documentos |
 |:---:	|:---:	|
 |	Perfil 	| Administrador |
 | Objetivo do Teste 	| Verificar se o painel administrativo é claro e eficiente para análise e aprovação de documentações. |
-| Ações necessárias 	| - Logar como Administrador <br> - Acessar "Lista de Usuários" no painel <br> - Clicar em um usuário e baixar o documento pendente. <br> - Aprovar ou rejeitar a documentação (em caso de rejeição, inserir justificativa).<br> - Clicar em "Salvar" e verificar a atualização do status do usuário. |
+| Ações necessárias 	| - Logar como Administrador <br> - Acessar "Lista de Usuários" no painel <br> - Clicar em "Ver detalhes" de um usuário e abrir o documento de comprovação do mesmo. <br> - Aprovar ou rejeitar a documentação. <br> - Verificar a atualização do status do usuário. |
 
-| Caso de Teste | CTU-09 – Gerar relatório de impacto (CO₂ / Volume) |
-|:---:	|:---:	|
-|	Perfil 	| Doador |
-| Objetivo do Teste 	|Verificar se as métricas socioambientais são apresentadas de forma clara e se a exportação é intuitiva |
-| Ações necessárias 	| - Acessar "Painel de Impacto Ambiental" ou "Métricas". <br> - Visualizar os gráficos e indicadores exibidos. <br> - Manipular os filtros disponíveis.. <br> - Clicar em "Exportar" e verificar o download do relatório. |
-
-| Caso de Teste | CTU-10 – Visualizar Perfil Público e Avaliar Usuário |
+| Caso de Teste | CTU-09 – Visualizar Perfil Público e Avaliar Usuário |
 |:---:	|:---:	|
 |	Perfil 	| Doador / Beneficiário |
 | Objetivo do Teste 	|Analisar a transparência das informações públicas e a facilidade de uso do sistema de avaliação. |
-| Ações necessárias 	| - A partir de uma reserva concluída, clicar no ícone do outro usuário. <br> - Visualizar os dados públicos exibidos no perfil. <br> - Clicar em "Avaliar Experiência".<br> - Inserir uma avaliação de 1 a 5 estrelas e um comentário.<br> - Clicar em "Enviar Avaliação" e verificar se aparece no perfil avaliado. |
+| Ações necessárias 	| - A partir de uma reserva concluída, clicar no nome do usuário e conferir as informações no modal <br> - Inserir uma avaliação de 1 a 5 estrelas. <br> - Clicar em "Confirmar Avaliação" e verificar se foi alterado a média das avaliações daquele usuário. |
 
-| Caso de Teste | CTU-11 – Iniciar Comunicação via Chat |
-|:---:	|:---:	|
-|	Perfil 	| Doador / Beneficiário |
-| Objetivo do Teste 	| Validar se o ícone e a interface de chat interno são fáceis de localizar e usar |
-| Ações necessárias 	| - Localizar o botão de mensagens dentro de uma reserva/doação ativa <br> - Digitar e enviar uma mensagem para a outra parte. <br> - Verificar visualmente a confirmação de envio. <br> - Confirmar se o destinatário recebe a notificação da mensagem. |
-
-| Caso de Teste | CTU-12 – Recebimento e leitura de notificações |
+| Caso de Teste | CTU-10 – Recebimento e leitura de notificações |
 |:---:	|:---:	|
 |	Perfil 	| Doador / Beneficiário |
 | Objetivo do Teste 	| Verificar se as notificações do sistema são visíveis, compreensíveis e acessíveis ao usuário. |
-| Ações necessárias 	| - Realizar o login na aplicação. <br> - Clicar no ícone de notificações no cabeçalho. <br> - Verificar se as notificações de aprovação, recusa ou lembrete estão listadas. <br> - Clicar em uma notificação e verificar se redireciona corretamente para a ação relacionada. |
+| Ações necessárias 	| - Realizar o login na aplicação. <br> - Clicar no ícone de notificações no cabeçalho. <br> - Verificar se as notificações de aprovação ou recusa estão listadas. <br> - Clicar em uma notificação e verificar se redireciona corretamente para a ação relacionada. |
 
 # 6. Cenários Testes
 
 Os participantes terão como responsabilidades simular e analisar eficientemente os cenários descritos, expondo sua opinião sobre a aplicação.
 
-| Cenário de Teste | CTU-13 – Doando produtos excedentes de casa |
+| Cenário de Teste | CTU-11 – Doando produtos excedentes de casa |
 |:---:	|:---:	|
 |	Perfil 	| Cidadão Consciente (Doador PF) |
 | Objetivo do Teste 	| Verificar a fluidez do fluxo completo desde o cadastro até a publicação do produto na vitrine.|
 | Cenário	| Como cidadão focado em sustentabilidade, você comprou alimentos a mais e percebeu que vão vencer. Acesse a plataforma, cadastre-se como Doador PF, aceite os Termos de Responsabilidade e cadastre esses itens na vitrine, incluindo fotos e especificando quantas unidades cada tipo de beneficiário pode retirar. |
 
-| Cenário de Teste | CTU-14 – ONG buscando mantimentos |
+| Cenário de Teste | CTU-12 – ONG buscando mantimentos |
 |:---:	|:---:	|
 |	Perfil 	| Gestora Social (Receptora PJ) |
 | Objetivo do Teste 	| Avaliar a usabilidade da vitrine, dos filtros e do fluxo de solicitação de reserva. |
-| Cenário 	| Como coordenadora de uma ONG, você precisa encontrar alimentos urgentes para as refeições de amanhã. Faça login, busque produtos na vitrine usando filtros de localização e categoria, encontre alimentos de um comerciante local e solicite a reserva informando a quantidade necessária para sua instituição. |
+| Cenário 	| Como coordenadora de uma ONG, você precisa encontrar alimentos urgentes para as refeições da semana que vem. Faça login, busque produtos na vitrine usando filtros de localização e categoria, encontre alimentos de um comerciante local e solicite a reserva informando a quantidade necessária para sua instituição. |
 
-| Cenário de Teste | CTU-15 – Comerciante organizando a entrega e impacto |
+| Cenário de Teste | CTU-13 – Comerciante organizando a entrega e impacto |
 |:---:	|:---:	|
 |	Perfil 	| Comerciante (Doador PJ) |
 | Objetivo do Teste 	| Verificar a clareza do fluxo de notificação de reserva, validação por código e geração de relatório.|
-| Cenário 	| Como dono de comércio, você recebeu uma notificação de que uma ONG deseja seus alimentos. Acesse o sistema e confirme a data de retirada. Simule a chegada da ONG: valide a entrega inserindo o código fornecido por eles. Em seguida, acesse o Painel de Impacto para exportar o relatório de CO₂ evitado neste mês |
+| Cenário 	| Como dono de comércio, você recebeu uma notificação de que uma ONG deseja seus alimentos. Acesse o sistema e confirme a data de retirada. Simule a chegada da ONG: valide a entrega inserindo o código fornecido por eles. Em seguida, acesse o "Histórico de doações" para conferir as métricas das doações. |
 
-| Cenário de Teste | CTU-16 – Chefe de família buscando ajuda alimentar |
+| Cenário de Teste | CTU-14 – Chefe de família buscando ajuda alimentar |
 |:---:	|:---:	|
 |	Perfil 	| Chefe de Família (Receptor PF) |
 | Objetivo do Teste 	| Analisar a acessibilidade mobile e a clareza da interface para usuários com menor letramento digital |
 | Cenário 	| Usando seu celular com internet limitada, você precisa verificar o status de uma reserva feita ontem. Faça login, acesse a área de notificações e verifique se sua reserva foi aprovada pelo doador. Ao confirmar a aprovação, localize e anote o código gerado para apresentar no momento da retirada |
 
-| Cenário de Teste | CTU-17 – Auditoria e segurança da plataforma |
+| Cenário de Teste | CTU-15 – Auditoria e segurança da plataforma |
 |:---:	|:---:	|
 |	Perfil 	| Administrador |
 | Objetivo do Teste 	| Verificar a usabilidade do painel de moderação e das métricas globais da plataforma.|
-| Cenário 	| Como administrador, você precisa garantir que fraudes não ocorram. Acesse o painel, visualize a lista de novos usuários, analise o documento enviado por uma nova ONG e aprove o cadastro. Em seguida, acesse a área de métricas globais e visualize o relatório de impacto da plataforma. |
+| Cenário 	| Como administrador, você precisa garantir que fraudes não ocorram. Acesse o painel, visualize a lista de novos usuários, analise o documento enviado por uma nova ONG e aprove o cadastro. |
 
-| Cenário de Teste | CTU-18 – Processo de conclusão da doação e feedback final |
+| Cenário de Teste | CTU-16 – Processo de conclusão da doação e feedback final |
 |:---:	|:---:	|
 |	Perfil 	| Beneficiário |
-| Objetivo do Teste 	| Simular o fluxo completo de comunicação interna e uso do sistema de avaliação após a conclusão da doação. |
-| Cenário 	| Você reservou um item, mas precisa avisar ao doador que chegará 30 minutos mais tarde. Use o chat interno para este alinhamento. Após simular que a retirada ocorreu, deixe uma avaliação de 5 estrelas com um comentário positivo no perfil do doador. |
+| Objetivo do Teste 	| Simular sistema de avaliação após a conclusão da doação. |
+| Cenário 	| Você reservou um item. Após simular que a retirada ocorreu, deixe uma avaliação de 1 a 5 estrelas no perfil do doador. |
 
-| Cenário de Teste | CTU-19 – Primeiro acesso de usuário com baixo letramento digital |
+| Cenário de Teste | CTU-17 – Primeiro acesso de usuário com baixo letramento digital |
 |:---:	|:---:	|
 |	Perfil 	| Receptor PF (Chefe de Família em vulnerabilidade) |
 | Objetivo do Teste 	| Avaliar se a interface é acessível e compreensível para usuários com pouca familiaridade com tecnologia, sem assistência. |
 | Cenário 	| Você nunca usou um aplicativo de doações e seu celular é básico. Sem ajuda do moderador, tente criar uma conta, encontrar um alimento na vitrine e fazer uma solicitação de reserva. O moderador observará onde surgem dúvidas ou bloqueios sem intervir, registrando os pontos de fricção. |
 
-| Cenário de Teste | CTU-20 – Recuperação de senha e reacesso |
+| Cenário de Teste | CTU-18 – Recuperação de senha e reacesso |
 |:---:	|:---:	|
 |	Perfil 	| Doador / Beneficiário |
 | Objetivo do Teste 	| Verificar se o fluxo de recuperação de senha é claro e executável de forma autônoma pelo usuário. |
