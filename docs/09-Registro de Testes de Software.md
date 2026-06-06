@@ -77,17 +77,22 @@
 
 ## Relatório de testes de software
 
-Avaliação
+**Avaliação**
+
 Os casos de testes apresentaram 100% de sucesso, demonstrando que as funcionalidades implementadas satisfazem os requisitos funcionais e não funcionais estabelecidos para a aplicacão. Isso se deve ao fato de que o grupo se preocupou em eliminar possíveis erros e bugs durante a fase de implementação da solução, evitando que erros ocorressem posteriormente.
 
-Possíveis melhorias
+**Possíveis melhorias**
+
 Ao longo do desenvolvimento da solução, o grupo discutiu possíveis melhorias que poderiam ser implementadas futuramente com a intenção de deixar a aplicação melhor adequada para o mercado. As melhorias levantadas foram:
 
-Adicionar lote dos produtos que serão doados
+- Permitir usuários selecionarem/visualizarem o local de retirada do produto através de uma API de mapas;
+- Implementar um sistema de cadastro de produtos através de importação de planilhas;
+- Incluir um chat conectando doador/beneficiário após a confirmação de uma reserva;
+- Reformular o cadastro de produtos de modo que a aplicação consiga mensurar o impacto na redução da emissão de CO2;
 
-Conclusão
-Conforme apresentado acima, a aplicação demonstrou estabilidade durante a execução dos testes de software, sem presença de erros em funcionalidades. No entanto, a equipe levantou possíveis melhorias a serem implementadas na aplicação futuramente para melhor desempenho da solução no mercado.
+**Conclusão**
 
+Conforme apresentado acima, a aplicação demonstrou estabilidade durante a execução dos testes de software, sem presença de erros em funcionalidades. No entanto, devido ao tempo restrito de desenvolvimento, não foi possível implementar todas as melhorias levantadas pelo grupo. Sendo assim, destaca-se que ainda há oportunidades de otimização a serem implementadas futuramente na aplicação para melhor desempenho da solução no mercado.
 
 
 
