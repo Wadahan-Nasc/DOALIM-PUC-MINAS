@@ -53,21 +53,21 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 |EU COMO... `PERSONA`| QUERO/PRECISO ... `FUNCIONALIDADE` |PARA ... `MOTIVO/VALOR`                 |
 |--------------------|------------------------------------|----------------------------------------|
-|Doador/ Beneficiário  |Deseja se cadastrar na plataforma por meio de inclusão de dados/informações próprias.   | Para ter acesso a plataforma como doador ou receptor das mercadorias.               |
-|Doador      | Deseja cadastrar doações em lote através da importação de uma planilha.                | Para otimizar o tempo da equipe, cadastrando de um item a centenas de itens próximos ao vencimento de uma única vez. |
-|Doador       | Precisa cadastrar doações individualmente, informando foto, validade, tipo de armazenamento e demais classificações.                 | Para conseguir publicar excedentes pontuais de forma rápida e direta na vitrine. |
-|Doador       | Necessita validar a doação com um código ou QR Code apresentado pelo beneficiário no momento da entrega.                 | Para dar baixa no sistema, confirmar a entrega de forma segura e manter a rastreabilidade da doação. |
-|Doador    | Necessita confirmar ou recusar a reserva solicitada pelo receptor.                 | Para que possa confirmar a disponibilidade ou preparar a logistica de entrega. |
-|Doador       | Deseja visualizar um painel com métricas do seu impacto (como kg doados e CO₂ evitado).                | Para ter controle da sua ação social e comprovar a redução de resíduos orgânicos para relatórios de sustentabilidade. |
-|Doador      | Desejo delimitar a quantidade que cada beneficiario pode retirar de determinado produto.                 | Para que não sejam realizados pedidos de forma abusiva pelo beneficiario. |
-|Beneficiário       | Deseja visualizar quantidade de mercadorias recebidas pelos doadores.                 | Para ter o controle da quantidade de alimentos que recebeu. |
-|Beneficiário       | Deseja visualizar uma vitrine de doações e filtrá-las por distância e categoria.                 | Para encontrar de forma rápida os alimentos disponíveis mais próximos à sua localização atual. |
-|Beneficiário       | Precisa fazer a reserva de uma doação específica listada no site.                 | Para ter a garantia de que o alimento estará disponível ao chegar no local de retirada, evitando viagens perdidas. |
-|Doador/ Beneficiário      | Necessita receber notificações (e-mail ou mensagem) sobre o status de suas reservas.                | Para ser notificado qual o status de como está a reserva ou doação. |
-|Doador/ Beneficiário      | Precisa avaliar a experiência com o doador ou beneficiario.                 | Para indicar aos demais usuários a experiencia com da entrega ou recebimento das doações. |
-|Administrador       | Deseja validar os documentos enviados pelas ONGs e instituições no momento do cadastro.                 | Para garantir a integridade da plataforma, assegurando que os beneficiários sejam entidades reais e confiáveis. |
-|Administrador       | Deseja extrair os dados gerados pelas doações realizadas pela plataforma.                | Para validar o impacto gerado pelo sistema na sociedade. |
-|Doador/Beneficiário/Administrador       | Desejo visualizar o perfil publico dos demais usuários.                | Para visualizar as informações publicas e a media de avaliações do perfil. |
+|Doador/ Beneficiário  | cadastrar na plataforma por meio de inclusão de dados/informações próprias.   | Para ter acesso a plataforma como doador ou beneficiário das mercadorias.               |
+|Doador      | cadastrar doações em lote.                | Para otimizar o tempo da equipe no gereciamento de diferentes lotes de um mesmo produto, cada lote com sua data de validade. |
+|Doador       | cadastrar doações individualmente, informando foto, validade, tipo de armazenamento e demais classificações.                 | Para conseguir publicar excedentes pontuais de forma rápida e direta na vitrine. |
+|Doador       | validar a doação com um código apresentado pelo beneficiário no momento da entrega.                 | Para dar baixa no sistema, confirmar a entrega de forma segura e manter a rastreabilidade da doação. |
+|Doador    | confirmar ou recusar a reserva solicitada pelo beneficiário.                 | Para que possa confirmar a disponibilidade ou preparar a logistica de entrega. |
+|Doador       | visualizar um painel com métricas do seu impacto (como unidades doadas).                | Para ter controle e comprovar os seus impactos sociais. |
+|Doador      | delimitar a quantidade que cada beneficiario pode retirar de determinado produto.                 | Para que não sejam realizados pedidos de forma abusiva pelo beneficiario. |
+|Beneficiário       | visualizar quantidade de mercadorias retiradas.                 | Para ter o controle da quantidade de alimentos que recebeu. |
+|Beneficiário       | visualizar uma vitrine de doações e filtrá-las por distância e categoria.                 | Para encontrar de forma rápida os alimentos disponíveis mais próximos à sua localização atual. |
+|Beneficiário       | fazer a reserva de uma doação específica listada no site.                 | Para ter a garantia de que o alimento estará disponível ao chegar no local de retirada, evitando viagens perdidas. |
+|Doador/ Beneficiário      | receber notificações sobre o status de suas reservas.                | Para ser notificado qual o status de como está a reserva ou doação. |
+|Doador/ Beneficiário      | avaliar a experiência com o doador ou beneficiario.                 | Para indicar aos demais usuários a experiencia com da entrega ou recebimento das doações. |
+|Administrador       | validar os documentos enviados pelas ONGs e instituições no momento do cadastro.                 | Para garantir a integridade da plataforma, assegurando que os beneficiários sejam entidades reais e confiáveis. |
+|Administrador       | visualizar relatório de métricas geradas pela plataforma.                | Para validar o impacto gerado pelo sistema na sociedade. |
+|Doador/Beneficiário/Administrador       | visualizar o perfil publico dos demais usuários.                | Para visualizar as informações publicas e a media de avaliações do perfil. |
 
 ## Requisitos
 
