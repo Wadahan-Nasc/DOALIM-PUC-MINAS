@@ -4,11 +4,11 @@
 
 | **Usuário**   | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1    |   210              |             13                  |     Sim         | Nenhum erro foi cometido.|Demorou um pouco pra prencher o cadastro, mas finalizou normal.|                     |      
-| Usuário 2    |   100              |             12                  |     Sim         | Nenhum erro foi cometido.|Finalizou o cadastro normal.|                     |      
-| Usuário 3    |   190              |             20                  |     Sim         | Erro o campo de CPF/CNPJ.|Não sabia que precisava selecionar tipo de usuário, para habilitar o campo CPF, mas conseguiu concluir após explorar a tela.|                     |  
-| Usuário 4    |   90               |             11                  |     Sim         | Nenhum erro foi cometido.|Finalizou o cadastro normal, com o aceite do termo de responsabilidade.  |                     | 
-| Usuário 5    |   95               |             11                  |     Sim         | Nenhum erro foi cometido.| Finalizou o cadastro normal. |                     | 
+| Usuário 1    |   210 |             13|     Sim| Nenhum erro foi cometido.|Demorou um pouco pra prencher o cadastro, mas finalizou normal.|                     |      
+| Usuário 2    |   100|             12|     Sim| Nenhum erro foi cometido.|Finalizou o cadastro normal.|                     |      
+| Usuário 3    |190|20|Sim| Erro o campo de CPF/CNPJ.|Não sabia que precisava selecionar tipo de usuário, para habilitar o campo CPF, mas conseguiu concluir após explorar a tela.|                     |  
+| Usuário 4    |   90|             11|     Sim| Nenhum erro foi cometido.|Finalizou o cadastro normal, com o aceite do termo de responsabilidade.  |                     | 
+| Usuário 5    |   95|             11|     Sim| Nenhum erro foi cometido.| Finalizou o cadastro normal. |                     | 
 
 ## CTU-02 – Edição de perfil e envio de documentos
 
@@ -178,11 +178,11 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 | Confiante | Concluiu | 85 | 10 | Não | n/a | Alternou rapidamente entre a aplicação e a caixa de e-mail. Fluxo limpo. |
-| Usuário 2 | Neutro | Concluiu | 140 | 14 | Sim | Sim | Digitou o e-mail com erro ortográfico na primeira tentativa. Corrigiu após a mensagem de "e-mail não encontrado". |
-| Usuário 3 | Confuso | Concluiu | 220 | 12 | Sim | Sim |O e-mail de recuperação caiu na caixa de Spam. Aguardou na caixa principal por um tempo antes de procurar em outras pastas.|
-| Usuário 4 | Satisfeito | Concluiu | 110 | 11 | Não | n/a | Processo sem fricção. Recebeu o e-mail instantaneamente e trocou a senha sem problemas. |
-| Usuário 5 | Neutro | Concluiu | 175 | 16 | Sim | Sim |Esqueceu de inserir um caractere especial na nova senha, recebeu o aviso de validação vermelho e corrigiu imediatamente. |
+| Usuário 1 | Confiante | Concluiu | 120 | 16 | Não | N/A | Usou chat para avisar atraso, confirmou e deu 5 estrelas. |
+| Usuário 2 | Satisfeito | Concluiu | 140 | 18 | Não | N/A | Fez comentário muito positivo no feedback do doador. |
+| Usuário 3 | Satisfeito | Concluiu | 190 | 21 | Sim | Sim| Demorou a carregar o chat no 3G, enviou a mensagem e avaliou.|
+| Usuário 4 | Neutro | Concluiu | 160 | 19 | Não | N/A |Processo contínuo entre pegar o alimento e avaliar o local. |
+| Usuário 5 | Confuso | Concluiu | 250 | 25 | Sim | Sim |Avaliou com estrela, mas não sabia onde apertar para concluir. |
 
 ## Relatório dos testes de usabilidade 
 
