@@ -10,7 +10,7 @@
 | Usuário 4    |   90               |             11                  |     Sim         | Nenhum erro foi cometido.|Finalizou o cadastro normal, com o aceite do termo de responsabilidade.  |                     | 
 | Usuário 5    |   95               |             11                  |     Sim         | Nenhum erro foi cometido.| Finalizou o cadastro normal. |                     | 
 
-## CTU-02 – Edição de perfil e envio de documentos: Verifica a usabilidade na edição de dados e anexo de arquivos de comprovação.
+## CTU-02 – Edição de perfil e envio de documentos
 
 | **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
@@ -30,6 +30,16 @@
 | Usuário 4   | 55 | 18 | Sim | Nenhum erro foi cometido | N/A |                     | 
 | Usuário 5   | 83 | 27 | Sim | Errou ao selecionar o arquivo da imagem correto | Informou necessidade de cadastrar o lote do produto |                     | 
 
+## CTU-04 –  Buscar Produtos na Vitrine e Filtrar 
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   |  |  |  |  |  |  |      
+| Usuário 2   |  |  |  |  |  |  |      
+| Usuário 3   |  |  |  |  |  |  | 
+| Usuário 4   |  |  |  |  |  |  | 
+| Usuário 5   |  |  |  |  |  |  | 
+
 ## CTU-05 – Solicitar Reserva de Doação
 
 | **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
@@ -39,6 +49,27 @@
 | Usuário 3 | 198 | 15 | Sim | Tentou usar o campo de busca para encontrar o item | Precisei de ajuda para entender onde estava o produto. |
 | Usuário 4 | 45 | 7 | Sim | Nenhum | Processo bem direto. A confirmação de status ficou clara. |
 | Usuário 5 | 52 | 8 | Sim | Inseriu quantidade incorreta no modal | Quase tudo intuitivo. Sugiro validação de quantidade mínima. |
+
+## CTU-06 –  Confirmar Data de Retirada
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   |  |  |  |  |  |  |      
+| Usuário 2   |  |  |  |  |  |  |      
+| Usuário 3   |  |  |  |  |  |  | 
+| Usuário 4   |  |  |  |  |  |  | 
+| Usuário 5   |  |  |  |  |  |  | 
+
+## CTU-07 –  Validar Entrega com Código
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   |  |  |  |  |  |  |      
+| Usuário 2   |  |  |  |  |  |  |      
+| Usuário 3   |  |  |  |  |  |  | 
+| Usuário 4   |  |  |  |  |  |  | 
+| Usuário 5   |  |  |  |  |  |  | 
+
 
 ## CTU-08 – Moderação de Usuários e Documentos
 
@@ -50,9 +81,29 @@
 | Usuário 4 | 85 | 8 | Sim | Esqueceu de preencher a justificativa ao rejeitar o documento na primeira tentativa. | A mensagem de erro ajudou a entender o que faltava preencher. |
 | Usuário 5 | 110 | 10 | Sim | Teve dúvida se a alteração havia sido salva corretamente. | Seria interessante exibir uma mensagem de confirmação mais visível após salvar. |
 
+## CTU-09 –  Visualizar Perfil Público e Avaliar Usuário
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   |  |  |  |  |  |  |      
+| Usuário 2   |  |  |  |  |  |  |      
+| Usuário 3   |  |  |  |  |  |  | 
+| Usuário 4   |  |  |  |  |  |  | 
+| Usuário 5   |  |  |  |  |  |  | 
+
+## CTU-10 –  Recebimento e leitura de notificações
+
+| **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
+|-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
+| Usuário 1   |  |  |  |  |  |  |      
+| Usuário 2   |  |  |  |  |  |  |      
+| Usuário 3   |  |  |  |  |  |  | 
+| Usuário 4   |  |  |  |  |  |  | 
+| Usuário 5   |  |  |  |  |  |  | 
+
 ### Registros baseados em cenários 
 
-### CTU-13 – Doando produtos excedentes de casa 
+### CTU-11 – Doando produtos excedentes de casa
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
@@ -62,7 +113,7 @@
 | Usuário 4 | Neutro | Concluiu | 150 | 16 | Não | n/a | Navegação fluida, mas sugeriu verbalmente a inclusão de um campo de observação opcional no cadastro do produto. |
 | Usuário 5 | Confuso | Concluiu | 240 | 25 | Sim | Sim |Teve certa dificuldade em entender a divisão de quantidade por tipo de beneficiário, mas leu as instruções (tooltip) na tela e conseguiu finalizar.|
 
-## CTU-14 – ONG Buscando Mantimentos
+## CTU-12 – ONG Buscando Mantimentos
 
 | **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
@@ -71,9 +122,48 @@
 | Usuário 3 | 310 | 20 | Sim | Não encontrou o filtro de localização | Difícil achar os filtros. Seriam melhor destacados na página. |
 | Usuário 4 | 75 | 9 | Sim | Nenhum | Filtros funcionaram bem. Encontrei o comerciante rapidamente. |
 | Usuário 5 | 88 | 11 | Sim | Filtro retornou vazio na 1ª tentativa | Boa experiência. Sugiro sugestão automática nos filtros. |
-[relatorio_usabilidadeCTU05e14.docx](https://github.com/user-attachments/files/27572029/relatorio_usabilidade.docx)
 
-### CTU-19 – Primeiro acesso de usuário com baixo letramento digital 
+### CTU-13 – Comerciante organizando a entrega e impacto
+
+| **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
+| :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
+| Usuário 1 |  |  |  |  |  |  |  |
+| Usuário 2 |  |  |  |  |  |  |  |
+| Usuário 3 |  |  |  |  |  |  |  |
+| Usuário 4 |  |  |  |  |  |  |  |
+| Usuário 5 |  |  |  |  |  |  |  |
+
+### CTU-14 – Chefe de família buscando ajuda alimentar
+
+| **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
+| :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
+| Usuário 1 |  |  |  |  |  |  |  |
+| Usuário 2 |  |  |  |  |  |  |  |
+| Usuário 3 |  |  |  |  |  |  |  |
+| Usuário 4 |  |  |  |  |  |  |  |
+| Usuário 5 |  |  |  |  |  |  |  |
+
+### CTU-15 – Auditoria e segurança da plataforma
+
+| **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
+| :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
+| Usuário 1 |  |  |  |  |  |  |  |
+| Usuário 2 |  |  |  |  |  |  |  |
+| Usuário 3 |  |  |  |  |  |  |  |
+| Usuário 4 |  |  |  |  |  |  |  |
+| Usuário 5 |  |  |  |  |  |  |  |
+
+### CTU-16 – Processo de conclusão da doação e feedback final
+
+| **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
+| :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
+| Usuário 1 |  |  |  |  |  |  |  |
+| Usuário 2 |  |  |  |  |  |  |  |
+| Usuário 3 |  |  |  |  |  |  |  |
+| Usuário 4 |  |  |  |  |  |  |  |
+| Usuário 5 |  |  |  |  |  |  |  |
+
+### CTU-17 – Primeiro acesso de usuário com baixo letramento digital 
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
@@ -84,7 +174,7 @@
 | Usuário 5 | Estressado | Não concluiu | 400 | 42 | Sim | n/a |Desistiu no momento do cadastro ao não conseguir formatar o telefone corretamente. Ponto de atenção crítico na máscara do input. |
 
 
-### CTU-20 – Recuperação de senha e reacesso 
+### CTU-18 – Recuperação de senha e reacesso 
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
