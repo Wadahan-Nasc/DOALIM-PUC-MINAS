@@ -25,17 +25,17 @@ A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando 
 |RF-002| A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador.|Models\TermoAceitacao | Paulo |
 |RF-003| A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador.| |Gabriel  |
 |RF-004| A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos.| | Victor |
-|RF-005| A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros.| |Wadahan  |
-|RF-006| A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento| |  |
-|RF-007| A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada.| |  |
+|RF-005| A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros.| Produto.cs; Reserva.cs; VitrineCompleteViewModel.cs; VitrineDoacoesViewModel.cs; VitrineFiltroViewModel.cs  |Wadahan  |
+|RF-006| A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento| CarrinhoItem.cs; Lote.cs; Pedido.cs; ValorLookUp.cs; CarrinhoItemViewModel.cs; CarrinhoViewModel.cs; PedidoConfirmadoViewModel.cs; CarrinhoController.cs; LookupController.cs; ReservasController.cs; Carrinho/Confirmado.cshtml; Carrinho/Index.cshtml; Lookup/Index.cshtml; Reservas/MinhasReservas.cshtml | Wadahan/Victor |
+|RF-007| A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada.| GerenciarReservaDoadorViewModel.cs; GerenciarReservasPagesViewModel.cs; Produtos/GerenciarReservas.cshtml | Wadahan/Victor |
 |RF-008| A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários.| |Deivid  |
 |RF-009| A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas.| |Gabriel  |
-|RF-010| A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte.| |  |
-|RF-011| A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos.| |  |
+|RF-010| A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma.| |  |
+|RF-011| A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos.| |  |
 |RF-012| A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item.| |Victor  |
 |RF-013| A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos.| |  |
 |RF-014| A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada.| |  |
-|RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.| |  |
+|RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.| Não Implementado | Não Implementado |
 
 # Instruções de acesso
 
