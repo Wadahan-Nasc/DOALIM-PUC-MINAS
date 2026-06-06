@@ -10,148 +10,148 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. <br> RF-002 - A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador. |
 | Objetivo do Teste 	| Verificar se o usuário consegue se cadastrar na aplicação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Cadastre-se" na homepage <br> - Preencher os campos obrigatórios (Nome/Razão Social, CPF/CNPJ, E-mail, Senha, entre outros...) <br> - Informar se o cadastro está sendo realizado para um perfil de "doador" ou "beneficiário" preenchendo o campo respectivo <br> No caso do cadastro de doador, marcar o campo obrigatório referente ao aceite dos Termos de Responsabilidade <br> - Clicar em "Cadastrar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Criar conta" na homepage <br> - Preencher os campos obrigatórios (Nome/Razão Social, CPF/CNPJ, E-mail, Senha, entre outros...) <br> - Informar se o cadastro está sendo realizado para um perfil de "doador" ou "beneficiário" preenchendo o campo respectivo <br> No caso do cadastro de doador, marcar o campo obrigatório referente ao aceite dos Termos de Responsabilidade <br> - Clicar em "Criar Conta" |
 |Critério de Êxito | - O cadastro foi realizado com sucesso. <br>- Para o perfil Doador: o aceite do Termo de Responsabilidade é exigido obrigatoriamente.<br> |
 
 | **Caso de Teste** 	| **CT02 – Efetuar Login** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
 | Objetivo do Teste 	| Verificar se o usuário consegue entrar com sua conta cadastrada na aplicação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Login" na homepage <br> - Preencher os campos com as informações de acesso cadastradas <br> - Clicar em "Entrar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Entrar" na homepage <br> - Preencher os campos com as informações de acesso cadastradas <br> - Clicar em "Entrar" |
 |Critério de Êxito | - O login foi realizado com sucesso e o usuário é redirecionado à homepage autenticada. |
 
 | **Caso de Teste** 	| **CT03 – Efetuar Logout** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
 | Objetivo do Teste 	| Verificar se o usuário consegue sair da sua conta previamente logada. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login <br> - Clicar em "Logout" no cabeçalho da página |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login <br> - Clicar em "Sair" no cabeçalho da página |
 |Critério de Êxito | - O usuário foi desconectado do perfil logado e redirecionado à tela inicial. |
 
 | **Caso de Teste** 	| **CT04 – Recuperar Senha** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
 | Objetivo do Teste 	| Verificar o redirecionamento da senha para o email cadastrado. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Login" na homepage <br> - Clicar em "Recuperar senha" <br> - Preencher o campo referente ao email cadastrado <br> - Em seu correio eletrônico, verificar o recebimento do email com as instruções de recuperação, acessando o link fornecido <br> - Na página redirecionada, preencher os campos obrigatórios com nova senha |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Clicar em "Entrar" na homepage <br> - Clicar em "Esqueceu a senha?" <br> - Preencher o campo referente ao email cadastrado <br> - Em seu correio eletrônico, verificar o recebimento do email com as instruções de recuperação, acessando o link fornecido <br> - Na página redirecionada, preencher os campos obrigatórios com nova senha |
 |Critério de Êxito | - Receber o email com as instruções de recuperação <br> - Cadastro da nova senha realizado com sucesso. |
 
 | **Caso de Teste** 	| **CT05 – Edição de Perfil** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
 | Objetivo do Teste 	| Verificar dr o usuário consegue alterar as informações de perfil. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência. <br> - Efetuar o login com a conta previamente cadastrada. <br> - Acessar o perfil através da foto de perfil no cabeçalho. <br> - Clicar no íncone de edição ao lado dos campos permitidos para alteração. <br> - Clicar em "Salvar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência. <br> - Efetuar o login com a conta previamente cadastrada. <br> - Acessar "Meu perfil" através do ícone no cabeçalho. <br> - Alterar as informações permitidas nos respectivos campos de interesse. <br> - Clicar em "Salvar alterações" |
 |Critério de Êxito | - As alterações nas informações do perfil foram salvas e exibidas corretamente. |
 
 | **Caso de Teste** 	| **CT06 – Envio de documentos para verificação** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
 | Objetivo do Teste 	| Verificar se o usuário consegue enviar documentos para verificação pelo administrador. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta previamente cadastrada <br> - Acessar o perfil através da foto de perfil no cabeçalho <br> - Anexar os documentos de Comprovação de Identificação através do campo destinado <br> - Clicar em "Salvar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta previamente cadastrada <br> - Acessar o "Meu perfil" através do ícone no cabeçalho <br> - Anexar os documentos de Comprovação de Identificação através do campo destinado <br> - Clicar em "Salvar alterações" |
 |Critério de Êxito | - Visualizar a mensagem de "arquivo anexado com êxito." <br> O documento enviado fica disponível para revisão pelo administrador.<br>|
 
 | **Caso de Teste** 	| **CT07 – Visualização de histórico - Beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-006 – A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento. |
 | Objetivo do Teste 	| Verificar se o beneficiário consegue visualizar seu histórico de solicitações de reserva. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de beneficiário <br> - A partir da homepage, clicar em "Visualizar histórico de requisição de reservas" <br> - Ao clicar em cada item do histórico, visualizar as informações da reserva |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de beneficiário <br> - A partir da homepage, clicar em "Minhas Reservas" <br> - Visualizar as informações de cada reserva nos cards correspondentes. - Preencher os filtros de acordo com a necessidade. |
 |Critério de Êxito | - Visualizar as informações de cada requisição de reserva são exibidas corretamente. |
 
 | **Caso de Teste** 	| **CT08 – Visualização de histórico - Doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. |
 | Objetivo do Teste 	| Verificar se o doador consegue visualizar seu histórico de produtos cadastrados para doação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de doador <br> - A partir da homepage, clicar em "Visualizar histórico de produtos cadastrados" <br> - Ao clicar em cada item do histórico, visualizar as informações do produto cadastrado para doação <br> - Caso haja uma requisição de reserva, conseguir acessar a página da reserva clicando na solicitação |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de doador <br> - A partir da homepage, clicar em "Meus produtos" <br> - Ao clicar em "Gerenciar" de cada item do histórico, visualizar as informações do produto cadastrado para doação <br>|
 |Critério de Êxito | - Visualizar as informações de cada produto cadastrado são exibidas corretamente. <br> - Conseguir acessar as páginas de solicitação de reserva vinculadas. |
 
 | **Caso de Teste** 	| **CT09 – Cadastro de Produto** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 - A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. <br> RF-012 A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item. |
 | Objetivo do Teste 	| Verificar se o usuário do tipo doador consegue cadastrar um produto para doação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com uma conta do tipo "doador" <br> - A partir do homepage, clicar em "Cadastrar produto" <br> - Preencher os campos obrigatórios do formulário de cadastro do produto <br> - Indicar nos campos dedicados a divisão da quantidade destinada para cada tipo de usuário <br> - Clicar em "Salvar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com uma conta do tipo "doador" <br> - A partir do homepage, clicar em "Cadastrar produto" <br> - Preencher os campos obrigatórios do formulário de cadastro do produto <br> - Indicar nos campos dedicados a divisão da quantidade destinada para cada tipo de usuário <br> Preencher as informações de pelo menos um lote <br> - Clicar em "Salvar Produto e Lote" |
 |Critério de Êxito | - Produto registrado com êxito no banco de dados. |
 
 | **Caso de Teste** 	| **CT10 – Visualizar Vitrine** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-005 - A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficário possa realizar filtros. |
 | Objetivo do Teste 	| Verificar se o usuário consegue visualizar produtos na vitrine |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - A partir da homepage, clicar em "buscar" <br> - Na barra de pesquisa da vitrine, inserir o nome do produto desejado. <br> - Verificar se a lista de produtos disponíveis é exibida. <br> - Aplicar os filtros disponíveis (categoria, data de validade, localização, etc.).<br> - Verificar se os resultados são atualizados conforme os filtros aplicados. <br>|
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - A partir da homepage, clicar em "Ver Vitrine" ou a partir do "Vitrine" no cabeçalho <br> - Na barra de pesquisa da vitrine, inserir o nome do produto desejado. <br> - Verificar se a lista de produtos disponíveis é exibida. <br> - Aplicar os filtros disponíveis (categoria, data de validade, endereço, nome, quantidade).<br> - Verificar se os resultados são atualizados conforme os filtros aplicados. <br>|
 |Critério de Êxito | - Os produtos cadastrados para doação são exibidos na vitrine. <br> - Os filtros alteram os resultados exibidos de forma condizente com os critérios selecionados. <br> |
 
 | **Caso de Teste** 	| **CT11 – Reserva de Produto** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-006 - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento. |
 | Objetivo do Teste 	| Verificar se o usuário consegue reservar um produto da vitrine e se o status do item é atualizado corretamente |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - Acessar a vitrine e buscar por um produto desejado <br> - Selecionar um produto disponivel e clicar em "Solicitar Reserva" <br> - Informar a quantidade solicitada no modal dedicado e clicar em "Reservar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - Acessar a vitrine e buscar por um produto desejado <br> - Selecionar um produto disponivel e clicar em "Adicionar" <br> - No carrinho, clicar em "Contiunuar comprando" para ser redirecionado a vitrine novamente ou em "Finalizar Pedido" <br> - Após aprovação do pedido pelo doador, verificar se o item ainda está disponivel ou se a quantidade foi subtraída. |
 |Critério de Êxito | - Produto desejado reservado com sucesso. <br> - O status do item é atualizado imediatamente no sistema. <br> - Caso a quantidade se esgote, o produto é removido da vitrine e indisponibilizado para outros beneficiários. <br>|
 
 | **Caso de Teste** 	| **CT12 – Confirmação da Data de Retirada** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-009 - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. |
 | Objetivo do Teste 	| Verificar se o doador consegue confirmar a reserva solicitada pelo beneficiário, informando uma data de retirada |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página de proposta de reserva recebido, seja através do histórico de produtos cadastrados ou diretamente da homepage <br> - Clicar em uma das propostas recebidas <br> - A partir do modal gerado, clicar em "Confirmar Reserva" <br> - Informar uma data disponível para a retirada do produto no campo destinado e clicar em "Notificar Beneficário" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página "MInhas Reservas", seja através do histórico de produtos cadastrados ou diretamente do cabeçalho <br> - Clicar em "Aprovar" no pedido <br> - Nos campos de data, informar o período de retirada e clicar em "Confirmar Aprovação" |
 |Critério de Êxito | - A mensagem "Confirmação da reserva realizada com sucesso!" é exibida.<br> - O beneficiário recebe notificação com a data de retirada confirmada.<br> |
 
 | **Caso de Teste** 	| **CT13 – Confirmação da Doação Realizada** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-007 - A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada. |
 | Objetivo do Teste 	| Verificar se o doador consegue confirmar a finalizaçao da doação à partir do código recebido e informado pelo beneficiário |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página de proposta de reserva recebido, seja através do histórico de produtos cadastrados ou diretamente da homepage <br> - Clicar em uma das propostas recebidas <br> - A partir do modal gerado, clicar em "Concluir Doação" <br> - Informar o código fornecido pelo beneficiário |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página de "Gerenciar Reservas" <br> - Clicar em "Confirmar Entrega" <br> - No campo aberto, inserir o token informado pelo beneficiário e clicar em "Confirmar" |
 |Critério de Êxito | - Doação finalizada com sucesso. <br> - O status da reserva é atualizado para "Concluída" no sistema. <br> |
 
 | **Caso de Teste** 	| **CT14 – Moderação de Usuários ** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-008 - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. |
 | Objetivo do Teste 	| Verificar se o perfil de administrador consegue aprovar documentação enviadas pelo doador e beneficiário |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo administrador, fornecida pelo desenvolvedor <br> - A partir do painel de administrativo (homepage) clicar em "lista de usuários" <br> - Ao clicar em cada uduário, conseguir visualizar as informações do mesmo <br> - Baixar as documentações fornecidas no ícone ao lado do campo dedicado <br> - Aceitar ou recusar documentação fornecida <br> Em caso de recusa, digitar uma mensagem informando ao usuário a causa <br> - Clicar em "Salvar". |
-|Critério de Êxito | - É possível acessar e baixar a documentação fornecida pelo usuário.  <br> - A aprovação ou rejeição da documentação é registrada com êxito. <br> - Em caso de recusa, o usuário recebe a mensagem com a justificativa.  |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo administrador <br> - A partir do painel de administrativo clicar em "Ver detalhes" de algum usuário <br> - Clicar em "Abrir comprovação" para visualizar o documento <br> - Uma vez visualizado o documento, clicar em "Aprovar" ou "Rejeitar" |
+|Critério de Êxito | - É possível acessar e baixar a documentação fornecida pelo usuário.  <br> - A aprovação ou rejeição da documentação é registrada com êxito.  |
 
-| **Caso de Teste** 	| **CT15 – Moderação de Métricas ** 	|
+| **Caso de Teste** 	| **CT15 – Métricas da plataforma ** 	|
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-008 - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. |
+|	Requisito Associado 	| RF-011 - A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos. |
 | Objetivo do Teste 	| Verificar se o perfil de administrador consegue aprovar documentação enviadas pelo doador e beneficiário |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo Administrador, fornecida pelo desenvolvedor <br> - A partir do painel de administrativo clicar em "Métricas da Plataforma". <br> - Preencher os filtros disponíveis conforme necessidade. <br> - Exportar um relatório com os dados filtrados através de um botão dedicado. |
-|Critério de Êxito | - Os filtros funcionam corretamente, exibindo dados condizentes com os critérios selecionados. <br> - Conseguir exportar com êxito um relatório com as informações filtradas. |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Visualizar as informações de métricas da plataforma na homepage. <br> - Realizar algum evento dos fluxos anteriores <br> - Conferir se as métricas alteraram na homepage. |
+|Critério de Êxito | - Dados atualizados na homepage após algum evento. |
 
 | **Caso de Teste** 	| **CT16 – Recebimento de Notificações** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-009 - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. |
 | Objetivo do Teste 	| Verificar se o doador ou beneficiário estão recebendo notificações do status de uma doação/reserva |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Provocar diferentes eventos (aprovação de reserva, recusa, lembrete de retirada) através dos fluxos de teste anteriores. <br> - Clicar no ícone de notificações no cabeçalho. <br> - Verificar o histórico de notificações recebidas |   
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Provocar diferentes eventos através dos fluxos de teste anteriores. <br> - Verificar se o ícone de notificações no cabeçalho exibe as últimas notificações. |   
 |Critério de Êxito | - As notificações de aprovação, recusa e lembrete de retirada são exibidas corretamente na página de histórico de notificações. <br> - Doações expiradas geram notificação para o doador responsável. |
 
 | **Caso de Teste** 	| **CT17 – Relatório de Impacto - Doador ** 	|
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte. |
-| Objetivo do Teste 	| Verificar se o doador consegue emitir um relatório de impacto socioambiental |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - A partir da homepage clicar em "Painel de Impacto Ambiental" <br> - Visualizar as métricas exibidas. <br>  - Manipular os filtros conforme necessidade <br> - Clicar em "Exportar" para baixar um relatório de impacto com as métricas do usuário. |
-|Critério de Êxito | - As métricas de impacto socioambiental são exibidas corretamente. <br> - O relatório é exportado com êxito. |
+|	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
+| Objetivo do Teste 	| Verificar se o doador consegue visualizar um relatório de impacto social |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - A partir da homepage clicar em "Histórico de Doaçoes" <br> - Visualizar as métricas exibidas. <br>  - Manipular os filtros conforme necessidade |
+|Critério de Êxito | - As métricas de impacto socioambiental são exibidas corretamente.|
 
 | **Caso de Teste** 	| **CT18 – Relatório de Impacto - Beneficiário ** 	|
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-011 - A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos. |
-| Objetivo do Teste 	| Verificar se o beneficiário consegue emitir um relatório de impacto socioambiental |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - A partir da homepage clicar em "Doações Recebidas" <br> - Clicar em "Métricas do Beneficiário" <br> - Visualizar as métricas exibidas na página <br> - Manipular os filtros conforme necessidade <br> - Clicar em "Exportar" para baixar um relatório de impacto com as métricas do usuário. |
-|Critério de Êxito | - As métricas de impacto são exibidas corretamente. <br> - O relatório é exportado com êxito. |
+|	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
+| Objetivo do Teste 	| Verificar se o beneficiário consegue visualizar um relatório de impacto social |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - A partir da homepage clicar em "Minhas Reserva" <br> - Visualizar as métricas exibidas na página |
+|Critério de Êxito | - As métricas de impacto são exibidas corretamente. |
 
 | **Caso de Teste** 	| **CT19 – Acessos ao perfil público do beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-013 - 	A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
 | Objetivo do Teste 	| Verificar se os usuários conseguem visualizar o perfil público dos demais usuários |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página de proposta de reserva recebido, seja através do histórico de produtos cadastrados ou diretamente da homepage <br> - Clicar em uma das propostas recebidas <br> A partir do modal gerado, clicar no ícone do beneficiário solicitante |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo doador <br> - Acessar à página de "Gerenciar Reservas" <br> - Clicar no nome do beneficiário que solicitou a reserva. |
 |Critério de Êxito | - O perfil público do beneficiário solicitante é exibido corretamente. |
 
 | **Caso de Teste** 	| **CT20 – Acessos ao perfil público do doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-013 - 	A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
 | Objetivo do Teste 	| Verificar se os usuários conseguem visualizar o perfil público dos demais usuários |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - Acessar a vitrine e buscar por um produto desejado <br> Selecionar um produto disponivel e clicar no ícone do doador <br> Alternativamente, a partir do histórico de requisição de reservas, clicar em um item do histórico <br> - Nas informações da reserva, clicar no ícone do doador |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login com uma conta do tipo beneficiário <br> - Acessar a vitrine e buscar por um produto desejado <br> Selecionar um produto disponivel e clicar no ícone do doador <br> Alternativamente, a partir do histórico de requisição de reservas, clicar no ícone do doador de um dos itens do histórico |
 |Critério de Êxito | - O perfil público do doador ofertante é exibido corretamente. |
 
 | Caso de Teste | CT21 – Avaliação de Usuário (Doador/Beneficiário) |
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada. |
-| Objetivo do Teste 	| Verificar se o sistema permite o envio de nota e comentário após o encerramento da doação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Acessar uma doação já marcada como "Concluída" através do histórico <br> - Clicar no botão "Avaliar Experiência" <br> - Selecionar uma nota (ex: 1 a 5 estrelas) <br> - Escrever um comentário curto <br> - Clicar em "Enviar Avaliação" |
-|Critério de Êxito | - A avaliação é salva com sucesso <br> - A avaliação passa a ser exibida no perfil público do usuário avaliado |
+|	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e beneficiário avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada. |
+| Objetivo do Teste 	| Verificar se o sistema permite o envio de nota após o encerramento da doação. |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Acessar uma doação já marcada como "Concluída" através do histórico correspondente ao tipo de usuário <br> - Selecionar uma nota (1 a 5 estrelas) <br> - Clicar em "Avaliar" ou no ícone de check <br> - N modal aberto, clicar em "Confirmar" |
+|Critério de Êxito | - A avaliação é salva com sucesso <br> - A avaliação passa integrar a média da nota ser exibida no perfil público do usuário avaliado |
 
 | Caso de Teste | CT22 – Comunicação via Chat Interno |
 |:---:	|:---:	|
