@@ -1,17 +1,5 @@
 # Registro de Testes de Usabilidade
 
-## Perfil dos usuários que participaram do teste
-
-- Usuário 1 (Ana, Cidadã Consciente - Doadora PF): 28 anos, nível superior completo, conhecimento avançado em tecnologia. Engajada e ágil na navegação, exige clareza no processo e nas informações para se sentir segura ao disponibilizar seus alimentos excedentes.
-
-- Usuário 2 (Marta, Gestora Social - Receptora PJ): 45 anos, nível superior incompleto, conhecimento intermediário em tecnologia. Devido à rotina corrida na ONG e recursos escassos, busca eficiência e agilidade máxima nas buscas e solicitações de reserva na vitrine.
-
-- Usuário 3 (João, Chefe de Família - Receptor PF): 55 anos, nível básico incompleto, conhecimento básico em tecnologia. Utiliza hardware modesto e pacote de dados limitado; precisa de interfaces muito limpas, leves, com linguagem simples e sem barreiras complexas de acesso.
-
-- Usuário 4 (Ricardo, Comerciante - Doador PJ): 40 anos, nível médio completo, conhecimento avançado em tecnologia. Focado na gestão comercial e redução de perdas, presta muita atenção aos Termos de Responsabilidade e aos validadores de entrega por receio de implicações jurídicas.
-
-- Usuário 5 (Variação de João, Receptor PF em extrema vulnerabilidade): 60 anos, nível fundamental incompleto, letramento digital crítico/nulo. Apresenta alta dificuldade com interações mais elaboradas e formatações de formulários, dependendo de caminhos extremamente guiados e tolerantes a erros.
-
 ### CTU-01 – Cadastro de Usuário e Aceite de Termos
 
 | **Usuário**   | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
