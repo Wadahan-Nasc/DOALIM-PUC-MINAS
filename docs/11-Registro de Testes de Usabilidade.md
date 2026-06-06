@@ -24,21 +24,21 @@
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   | 100 | 30 | Sim | Selecionou de forma errada a data de vencimento do produto (utilizando o calendário que aparece ao selecionar o campo da data) | Informou que o calendário que é mostrado é muito pequeno |                     |      
-| Usuário 2   | 145 | 35 | Sim | Errou ao selecionar o arquivo da imagem correto e escreveu alguns dados do produto de errada (erro de ortográfia), que foi notado apenas na conferência antes de salvar o cadastro do produto | Ter uma outra aba para cadastrar categoria, marca, entre outros, para que em vez de digitar e ter variações, possa apenas selecionar a opção padrão |                     |      
-| Usuário 3   | 60 | 22 | Sim | Nenhum erro foi cometido | N/A |                     |  
-| Usuário 4   | 55 | 18 | Sim | Nenhum erro foi cometido | N/A |                     | 
-| Usuário 5   | 83 | 27 | Sim | Errou ao selecionar o arquivo da imagem correto | Informou necessidade de cadastrar o lote do produto |                     | 
+| Usuário 1   | 60 | 12 | Sim | Nenhum | Satisfeito. Anexou foto do alimento e preencheu a validade sem problemas. |     
+| Usuário 2   | 120 | 15 | Sim | Nenhum | Neutro. Precisou ler os tooltips para entender a divisão por classe de beneficiário. |   
+| Usuário 3   | 185 | 22 | Sim | Selecionou de forma errada a data de vencimento do produto (utilizando o calendário que aparece ao selecionar o campo da data) | Informou que o calendário que é mostrado é muito pequeno |
+| Usuário 4   | 80 | 14 | Sim | Nenhum | Confiante. Sugeriu a inclusão de um botão para cadastro de itens em lote. |
+| Usuário 5   | 240 | 25 | Sim | Incompreensão da regra de limite por família. | Estressado. Demorou a entender a lógica de divisão dos produtos. |
 
 ## CTU-04 –  Buscar Produtos na Vitrine e Filtrar 
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   |  |  |  |  |  |  |      
-| Usuário 2   |  |  |  |  |  |  |      
-| Usuário 3   |  |  |  |  |  |  | 
-| Usuário 4   |  |  |  |  |  |  | 
-| Usuário 5   |  |  |  |  |  |  | 
+| Usuário 1   | 40 | 6 | Sim | Nenhum | Confiante. Aplicou filtros simultâneos e achou o produto desejado. |    
+| Usuário 2   | 45 | 6 | Sim | Nenhum | Satisfeito. Usou o filtro de localização com precisão. |   
+| Usuário 3   | 120 | 12 | Sim | Dificuldade para desativar um filtro já aplicado. | Confuso. Não encontrou o botão de limpar filtros. |
+| Usuário 4   | 75 | 9 | Sim | Nenhum | Neutro. Navegação fluida no celular sem travamentos no scroll. |
+| Usuário 5   | 190 | 18 | Sim | Busca com erro ortográfico de acentuação não retornou resultados. | Estressado. Achou que a vitrine estava vazia até perceber o erro na acentuação. |
 
 ## CTU-05 – Solicitar Reserva de Doação
 
@@ -109,9 +109,9 @@
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
 | Usuário 1 | Confiante | Concluiu | 120 | 15 | Não | n/a | Fluxo fluido; o usuário não demonstrou nenhuma hesitação ao anexar as fotos. |
 | Usuário 2 | Neutro | Concluiu | 185 | 19 | Sim | Sim | Não visualizou a caixa do "Termo de Responsabilidade". Recebeu o alerta do sistema e marcou em seguida. |
-| Usuário 3 | Satisfeito | Concluiu | 210 | 22 | Não | n/a |Demorou um pouco mais na etapa de delimitar as unidades por beneficiário, mas compreendeu a funcionalidade sem ajuda.|
+| Usuário 3 | Satisfeito | Concluiu | 210 | 22 | Não | n/a | Demorou um pouco mais na etapa de delimitar as unidades por beneficiário, mas compreendeu a funcionalidade sem ajuda.|
 | Usuário 4 | Neutro | Concluiu | 150 | 16 | Não | n/a | Navegação fluida, mas sugeriu verbalmente a inclusão de um campo de observação opcional no cadastro do produto. |
-| Usuário 5 | Confuso | Concluiu | 240 | 25 | Sim | Sim |Teve certa dificuldade em entender a divisão de quantidade por tipo de beneficiário, mas leu as instruções (tooltip) na tela e conseguiu finalizar.|
+| Usuário 5 | Confuso | Concluiu | 240 | 25 | Sim | Sim | Teve certa dificuldade em entender a divisão de quantidade por tipo de beneficiário, mas leu as instruções (tooltip) na tela e conseguiu finalizar.|
 
 ## CTU-12 – ONG Buscando Mantimentos
 
