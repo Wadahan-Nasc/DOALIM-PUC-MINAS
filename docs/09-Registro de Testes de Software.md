@@ -70,10 +70,85 @@
 |	Requisito Associado 	| RF-008 - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. |
 |Registro de evidência | https://github.com/user-attachments/assets/91decdb8-eb38-4c19-a351-698598bfaf83 |
 
-| **Caso de Teste** 	| **CT15 – Moderação de Métricas** 	|
+| **Caso de Teste** 	| **CT15 – Métricas da Plataforma** 	|
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-008 - A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. |
+|	Requisito Associado 	| RF-011 - A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos. |
 |Registro de evidência | www.teste.com.br/drive/ct-02 |
+
+| **Caso de Teste** 	| **CT16 – Recebimento de Notificações** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-009 - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT17 – Relatório de Impacto - Doador** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT18 – Relatório de Impacto - Beneficiário** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT19 – Acessos ao perfil público do beneficiário** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-013 - A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT20 – Acessos ao perfil público do doador** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-013 - A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT21 – Avaliação de Usuário (Doador/Beneficiário)** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e beneficiário avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT22 – Acesso a APIs externas** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-001 - A aplicação deve conseguir acessar API's. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT23 – Tecnologias utilizadas no desenvolvimento** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-002 - A aplicação deve ser desenvolvida utilizando a linguagem C# no back-end e a tríade JavaScript, HTML e CSS (com framework Bootstrap) no front-end. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT24 – Analisar responsividade da aplicação (Mobile-first)** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-004 - A aplicação deve possuir uma interface "mobile-first", sendo responsiva e adaptável a telas de celulares, considerando que muitos receptores usarão o sistema via smartphone. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT25 – Banco de dados utilizando SQL Server** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-008 - A aplicação deve utilizar o Microsoft SQL Server para armazenamento de dados. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT26 – Prevenção de double booking** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-005 – A aplicação deve garantir transações no banco de dados e evitar "double booking" (reservas simultâneas da mesma doação). |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT27 – Compatibilidade entre navegadores** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-007 – A aplicação deve ser compatível com os principais navegadores (Chrome, Firefox e Edge). |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT28 – Desempenho da vitrine** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-010 – A aplicação deve ter um tempo de resposta inferior a 5 segundos para buscas e listagens de doações na vitrine em condições normais de tráfego. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT29 – Acessibilidade básica (WCAG)** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-011 – A aplicação deve seguir diretrizes básicas de acessibilidade (WCAG), possuindo bom contraste de cores e navegação por teclado. |
+|Registro de evidência |  |
+
+| **Caso de Teste** 	| **CT30 – Segurança de senhas e protocolo HTTPS** 	|
+|:---:	|:---:	|
+|	Requisito Associado 	| RNF-012 – A aplicação deve garantir a segurança dos dados utilizando senhas com hash forte e comunicação via protocolo TLS/HTTPS. |
+|Registro de evidência |  |
 
 ## Relatório de testes de software
 
