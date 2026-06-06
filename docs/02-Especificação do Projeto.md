@@ -86,11 +86,11 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 |RF-007| A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada. | ALTA |
 |RF-008| A aplicação deve possuir um painel administrativo para moderação de conteúdo e gerenciamento de usuários. | ALTA |
 |RF-009| A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. | MÉDIA |
-|RF-010| A aplicação deve gerar relatórios de impacto para o doador, exibindo o volume total doado e a redução estimada de CO₂ gerada por evitar o descarte. | MÉDIA |
-|RF-011| A aplicação deve gerar relatórios de impacto para o beneficiário, exibindo o volume total itens recebidos. | MÉDIA |
+|RF-010| A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. | MÉDIA |
+|RF-011| A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos. | MÉDIA |
 |RF-012| A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item. | BAIXA |
-|RF-013| A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos. | BAIXA |
-|RF-014| A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada. | BAIXA |
+|RF-013| A aplicação deve permitir que doador e beneficiário acessem o perfil um do outro para validação dos dados públicos. | BAIXA |
+|RF-014| A aplicação deve permitir que doador e beneficiário avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada. | BAIXA |
 |RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário. | BAIXA |
 
 ### Requisitos não Funcionais
@@ -116,7 +116,7 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 
 |ID| Restrição                                             |
 |--|-------------------------------------------------------|
-|01| O projeto deverá ser entregue até o final do semestre |
+|01| O projeto foi desenvolvido entre fevereiro e junho de 2026, sendo entregue no final do semestre. |
 |02| Para o desenvolvimento do Back-end deverá ser utilizado C#.   |
 
 ## Diagrama de Casos de Uso
