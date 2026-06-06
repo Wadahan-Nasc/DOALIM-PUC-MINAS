@@ -150,96 +150,68 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e beneficiário avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada. |
 | Objetivo do Teste 	| Verificar se o sistema permite o envio de nota após o encerramento da doação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Acessar uma doação já marcada como "Concluída" através do histórico correspondente ao tipo de usuário <br> - Selecionar uma nota (1 a 5 estrelas) <br> - Clicar em "Avaliar" ou no ícone de check <br> - N modal aberto, clicar em "Confirmar" |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Doador ou Beneficiário <br> - Acessar uma doação já marcada como "Concluída" através do histórico correspondente ao tipo de usuário <br> - Selecionar uma nota (1 a 5 estrelas) <br> - Clicar em "Avaliar" <br> - No modal aberto, clicar em "Confirmar" |
 |Critério de Êxito | - A avaliação é salva com sucesso <br> - A avaliação passa integrar a média da nota ser exibida no perfil público do usuário avaliado |
 
-| Caso de Teste | CT22 – Comunicação via Chat Interno |
-|:---:	|:---:	|
-|	Requisito Associado 	| RF-015 - A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário. |
-| Objetivo do Teste 	| Verificar se as mensagens são enviadas e recebidas corretamente entre as duas partes. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Realizar o login como Beneficiário <br> - Acessar uma reserva ativa <br> - Clicar no ícone de "Chat" ou "Enviar Mensagem" <br> - Digitar uma mensagem de texto e enviar <br> - Acessar a área de mensagens/notificações para verificar o recebimento |
-|Critério de Êxito | - A mensagem é entregue em tempo real <br> - A notificação é exibida corretamente no ícone de mensagens do destinatário |
-
-| Caso de Teste | CT23 – Acesso a APIs externas|
+| Caso de Teste | CT22 – Acesso a APIs externas|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-001 - A aplicação deve conseguir acessar API's |
 | Objetivo do Teste 	| Verificar se o sistema realiza comunicação bem-sucedida com serviços externos. |
-| Passos 	| - Acessar a página com o formulário que consome a API (ex: preenchimento de CEP no cadastro) <br> - Inserir um dado válido <br> - Abrir as ferramentas de desenvolvedor do navegador (Aba Network/Rede) <br> - Clicar em buscar ou fora do campo |
+| Passos 	| - Acessar a página de cadastro de usuário - Abrir as ferramentas de desenvolvedor do navegador (Aba Network/Rede) <br> - Preencha o campo de CEP com um valor válido e aperte TAB no teclado <br> - Consultar o "Request URL" no JSON gerado nas ferramentos de desenvolvedor |
 |Critério de Êxito | - A requisição retorna status OK. <br> - Os dados retornados pela API preenchem a interface corretamente. |
 
-| Caso de Teste | CT24 – Tecnologias utilizadas no desenvolvimento|
+| Caso de Teste | CT23 – Tecnologias utilizadas no desenvolvimento|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-002 - A aplicação deve ser desenvolvida utilizando a linguagem C# no back-end e a tríade JavaScript, HTML e CSS (com framework Bootstrap) no front-end. |
 | Objetivo do Teste 	| Verificar por inspeção se as tecnologias definidas estão sendo utilizadas no projeto. |
-| Passos 	| - Acessar o Visual Studio ou repositório do projeto <br> - Verificar o nome e extensão dos arquivos de back-end <br> - Verificar os arquivos de front-end e a importação das bibliotecas Bootstrap. |
-|Critério de Êxito | - Os arquivos do servidor possuem extensão .cs (C#). <br> - Os arquivos de interface utilizam extensões .html, .css e .js. <br> - O Bootstrap está devidamente importado e aplicado nas páginas. |
+| Passos 	| - Acessar o Visual Studio ou repositório do projeto <br> - Verificar o nome e extensão dos arquivos de back-end |
+|Critério de Êxito | - Os arquivos do servidor possuem extensão .cs (C#). <br> - Os arquivos de interface utilizam extensões .html, .css e .js. |
 
-| Caso de Teste | CT25 – Conformidade com LGPD|
-|:---:	|:---:	|
-|	Requisito Associado 	| RNF-003 - A aplicação deve estar em total conformidade com a LGPD, garantindo o tratamento seguro de dados sensíveis de famílias cadastradas e políticas claras de privacidade. |
-| Objetivo do Teste 	| Verificar a presença de termos claros de consentimento e ferramentas de privacidade. |
-| Passos 	| - Acessar o site e verificar aviso de Cookies <br> - Acessar a tela de cadastro e identificar a "Política de Privacidade" e os Termos de Responsabilidade <br> - Logar no sistema e acessar as configurações do perfil <br> - Localizar a opção de exclusão ou solicitação de remoção de dados. |
-|Critério de Êxito | - Os documentos legais estão disponíveis para aceite no momento do cadastro. <br> - O botão de solicitação de remoção de dados está funcional e acessível. |
-
-| Caso de Teste | CT26 – Analisar responsividade da aplicação (Mobile-first)|
+| Caso de Teste | CT24 – Analisar responsividade da aplicação (Mobile-first)|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-004 - A aplicação deve possuir uma interface "mobile-first", sendo responsiva e adaptável a telas de celulares, considerando que muitos receptores usarão o sistema via smartphone. |
 | Objetivo do Teste 	| Verificar a responsividade da aplicação em telas menores. |
 | Passos 	| - Acessar a URL da aplicação <br> - Redimensionar a janela do navegador (ou usar o F12 em modo mobile) para dimensões de um smartphone <br> - Navegar pelas páginas da vitrine, perfil e reserva de doações |
 |Critério de Êxito | - A interface não apresenta falhas de posicionamento, quebra de botões ou necessidade de rolagem horizontal. <br> - Todos os elementos interativos são acessíveis e utilizáveis na versão mobile. |
 
-| Caso de Teste | CT27 – Banco de dados utilizando SQL Server|
+| Caso de Teste | CT25 – Banco de dados utilizando SQL Server|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-008 - A aplicação deve utilizar o Microsoft SQL Server para armazenamento de dados. |
 | Objetivo do Teste 	| Verificar o SGBD utilizado para a persistência de dados. |
-| Passos 	| - Acessar as configurações do back-end <br> - Mostrar a string de conexão configurada <br> - Acessar a URL da aplicação e cadastrar um produto para doação <br> - Executar uma consulta (SELECT) através do SQL |
+| Passos 	| - Acessar o Visual Studio <br> - Abrir seção de banco de dados <br> - Mostar o nome da conexão <br> - Acessar a URL da aplicação <br> - Realizar o cadastro de produto <br> - Verficar o preenchimento da tabela de produtos |
 |Critério de Êxito | - A string de conexão aponta para o provedor SQL Server. <br> - O cadastro do produto aparece imediatamente na tabela correta do banco de dados |
 
-| Caso de Teste | CT28 – Prevenção de double booking|
+| Caso de Teste | CT26 – Prevenção de double booking|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-005 – A aplicação deve garantir transações no banco de dados e evitar "double booking" (reservas simultâneas da mesma doação). |
 | Objetivo do Teste 	| Verificar se o sistema impede que dois beneficiários reservem o mesmo item simultaneamente. |
 | Passos 	| - Acessar a aplicação em dois navegadores distintos (ou abas anônimas) com duas contas de beneficiário diferentes. <br> - Em ambas as sessões, localizar o mesmo produto com quantidade limitada na vitrine <br> - Tentar efetuar a reserva simultânea do mesmo item nas duas sessões ao mesmo tempo. |
 |Critério de Êxito | - Apenas uma das reservas é confirmada com sucesso. <br> - A segunda tentativa recebe mensagem de indisponibilidade ou estoque esgotado. <br> - O status do item é atualizado corretamente, sem duplicidade de reservas.|
 
-| Caso de Teste | CT29 – Disponibilidade da aplicação (24/7)|
-|:---:	|:---:	|
-|	Requisito Associado 	| RNF-006 – A aplicação deve estar disponível 24 horas por dia, 7 dias por semana. |
-| Objetivo do Teste 	| Verificar se a aplicação permanece acessível e funcional fora do horário comercial. |
-| Passos 	| - Acessar a URL da aplicação em horários variados (madrugada, fim de semana, feriados). <br> -Realizar o login com uma conta válida. <br> - Navegar pelas principais funcionalidades: vitrine, reserva e perfil. <br> - Verificar o tempo de resposta e a ausência de erros de servidor. |
-|Critério de Êxito | - A aplicação responde normalmente em todos os horários testados. <br> - Nenhuma funcionalidade principal apresenta indisponibilidade fora do horário comercial. |
-
-| Caso de Teste | CT30 – Compatibilidade entre navegadores|
+| Caso de Teste | CT27 – Compatibilidade entre navegadores|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-007 – A aplicação deve ser compatível com os principais navegadores (Chrome, Firefox e Edge). |
 | Objetivo do Teste 	| Verificar se as funcionalidades principais funcionam corretamente nos três navegadores exigidos. |
 | Passos 	| - AceAcessar a aplicação no Google Chrome e executar o fluxo: cadastro, login, busca na vitrine e reserva de produto. <br> - Repetir o mesmo fluxo no Mozilla Firefox. <br> - Repetir o mesmo fluxo no Microsoft Edge. <br> Registrar qualquer falha visual ou funcional identificada em cada navegador. |
 |Critério de Êxito | - Nenhum dos três navegadores apresenta falha visual (layout quebrado) ou funcional (ação que não conclui). <br> - A experiência do usuário é equivalente nos três ambientes. |
 
-| Caso de Teste | CT31 – Desempenho da vitrine|
+| Caso de Teste | CT28 – Desempenho da vitrine|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-010 – A aplicação deve ter um tempo de resposta inferior a 5 segundos para buscas e listagens de doações na vitrine em condições normais de tráfego |
 | Objetivo do Teste 	| Verificar se a busca e a listagem de doações na vitrine respondem em menos de 5 segundos. |
 | Passos 	| - Acessar a vitrine da aplicação. <br> - Abrir as ferramentas de desenvolvedor do navegador (F12), aba Network/Rede. <br> - Realizar uma busca por produto. <br> - Analisar o tempo de resposta das requisições disparadas.|
 |Critério de Êxito | - O tempo de resposta de cada requisição de busca e listagem é inferior a 5 segundos <br> - A interface exibe os resultados sem travamento ou carregamento prolongado. |
 
-| Caso de Teste | CT32 – Acessibilidade básica (WCAG)|
+| Caso de Teste | CT29 – Acessibilidade básica (WCAG)|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-011 – A aplicação deve seguir diretrizes básicas de acessibilidade (WCAG), possuindo bom contraste de cores e navegação por teclado. |
 | Objetivo do Teste 	| Verificar o SGBD utilizado para a persistência de dados. |
 | Passos 	| - Acessar a aplicação nas páginas de cadastro, vitrine e perfil. <br> - Navegar pelas ações principais utilizando apenas as teclas Tab e Enter (sem mouse). <br> - Abrir as ferramentas de desenvolvedor do Chrome e executar a análise de Acessibilidade via Lighthouse. |
 |Critério de Êxito | - As ações principais (login, busca, reserva) são completáveis via teclado sem necessidade de mouse. <br> - A pontuação de acessibilidade no Lighthouse é igual ou superior a 70. Não há elementos sem contraste mínimo entre texto e fundo. |
 
-| Caso de Teste | CT33 – Segurança de senhas e protocolo HTTPS|
+| Caso de Teste | CT30 – Segurança de senhas e protocolo HTTPS|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-012 – A aplicação deve garantir a segurança dos dados utilizando senhas com hash forte e comunicação via protocolo TLS/HTTPS. |
 | Objetivo do Teste 	| Verificar se as senhas são armazenadas com hash e se toda comunicação ocorre via HTTPS. |
 | Passos 	| - Acessar o banco de dados e consultar o campo de senha de um usuário cadastrado. <br> - Verificar na barra de endereço do navegador se a URL utiliza "https://". <br> - Abrir as ferramentas de desenvolvedor (aba Network) e confirmar se nenhuma requisição trafega via HTTP simples. |
 |Critério de Êxito | - O campo de senha no banco de dados contém um hash irreconhecível, não o texto original. <br> - Todas as requisições da aplicação utilizam HTTPS. <br> - Nenhuma informação sensível é transmitida em texto puro. |
-
-| Caso de Teste | CT34 – Carga simultânea de acessos|
-|:---:	|:---:	|
-|	Requisito Associado 	| RNF-009 – A aplicação deve ter capacidade de receber múltiplos acessos simultâneos. |
-| Objetivo do Teste 	| Verificar se a aplicação suporta múltiplos acessos simultâneos sem degradação significativa de desempenho. |
-| Passos 	| - Utilizar uma ferramenta de teste de carga (ex: Apache JMeter, Postman Runner ou k6). <br> - Configurar uma simulação com 20 requisições simultâneas ao endpoint da vitrine. <br> Executar o teste e monitorar os tempos de resposta e possíveis erros retornados. |
-|Critério de Êxito | - Todas as requisições retornam resposta válida (status 200 OK). <br> - O tempo de resposta médio permanece dentro do limite definido pelo RNF-010 (abaixo de 5 segundos). <br> - Nenhum erro de servidor (5xx) é retornado durante a execução do teste. |
