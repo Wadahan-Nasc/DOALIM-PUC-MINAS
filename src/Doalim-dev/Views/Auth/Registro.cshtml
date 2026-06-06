@@ -5,6 +5,52 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .reg-avatar-wrapper {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    .reg-avatar-placeholder {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #198754;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #dee2e6;
+    }
+    .reg-avatar-img {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #dee2e6;
+        display: block;
+    }
+    .reg-avatar-edit-btn {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #198754;
+        color: #fff;
+        border: 2px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .85rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,.2);
+    }
+    .reg-comprovacao-area:hover {
+        border-color: #198754 !important;
+        background: #f0faf0 !important;
+    }
+</style>
+
 <div class="row justify-content-center mt-4 mb-5">
     <div class="col-md-7 col-lg-6">
 
@@ -163,18 +209,52 @@
                 </small>
             </div>
 
-            <!-- Uploads opcionais -->
+            <!-- Foto de Perfil — avatar clicável -->
             <div class="mb-3">
-                <label asp-for="FotoPerfilUpload" class="form-label">
-                    Foto do Perfil <span class="text-muted small">(opcional)</span>
-                </label>
-                <input asp-for="FotoPerfilUpload" type="file" class="form-control" accept="image/*" />
+                <label class="form-label">Foto do Perfil <span class="text-muted small">(opcional)</span></label>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="reg-avatar-wrapper" onclick="document.getElementById('fotoPerfilInput').click()" title="Clique para escolher uma foto">
+                        <div id="fotoPreviewReg" class="reg-avatar-placeholder">
+                            <i class="bi bi-person" style="font-size:2.2rem; color:#fff;"></i>
+                        </div>
+                        <span class="reg-avatar-edit-btn">
+                            <i class="bi bi-camera-fill"></i>
+                        </span>
+                    </div>
+                    <div class="text-muted small">
+                        Clique no avatar para escolher uma foto.<br>
+                        Formatos aceitos: JPG, PNG &bull; Máx. 2 MB
+                    </div>
+                </div>
+                <input asp-for="FotoPerfilUpload" id="fotoPerfilInput" type="file"
+                       class="d-none" accept=".png,.jpg,.jpeg" />
             </div>
+
+            <!-- Arquivo de Comprovação -->
             <div class="mb-3">
-                <label asp-for="ArquivoComprovacaoUpload" class="form-label">
-                    Arquivo de Comprovação <span class="text-muted small">(opcional — necessário para doar ou reservar)</span>
+                <label class="form-label">
+                    Arquivo de Comprovação
+                    <span class="text-muted small">(opcional — necessário para doar ou reservar)</span>
                 </label>
-                <input asp-for="ArquivoComprovacaoUpload" type="file" class="form-control" accept=".pdf,.jpg,.png" />
+                <div class="reg-comprovacao-area p-3" style="border:2px dashed #a5d6a7; border-radius:10px; background:#f8fbf6; cursor:pointer;"
+                     onclick="document.getElementById('comprovacaoInput').click()">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded"
+                             style="width:44px;height:44px;background:#e8f5e9;flex-shrink:0;">
+                            <i class="bi bi-file-earmark-arrow-up text-success" style="font-size:1.4rem;"></i>
+                        </div>
+                        <div>
+                            <div id="comprovacaoNomeReg" class="fw-semibold small" style="color:#2e7d32;">
+                                Clique para anexar um documento
+                            </div>
+                            <div class="text-muted" style="font-size:.78rem;">
+                                Formatos aceitos: PDF, JPG, PNG &bull; Máx. 5 MB
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input asp-for="ArquivoComprovacaoUpload" id="comprovacaoInput" type="file"
+                       class="d-none" accept=".pdf,.jpg,.png" />
             </div>
 
             <div class="d-grid mb-3">
@@ -359,7 +439,38 @@
         checkEmpresa.addEventListener('change', atualizarCampos);
 
         atualizarCampos();
-        
+
+        // Pré-visualização da foto de perfil
+        document.getElementById('fotoPerfilInput').addEventListener('change', function () {
+            if (!this.files || !this.files[0]) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('fotoPreviewReg');
+                if (preview.tagName === 'IMG') {
+                    preview.src = e.target.result;
+                } else {
+                    var img = document.createElement('img');
+                    img.id = 'fotoPreviewReg';
+                    img.src = e.target.result;
+                    img.className = 'reg-avatar-img';
+                    preview.replaceWith(img);
+                }
+            };
+            reader.readAsDataURL(this.files[0]);
+        });
+
+        // Exibe nome do arquivo de comprovação selecionado
+        document.getElementById('comprovacaoInput').addEventListener('change', function () {
+            var label = document.getElementById('comprovacaoNomeReg');
+            if (this.files && this.files[0]) {
+                label.textContent = this.files[0].name;
+                label.style.color = '#198754';
+            } else {
+                label.textContent = 'Clique para anexar um documento';
+                label.style.color = '#2e7d32';
+            }
+        });
+
         function alternarSenha(id, btn) {
             const input = document.getElementById(id);
             const icon  = btn.querySelector('i');

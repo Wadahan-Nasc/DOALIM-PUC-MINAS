@@ -1,18 +1,30 @@
 namespace Doalim_dev.ViewModels
 {
     /// <summary>
-    /// ViewModel da pagina de gerenciamento de reservas do doador.
-    /// Separa reservas por status para facilitar a renderizacao da view.
+    /// ViewModel da página de gerenciamento de reservas do doador.
+    /// Separa reservas por status para facilitar a renderização da view.
     /// </summary>
     public class GerenciarReservasPageViewModel
     {
-        // Reservas aguardando aprovacao do doador
+        // Reservas aguardando aprovação do doador
         public List<GerenciarReservaDoadorViewModel> Pendentes { get; set; } = new();
 
-        // Reservas aprovadas aguardando retirada pelo beneficiario
+        // Reservas aprovadas aguardando retirada pelo beneficiário
         public List<GerenciarReservaDoadorViewModel> Confirmadas { get; set; } = new();
 
-        // Reservas concluidas (Retirada) que o doador ainda nao avaliou
-        public List<GerenciarReservaDoadorViewModel> PendentesAvaliacao { get; set; } = new();
+        // Reservas concluídas (Retirada) com avaliação pendente do doador
+        public List<GerenciarReservaDoadorViewModel> Retiradas { get; set; } = new();
+
+        // ── Filtros ativos ────────────────────────────────────────────────
+        public string? FiltroNomeBeneficiario { get; set; }
+        public DateTime? FiltroDataInicio { get; set; }
+        public DateTime? FiltroDataFim { get; set; }
+        public string? FiltroStatus { get; set; }
+
+        public bool TemFiltroAtivo =>
+            !string.IsNullOrWhiteSpace(FiltroNomeBeneficiario)
+            || FiltroDataInicio.HasValue
+            || FiltroDataFim.HasValue
+            || !string.IsNullOrWhiteSpace(FiltroStatus);
     }
 }

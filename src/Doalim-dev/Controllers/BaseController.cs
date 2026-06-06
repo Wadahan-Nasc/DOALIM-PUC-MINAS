@@ -85,12 +85,51 @@ namespace Doalim_dev.Controllers
             {
                 mime = "image/jpeg";
             }
+            else if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x3C
+                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
+            {
+                mime = "image/svg+xml";
+            }
             else
             {
                 mime = "image/jpeg"; // fallback seguro para a maioria dos uploads
             }
 
             return $"data:{mime};base64,{Convert.ToBase64String(fotoProduto)}";
+        }
+
+        // -------------------------------------------------------------------------
+        // Cria uma notificação para o usuário.
+        // Se chaveDeduplicacao for informada, ignora silenciosamente duplicatas.
+        // -------------------------------------------------------------------------
+        protected async Task CriarNotificacaoAsync(
+            int idUsuario,
+            string titulo,
+            string mensagem,
+            TipoNotificacao tipo,
+            string? url = null,
+            string? chaveDeduplicacao = null)
+        {
+            // Evita duplicata quando a chave já existe para este usuário
+            if (chaveDeduplicacao != null)
+            {
+                var jaExiste = await _context.Notificacoes
+                    .AnyAsync(n => n.IdUsuario == idUsuario && n.ChaveDuplicacao == chaveDeduplicacao);
+                if (jaExiste) return;
+            }
+
+            _context.Notificacoes.Add(new Notificacao
+            {
+                IdUsuario        = idUsuario,
+                Titulo           = titulo,
+                Mensagem         = mensagem,
+                Tipo             = tipo,
+                Url              = url,
+                DataCriacao      = DateTime.UtcNow,
+                Lida             = false,
+                ChaveDuplicacao  = chaveDeduplicacao
+            });
         }
 
         protected async Task AtualizarStatusPedidoAsync(int? idPedido)

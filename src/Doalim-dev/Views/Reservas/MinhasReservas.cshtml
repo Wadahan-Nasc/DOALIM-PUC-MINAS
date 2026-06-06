@@ -9,34 +9,27 @@
     var totalRetirada   = Model.Reservas.Count(r => r.StatusReserva == "Retirada");
     var totalCancelada  = Model.Reservas.Count(r => r.StatusReserva == "Cancelada");
     var totalRejeitada  = Model.Reservas.Count(r => r.StatusReserva == "Rejeitada");
+
+    // Agrupamento por (IdPedido, IdUsuarioDoador) — mesma lógica do doador
+    var grupos = Model.Reservas
+        .GroupBy(r => new { r.IdPedido, r.IdUsuarioDoador })
+        .ToList();
 }
 
 <style>
-    .reserva-card {
+    .reserva-group-card {
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid #e0e0e0;
         transition: box-shadow .2s, transform .2s;
     }
-    .reserva-card:hover {
+    .reserva-group-card:hover {
         box-shadow: 0 6px 20px rgba(0,0,0,.10) !important;
         transform: translateY(-2px);
     }
-    .reserva-card .status-strip {
+    .reserva-group-card .status-strip {
         height: 4px;
         width: 100%;
-    }
-    .reserva-info-label {
-        font-size: .75rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        color: #888;
-        font-weight: 600;
-    }
-    .reserva-info-value {
-        font-size: .9rem;
-        font-weight: 600;
-        color: #333;
     }
     .stat-card {
         border-radius: 10px;
@@ -47,19 +40,49 @@
     .stat-card .stat-number { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
     .stat-card .stat-label  { font-size: .75rem; color: #666; margin-top: 2px; }
 
-    /* Estrelas de avaliacao */
+    /* Estrelas de avaliação */
     .btn-star {
         cursor: pointer;
         line-height: 1;
         transition: transform .1s;
     }
     .btn-star:hover { transform: scale(1.2); }
+
+    .produto-row {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .produto-row:last-child {
+        border-bottom: none;
+    }
+    .produto-row.item-cancelado {
+        opacity: .65;
+        background: #fafafa;
+    }
+    .info-label {
+        font-size: .70rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #888;
+        font-weight: 700;
+    }
+    .info-value {
+        font-size: .88rem;
+        font-weight: 600;
+        color: #333;
+    }
+    /* Divisor vertical no rodapé de contato */
+    @@media (min-width: 768px) {
+        .footer-contato-divider {
+            border-left: 1px solid #c3e6cb;
+            padding-left: 1rem;
+        }
+    }
 </style>
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
         <h2 class="mb-1 fw-bold">Minhas Reservas</h2>
-        <p class="text-muted mb-0">Alimentos reservados por voce aparecem aqui.</p>
+        <p class="text-muted mb-0">Alimentos reservados por você aparecem aqui.</p>
     </div>
     <div class="d-flex gap-2">
         <a asp-controller="Carrinho" asp-action="Index" class="btn btn-outline-primary">
@@ -71,7 +94,7 @@
     </div>
 </div>
 
-@* Totalizadores - exibe somente quando ha reservas *@
+@* Totalizadores *@
 @if (Model.Reservas.Any())
 {
     <div class="row g-2 mb-4">
@@ -111,8 +134,9 @@
 @* Filtros *@
 <form method="get" asp-controller="Reservas" asp-action="MinhasReservas"
       class="card p-3 mb-4 shadow-sm" style="border-radius:12px; background:#f9fbf9; border:1px solid #e8f5e9;">
-    <div class="row g-3">
+    <div class="row g-2">
 
+        @* Linha 1: Status | Categoria | Nome produto | Nome doador *@
         <div class="col-6 col-md-2">
             <label class="form-label fw-semibold small mb-1">Status</label>
             <select name="Status" class="form-select form-select-sm">
@@ -136,18 +160,19 @@
             </select>
         </div>
 
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <label class="form-label fw-semibold small mb-1">Nome do produto</label>
             <input type="text" name="NomeProduto" value="@filtros.NomeProduto"
-                   class="form-control form-control-sm" placeholder="Ex: Arroz, Feijao..." />
+                   class="form-control form-control-sm" placeholder="Ex: Arroz, Feijão..." />
         </div>
 
-        <div class="col-6 col-md-2">
+        <div class="col-6 col-md-3">
             <label class="form-label fw-semibold small mb-1">Nome do doador</label>
             <input type="text" name="NomeDoador" value="@filtros.NomeDoador"
                    class="form-control form-control-sm" placeholder="Ex: Maria" />
         </div>
 
+        @* Linha 2: Validade de | Validade até | Data reserva de | Data reserva até *@
         <div class="col-6 col-md-3">
             <label class="form-label fw-semibold small mb-1">Validade de</label>
             <input type="date" name="ValidadeInicio"
@@ -156,21 +181,21 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <label class="form-label fw-semibold small mb-1">Validade ate</label>
+            <label class="form-label fw-semibold small mb-1">Validade até</label>
             <input type="date" name="ValidadeFim"
                    value="@filtros.ValidadeFim?.ToString("yyyy-MM-dd")"
                    class="form-control form-control-sm" />
         </div>
 
         <div class="col-6 col-md-3">
-            <label class="form-label fw-semibold small mb-1">Data de reserva de</label>
+            <label class="form-label fw-semibold small mb-1">Reservado de</label>
             <input type="date" name="DataReservaInicio"
                    value="@filtros.DataReservaInicio?.ToString("yyyy-MM-dd")"
                    class="form-control form-control-sm" />
         </div>
 
         <div class="col-6 col-md-3">
-            <label class="form-label fw-semibold small mb-1">Data de reserva ate</label>
+            <label class="form-label fw-semibold small mb-1">Reservado até</label>
             <input type="date" name="DataReservaFim"
                    value="@filtros.DataReservaFim?.ToString("yyyy-MM-dd")"
                    class="form-control form-control-sm" />
@@ -196,7 +221,7 @@
 else if (!Model.Reservas.Any())
 {
     <div class="alert alert-info rounded-3">
-        <i class="bi bi-info-circle me-2"></i>Voce ainda nao possui reservas.
+        <i class="bi bi-info-circle me-2"></i>Você ainda não possui reservas.
     </div>
 }
 else
@@ -210,226 +235,353 @@ else
         </p>
     }
 
+    @* Cards agrupados por (pedido, doador) *@
     <div class="row g-3">
-        @foreach (var item in Model.Reservas)
+        @foreach (var grupo in grupos)
         {
-            var corStrip = item.StatusReserva == "Pendente"   ? "#ffc107" :
-                           item.StatusReserva == "Confirmada" ? "#198754" :
-                           item.StatusReserva == "Retirada"   ? "#0d6efd" :
-                           item.StatusReserva == "Rejeitada"  ? "#dc3545" : "#6c757d";
+            var rep   = grupo.First();
+            var itens = grupo.ToList();
 
-            var badgeClass = item.StatusReserva == "Pendente"   ? "bg-warning text-dark" :
-                             item.StatusReserva == "Confirmada" ? "bg-success" :
-                             item.StatusReserva == "Retirada"   ? "bg-primary" :
-                             item.StatusReserva == "Rejeitada"  ? "bg-danger" : "bg-secondary";
+            // Status misto: detecta quando itens do mesmo pedido têm status diferentes
+            // (ex.: um produto cancelado individualmente)
+            var todosStatus = itens.Select(i => i.StatusReserva).Distinct().ToList();
+            var statusMisto = todosStatus.Count > 1;
 
-            var iconeStatus = item.StatusReserva == "Pendente"   ? "bi-hourglass-split" :
-                              item.StatusReserva == "Confirmada" ? "bi-check-circle-fill" :
-                              item.StatusReserva == "Retirada"   ? "bi-bag-check-fill" :
-                              item.StatusReserva == "Rejeitada"  ? "bi-x-circle-fill" : "bi-dash-circle";
+            // Status representativo do grupo (mais ativo quando misto)
+            var grpStatus = statusMisto
+                ? (todosStatus.Contains("Confirmada") ? "Confirmada" :
+                   todosStatus.Contains("Pendente")   ? "Pendente"   :
+                   todosStatus.Contains("Retirada")   ? "Retirada"   :
+                   todosStatus.Contains("Rejeitada")  ? "Rejeitada"  : "Cancelada")
+                : rep.StatusReserva;
 
-            <div class="col-sm-6 col-md-4 col-xl-3">
-                <div class="card reserva-card h-100 shadow-sm">
+            var corStrip   = grpStatus == "Pendente"   ? "#ffc107" :
+                             grpStatus == "Confirmada" ? "#198754" :
+                             grpStatus == "Retirada"   ? "#0d6efd" :
+                             grpStatus == "Rejeitada"  ? "#dc3545" : "#6c757d";
 
-                    <div class="status-strip" style="background:@corStrip;"></div>
+            var badgeClass = grpStatus == "Pendente"   ? "bg-warning text-dark" :
+                             grpStatus == "Confirmada" ? "bg-success" :
+                             grpStatus == "Retirada"   ? "bg-primary" :
+                             grpStatus == "Rejeitada"  ? "bg-danger" : "bg-secondary";
 
-                    @if (!string.IsNullOrEmpty(item.FotoProduto))
-                    {
-                        <img src="@item.FotoProduto"
-                             class="card-img-top"
-                             alt="@item.NomeProduto"
-                             style="height:110px; object-fit:cover;" />
-                    }
-                    else
-                    {
-                        <div class="d-flex align-items-center justify-content-center bg-light"
-                             style="height:110px; font-size:2.2rem;">&#127857;</div>
-                    }
+            var iconeStatus = grpStatus == "Pendente"   ? "bi-hourglass-split" :
+                              grpStatus == "Confirmada" ? "bi-check-circle-fill" :
+                              grpStatus == "Retirada"   ? "bi-bag-check-fill" :
+                              grpStatus == "Rejeitada"  ? "bi-x-circle-fill" : "bi-dash-circle";
 
-                    <div class="card-body d-flex flex-column p-2">
+            <div class="col-12 col-md-6">
+            <div class="card reserva-group-card shadow-sm h-100">
 
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
-                            <h6 class="fw-bold mb-0 text-dark" style="font-size:.88rem;">@item.NomeProduto</h6>
-                            <span class="badge @badgeClass flex-shrink-0 d-flex align-items-center gap-1">
-                                <i class="bi @iconeStatus" style="font-size:.7rem;"></i>
-                                @item.StatusReserva
+                <div class="status-strip" style="background:@corStrip;"></div>
+
+                @* Cabeçalho do grupo *@
+                <div class="card-header d-flex justify-content-between align-items-center py-2 px-3"
+                     style="background:#fafafa;">
+                    <div>
+                        <a href="#" onclick="abrirPerfilModal(@rep.IdUsuarioDoador); return false;"
+                           class="fw-bold text-dark text-decoration-none">
+                            <i class="bi bi-person-circle me-1 text-success"></i>@rep.NomeDoador
+                        </a>
+                        <div class="text-muted" style="font-size:.77rem;">
+                            Pedido #@rep.IdPedido &bull; Reservado em @rep.DataReserva.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        <span class="badge @badgeClass d-flex align-items-center gap-1 py-2 px-3">
+                            <i class="bi @iconeStatus"></i> @grpStatus
+                        </span>
+                        @if (statusMisto)
+                        {
+                            <span class="badge bg-light text-muted border" style="font-size:.7rem;">
+                                <i class="bi bi-info-circle me-1"></i>Itens com status variado
                             </span>
-                        </div>
-
-                        <p class="text-muted mb-2" style="font-size:.76rem;">
-                            @item.MarcaProduto &bull; @item.CategoriaProduto
-                        </p>
-
-                        <div class="row g-1 mb-2">
-                            <div class="col-6">
-                                <div class="reserva-info-label">Quantidade</div>
-                                <div class="reserva-info-value">@item.QuantidadeReservada @item.UnidadeMedidaProduto</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="reserva-info-label">Pedido</div>
-                                <div class="reserva-info-value">#@item.IdPedido</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="reserva-info-label">Lote</div>
-                                <div class="reserva-info-value">@item.NumeroLote</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="reserva-info-label">Validade</div>
-                                <div class="reserva-info-value">@item.DataValidadeLote.ToString("dd/MM/yyyy")</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="reserva-info-label">Doador</div>
-                                <div class="reserva-info-value">
-                                    <a asp-controller="Usuarios" asp-action="PerfilPublico"
-                                       asp-route-id="@item.IdUsuarioDoador"
-                                       class="text-decoration-none text-dark fw-bold"
-                                       title="Ver perfil do doador">
-                                        @item.NomeDoador
-                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem; opacity:.6;"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="reserva-info-label">Reservado em</div>
-                                <div class="reserva-info-value" style="font-size:.8rem;">@item.DataReserva.ToString("dd/MM/yy HH:mm")</div>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(item.TelefoneDoador) && item.StatusReserva == "Confirmada")
-                            {
-                                <div class="col-12">
-                                    <div class="reserva-info-label">Telefone do doador</div>
-                                    <div class="reserva-info-value">
-                                        <i class="bi bi-telephone-fill text-success me-1" style="font-size:.8rem;"></i>@item.TelefoneDoador
-                                    </div>
-                                </div>
-                            }
-                        </div>
-
-                        @if (item.StatusReserva == "Confirmada" && item.DataRetiradaInicio.HasValue && item.DataRetiradaFim.HasValue)
-                        {
-                            <div class="alert @(item.RetiradaProxima ? "alert-warning" : "alert-success") py-2 px-3 mb-2 rounded-3"
-                                 style="font-size:.85rem;">
-                                <i class="bi bi-calendar-check me-1"></i>
-                                <strong>Retirada:</strong>
-                                @item.DataRetiradaInicio.Value.ToString("dd/MM/yyyy") ate @item.DataRetiradaFim.Value.ToString("dd/MM/yyyy")
-                                @if (item.RetiradaProxima)
-                                {
-                                    <div class="mt-1 fw-semibold">
-                                        <i class="bi bi-exclamation-triangle me-1"></i> Retirada proxima!
-                                    </div>
-                                }
-                            </div>
                         }
+                    </div>
+                </div>
 
-                        @if (item.StatusReserva == "Rejeitada" && !string.IsNullOrEmpty(item.MotivoRejeicao))
-                        {
-                            <div class="alert alert-danger py-2 px-3 mb-2 rounded-3" style="font-size:.85rem;">
-                                <div class="fw-semibold mb-1">
-                                    <i class="bi bi-x-circle me-1"></i> Motivo da rejeicao:
-                                </div>
-                                <span>@item.MotivoRejeicao</span>
-                            </div>
-                        }
-
-                        @if (item.ExibirToken)
-                        {
-                            <div class="alert alert-info py-2 px-3 mb-2 rounded-3">
-                                <div class="small text-muted mb-1">Token — apresente ao doador:</div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fs-5 fw-bold font-monospace" id="token-@item.IdReserva">@item.TokenConfirmacao</span>
+                @* ── Avaliação por grupo — topo do card (status Retirada) ── *@
+                @if (grpStatus == "Retirada")
+                {
+                    @if (rep.PodeAvaliar && !rep.JaAvaliou)
+                    {
+                        <div class="border-bottom px-3 py-2" style="background:#fffef5;">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="text-muted small fw-semibold">
+                                    <i class="bi bi-star me-1 text-warning"></i>Avaliar doador:
+                                </span>
+                                <div id="avaliacao-bloco-grp-@rep.IdPedido" class="d-flex align-items-center gap-2 flex-wrap">
+                                    <form method="post" asp-controller="Usuarios" asp-action="AvaliarUsuario"
+                                          class="avaliacao-form d-flex align-items-center gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="idReserva" value="@rep.IdReserva" />
+                                        <div class="star-group d-flex gap-1">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <button type="button"
+                                                        class="btn-star p-0 border-0 bg-transparent text-secondary"
+                                                        data-nota="@i" title="@i estrela(s)">
+                                                    <i class="bi bi-star" style="font-size:1.1rem;"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                        <input type="hidden" name="nota" class="nota-input" value="0" />
+                                        <button type="button"
+                                                class="btn btn-warning btn-sm rounded-pill px-2 py-1 submit-btn"
+                                                disabled title="Selecione uma nota"
+                                                data-bs-toggle="modal" data-bs-target="#modalConfirmarAvaliacao">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </form>
                                     <button type="button"
-                                            class="btn btn-outline-secondary btn-sm py-0"
-                                            onclick="copiarToken('@item.TokenConfirmacao', this)"
-                                            title="Copiar token">
-                                        <i class="bi bi-clipboard"></i>
+                                            class="btn btn-link btn-sm text-muted p-0 btn-pular-avaliacao"
+                                            style="font-size:.72rem;"
+                                            data-reserva="@rep.IdReserva"
+                                            data-alvo="avaliacao-bloco-grp-@rep.IdPedido">
+                                        <i class="bi bi-x me-1"></i>Pular
                                     </button>
                                 </div>
                             </div>
-                        }
-
-                        @* Avaliacao inline — visivel apenas para reservas Retiradas *@
-                        @if (item.PodeAvaliar)
-                        {
-                            <div class="border-top pt-2 mt-auto">
-                                @if (!item.JaAvaliou)
-                                {
-                                    <div id="avaliacao-bloco-@item.IdReserva">
-                                        <div class="reserva-info-label mb-1">
-                                            <i class="bi bi-star me-1"></i>Avaliar doador
-                                        </div>
-                                        <form method="post" asp-controller="Usuarios" asp-action="AvaliarUsuario"
-                                              class="avaliacao-form d-flex align-items-center gap-2 mb-1">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="idReserva" value="@item.IdReserva" />
-                                            <div class="star-group d-flex gap-1">
-                                                @for (int i = 1; i <= 5; i++)
-                                                {
-                                                    <button type="button"
-                                                            class="btn-star p-0 border-0 bg-transparent text-secondary"
-                                                            data-nota="@i" title="@i estrela(s)">
-                                                        <i class="bi bi-star" style="font-size:1.35rem;"></i>
-                                                    </button>
-                                                }
-                                            </div>
-                                            <input type="hidden" name="nota" class="nota-input" value="0" />
-                                            <button type="button"
-                                                    class="btn btn-warning btn-sm rounded-pill px-2 py-1 submit-btn"
-                                                    disabled title="Selecione uma nota primeiro"
-                                                    data-bs-toggle="modal" data-bs-target="#modalConfirmarAvaliacao">
-                                                <i class="bi bi-check2"></i>
-                                            </button>
-                                        </form>
-                                        <button type="button"
-                                                class="btn btn-link btn-sm text-muted p-0 btn-pular-avaliacao"
-                                                style="font-size:.75rem;"
-                                                data-reserva="@item.IdReserva"
-                                                data-alvo="avaliacao-bloco-@item.IdReserva">
-                                            <i class="bi bi-x me-1"></i>Nao quero avaliar
-                                        </button>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="reserva-info-label mb-1">Sua avaliacao ao doador</div>
-                                    <div class="d-flex align-items-center gap-1 mb-1">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <i class="bi @(i <= item.NotaAvaliacao ? "bi-star-fill text-warning" : "bi-star text-secondary")"
-                                               style="font-size:1.1rem;"></i>
-                                        }
-                                        <span class="text-muted ms-1" style="font-size:.8rem;">(@item.NotaAvaliacao/5)</span>
-                                    </div>
-                                    <div class="text-muted" style="font-size:.72rem;">
-                                        <i class="bi bi-lock-fill me-1"></i>Avaliacao enviada e nao pode ser alterada.
-                                    </div>
-                                }
+                        </div>
+                    }
+                    else if (rep.JaAvaliou)
+                    {
+                        <div class="border-bottom px-3 py-2" style="background:#f8fff8;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small fw-semibold">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>Sua avaliação:
+                                </span>
+                                <div class="d-flex gap-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= (rep.NotaAvaliacao ?? 0) ? "bi-star-fill text-warning" : "bi-star text-secondary")"
+                                           style="font-size:.85rem;"></i>
+                                    }
+                                </div>
+                                <span class="text-muted" style="font-size:.72rem;">Avaliado</span>
                             </div>
-                        }
-                        else
-                        {
-                            <div class="mt-auto pt-2">
+                        </div>
+                    }
+                }
+
+                @* Lista de produtos do grupo *@
+                <div class="list-group list-group-flush">
+                    @foreach (var item in itens)
+                    {
+                        var isCancelado = item.StatusReserva == "Cancelada";
+
+                        <div class="list-group-item px-3 py-3 produto-row @(statusMisto && isCancelado ? "item-cancelado" : "")">
+                            <div class="row gx-5 gy-2 align-items-center">
+
+                                @* Foto *@
+                                <div class="col-auto">
+                                    @if (!string.IsNullOrEmpty(item.FotoProduto))
+                                    {
+                                        <img src="@item.FotoProduto" alt="@item.NomeProduto"
+                                             class="rounded"
+                                             style="width:48px;height:48px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                             style="width:48px;height:48px;font-size:1.3rem;">&#127857;</div>
+                                    }
+                                </div>
+
+                                @* Nome + marca + badge status misto *@
+                                <div class="col-md-3">
+                                    <div class="fw-semibold d-flex align-items-center gap-2" style="font-size:.9rem; color:#1a2e1a;">
+                                        @item.NomeProduto
+                                        @if (statusMisto)
+                                        {
+                                            var iBadge = item.StatusReserva == "Pendente"   ? "bg-warning text-dark" :
+                                                         item.StatusReserva == "Confirmada" ? "bg-success" :
+                                                         item.StatusReserva == "Retirada"   ? "bg-primary" :
+                                                         item.StatusReserva == "Rejeitada"  ? "bg-danger" : "bg-secondary";
+                                            <span class="badge @iBadge" style="font-size:.68rem;">@item.StatusReserva</span>
+                                        }
+                                    </div>
+                                    <div class="text-muted small">@item.MarcaProduto &bull; @item.CategoriaProduto</div>
+                                </div>
+
+                                @* Qtd. *@
+                                <div class="col-auto">
+                                    <div class="info-label">Qtd.</div>
+                                    <div class="info-value">@item.QuantidadeReservada</div>
+                                </div>
+
+                                @* U.M. *@
+                                <div class="col-auto">
+                                    <div class="info-label">U.M.</div>
+                                    <div class="info-value">@item.UnidadeMedidaProduto</div>
+                                </div>
+
+                                @* Lote *@
+                                <div class="col-auto">
+                                    <div class="info-label">Lote</div>
+                                    <div class="info-value">@item.NumeroLote</div>
+                                </div>
+
+                                @* Validade *@
+                                <div class="col-auto">
+                                    <div class="info-label">Validade</div>
+                                    <div class="info-value">@item.DataValidadeLote.ToString("dd/MM/yyyy")</div>
+                                </div>
+
+                                @* Reserva *@
+                                <div class="col-auto">
+                                    <div class="info-label">Reserva</div>
+                                    <div class="info-value text-success">#@item.IdReserva</div>
+                                </div>
+
+                                @* Botão cancelar *@
                                 @if (item.PodeSerCancelada)
                                 {
-                                    <form asp-controller="Reservas" asp-action="Cancelar" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="idReserva" value="@item.IdReserva" />
-                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill"
-                                                onclick="return confirm('Cancelar a reserva de @item.NomeProduto? O lote sera devolvido para a vitrine.')">
-                                            <i class="bi bi-x-circle me-1"></i> Cancelar reserva
+                                    <div class="col-auto ms-auto">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm rounded-pill"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCancelar"
+                                                data-reserva-id="@item.IdReserva"
+                                                data-produto-nome="@item.NomeProduto"
+                                                title="Cancelar este produto">
+                                            <i class="bi bi-x-circle me-1"></i>Cancelar
                                         </button>
-                                    </form>
+                                    </div>
+                                }
+
+                            </div>
+
+                            @* Motivo de rejeição *@
+                            @if (grpStatus == "Rejeitada" && !string.IsNullOrEmpty(item.MotivoRejeicao))
+                            {
+                                <div class="alert alert-danger py-1 px-2 mt-2 mb-0 rounded-3" style="font-size:.82rem;">
+                                    <i class="bi bi-x-circle me-1"></i><strong>Motivo:</strong> @item.MotivoRejeicao
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Rodapé — token, retirada, contato (quando Confirmada) *@
+                @if (grpStatus == "Confirmada")
+                {
+                    <div class="card-footer px-3 py-3"
+                         style="background:#f0faf0; border-top:1px solid #c3e6cb;">
+                        <div class="row g-3 align-items-start">
+
+                            @* Coluna esquerda: token + período de retirada *@
+                            <div class="col-md-6">
+                                @if (rep.ExibirToken)
+                                {
+                                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                        <span class="text-muted small fw-semibold">Token:</span>
+                                        <span class="fw-bold font-monospace fs-5" id="token-grp-@rep.IdPedido">@rep.TokenConfirmacao</span>
+                                        <button type="button"
+                                                class="btn btn-outline-secondary btn-sm py-0"
+                                                onclick="copiarToken('@rep.TokenConfirmacao', this)"
+                                                title="Copiar token">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                        <span class="text-muted small">— apresente ao doador</span>
+                                    </div>
+                                }
+
+                                @if (rep.DataRetiradaInicio.HasValue && rep.DataRetiradaFim.HasValue)
+                                {
+                                    <div class="alert @(rep.RetiradaProxima ? "alert-warning" : "alert-success") py-2 px-3 mb-0 rounded-3"
+                                         style="font-size:.85rem;">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        <strong>Retirada:</strong>
+                                        @rep.DataRetiradaInicio.Value.ToString("dd/MM/yyyy") até @rep.DataRetiradaFim.Value.ToString("dd/MM/yyyy")
+                                        @if (rep.RetiradaProxima)
+                                        {
+                                            <span class="ms-2 fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Retirada próxima!</span>
+                                        }
+                                    </div>
                                 }
                             </div>
-                        }
 
+                            @* Coluna direita: telefone + endereço *@
+                            @if (!string.IsNullOrEmpty(rep.TelefoneDoador) || !string.IsNullOrEmpty(rep.EnderecoDoador))
+                            {
+                                <div class="col-md-6 footer-contato-divider">
+                                    @if (!string.IsNullOrEmpty(rep.TelefoneDoador))
+                                    {
+                                        <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.85rem;">
+                                            <i class="bi bi-telephone-fill text-success flex-shrink-0"></i>
+                                            <span>@rep.TelefoneDoador</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(rep.EnderecoDoador))
+                                    {
+                                        <div class="d-flex align-items-start gap-2" style="font-size:.85rem;">
+                                            <i class="bi bi-geo-alt-fill text-success mt-1 flex-shrink-0"></i>
+                                            <span>@rep.EnderecoDoador</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
+
+            </div>
             </div>
         }
     </div>
 }
 
-@* Modal de confirmacao de avaliacao — unico para toda a pagina *@
+@* ── Modal de perfil público ─────────────────────────────────────────── *@
+<div class="modal fade" id="modalPerfilPublico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="modalPerfilNomeTitle">Perfil</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2" id="modalPerfilConteudo">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal de cancelamento — único, populado via JS *@
+<div class="modal fade" id="modalCancelar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-body text-center p-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center
+                            justify-content-center mb-3" style="width:56px;height:56px;">
+                    <i class="bi bi-x-circle-fill text-danger" style="font-size:1.6rem;"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Cancelar reserva?</h6>
+                <p class="text-muted small mb-1">
+                    Você está cancelando a reserva de <strong id="txtProdutoCancelar"></strong>.
+                </p>
+                <p class="text-muted small mb-4">
+                    O produto será devolvido à vitrine para outros beneficiários.
+                </p>
+                <form id="formCancelar" asp-controller="Reservas" asp-action="Cancelar" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="inputReservaIdCancelar" name="idReserva" value="0" />
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Voltar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                            <i class="bi bi-x-circle me-1"></i> Confirmar cancelamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal de confirmação de avaliação *@
 <div class="modal fade" id="modalConfirmarAvaliacao" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow rounded-4">
@@ -438,10 +590,10 @@ else
                             justify-content-center mb-3" style="width:56px;height:56px;">
                     <i class="bi bi-star-fill text-warning" style="font-size:1.6rem;"></i>
                 </div>
-                <h6 class="fw-bold mb-1">Confirmar avaliacao?</h6>
+                <h6 class="fw-bold mb-1">Confirmar avaliação?</h6>
                 <p class="text-muted small mb-4">
-                    Voce selecionou <strong id="textoNotaModal"></strong> estrela(s).<br>
-                    <span class="text-danger fw-semibold">Esta avaliacao nao podera ser alterada.</span>
+                    Você selecionou <strong id="textoNotaModal"></strong> estrela(s).<br>
+                    <span class="text-danger fw-semibold">Esta avaliação não poderá ser alterada.</span>
                 </p>
                 <div class="d-flex justify-content-center gap-2">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
@@ -458,6 +610,64 @@ else
 
 @section Scripts {
 <script>
+    // ── Modal de perfil público ───────────────────────────────────────────
+    function abrirPerfilModal(id) {
+        var modalEl  = document.getElementById('modalPerfilPublico');
+        var modal    = bootstrap.Modal.getOrCreateInstance(modalEl);
+        var conteudo = document.getElementById('modalPerfilConteudo');
+        var titulo   = document.getElementById('modalPerfilNomeTitle');
+
+        conteudo.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
+        titulo.textContent = 'Carregando...';
+        modal.show();
+
+        function escapeHtmlPerfil(valor) {
+            var div = document.createElement('div');
+            div.textContent = valor == null ? '' : String(valor);
+            return div.innerHTML;
+        }
+
+        function urlImagemSegura(valor) {
+            var url = valor == null ? '' : String(valor);
+            return url.startsWith('data:image/') ? url : '';
+        }
+
+        fetch('/Usuarios/PerfilPublicoJson?id=' + id)
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (d) {
+                titulo.textContent = d.nome;
+                var estrelas = '';
+                if (d.notaMedia) {
+                    for (var i = 1; i <= 5; i++) {
+                        if (i <= Math.floor(d.notaMedia))       estrelas += '<i class="bi bi-star-fill"></i>';
+                        else if (i - d.notaMedia < 1)           estrelas += '<i class="bi bi-star-half"></i>';
+                        else                                     estrelas += '<i class="bi bi-star"></i>';
+                    }
+                }
+                var fotoHtml = d.temFoto
+                    ? '<img src="' + urlImagemSegura(d.fotoUrl) + '" class="rounded-circle object-fit-cover flex-shrink-0" style="width:72px;height:72px;" alt="" />'
+                    : '<div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-success fs-4" style="width:72px;height:72px;">' + escapeHtmlPerfil(d.iniciais) + '</div>';
+                var verificadoHtml = d.verificado
+                    ? '<span class="badge rounded-pill text-success bg-success bg-opacity-10"><i class="bi bi-patch-check-fill me-1"></i>Verificado</span>' : '';
+                var bioHtml = (d.bio && d.bio.trim())
+                    ? '<p class="mt-2 mb-0 text-secondary" style="font-size:14px;line-height:1.6;">' + escapeHtmlPerfil(d.bio) + '</p>'
+                    : '<p class="mt-2 mb-0 text-muted fst-italic" style="font-size:14px;">Sem bio cadastrada.</p>';
+                var avaliacaoHtml = (d.notaMedia && d.totalAvaliacoes > 0)
+                    ? '<hr class="my-3"/><div class="row g-2 text-center"><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Nota média</div><div class="fw-bold fs-5">' + d.notaMedia.toFixed(1) + '</div><div class="text-warning small">' + estrelas + '</div></div></div><div class="col"><div class="bg-light rounded-3 p-2"><div class="text-muted small">Avaliações</div><div class="fw-bold fs-5">' + d.totalAvaliacoes + '</div><div class="text-muted small">recebidas</div></div></div></div>'
+                    : '<hr class="my-3"/><div class="border rounded-3 p-3 text-center text-muted small"><i class="bi bi-star me-1"></i>Ainda sem avaliações.</div>';
+                conteudo.innerHTML =
+                    '<div class="d-flex gap-3 align-items-start">' + fotoHtml +
+                    '<div class="flex-grow-1"><div class="d-flex flex-wrap align-items-center gap-2 mb-1">' + verificadoHtml +
+                    '<span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">' + escapeHtmlPerfil(d.tipoLabel) + '</span></div>' +
+                    '<p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i>Membro desde ' + escapeHtmlPerfil(d.membroDesde) + '</p>' +
+                    bioHtml + '</div></div>' + avaliacaoHtml;
+            })
+            .catch(function () {
+                conteudo.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-exclamation-circle me-2"></i>Não foi possível carregar o perfil.</div>';
+            });
+    }
+
+    // ── Copiar token ──────────────────────────────────────────────────
     function copiarToken(token, btn) {
         navigator.clipboard.writeText(token).then(function () {
             var icon = btn.querySelector('i');
@@ -466,10 +676,21 @@ else
         });
     }
 
-    var formAvaliacaoPendente = null;
+    // ── Modal de cancelamento — popula dados pelo data-* ──────────────
+    var modalCancelarEl = document.getElementById('modalCancelar');
+    if (modalCancelarEl) {
+        modalCancelarEl.addEventListener('show.bs.modal', function (event) {
+            var btn = event.relatedTarget;
+            var reservaId   = btn.getAttribute('data-reserva-id');
+            var produtoNome = btn.getAttribute('data-produto-nome');
+            document.getElementById('inputReservaIdCancelar').value = reservaId;
+            document.getElementById('txtProdutoCancelar').textContent = produtoNome;
+        });
+    }
+
+    // ── Pular avaliação ───────────────────────────────────────────────
     var SKIP_PREFIX = 'doalim_skip_aval_benef_';
 
-    // Oculta blocos de avaliacao ja ignorados pelo usuario
     document.querySelectorAll('.btn-pular-avaliacao').forEach(function (btn) {
         var idReserva = btn.dataset.reserva;
         if (localStorage.getItem(SKIP_PREFIX + idReserva) === '1') {
@@ -478,7 +699,6 @@ else
         }
     });
 
-    // Clique em "Nao quero avaliar"
     document.querySelectorAll('.btn-pular-avaliacao').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var idReserva = btn.dataset.reserva;
@@ -488,7 +708,9 @@ else
         });
     });
 
-    // Interatividade das estrelas de avaliacao
+    // ── Interatividade das estrelas ───────────────────────────────────
+    var formAvaliacaoPendente = null;
+
     document.querySelectorAll('.star-group').forEach(function (group) {
         var form      = group.closest('form');
         var notaInput = form.querySelector('.nota-input');
@@ -527,10 +749,13 @@ else
         });
     });
 
-    document.getElementById('btnConfirmarAvaliacao').addEventListener('click', function () {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarAvaliacao'));
-        if (modal) modal.hide();
-        if (formAvaliacaoPendente) formAvaliacaoPendente.submit();
-    });
+    var btnConfirmar = document.getElementById('btnConfirmarAvaliacao');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', function () {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarAvaliacao'));
+            if (modal) modal.hide();
+            if (formAvaliacaoPendente) formAvaliacaoPendente.submit();
+        });
+    }
 </script>
 }

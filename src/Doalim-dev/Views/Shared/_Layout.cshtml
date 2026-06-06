@@ -11,6 +11,12 @@
             .Select(u => u.FotoPerfil)
             .FirstOrDefaultAsync()
         : null;
+
+    var idLogadoStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var idLogadoNav = int.TryParse(idLogadoStr, out var _tmpId) ? _tmpId : 0;
+    var notifNaoLidas = idLogadoNav > 0
+        ? await _context.Notificacoes.CountAsync(n => n.IdUsuario == idLogadoNav && !n.Lida)
+        : 0;
 }
 
 <!DOCTYPE html>
@@ -62,6 +68,27 @@
             background: #f1f8f1;
         }
         .navbar-doalim .dropdown-divider { margin: 4px 6px; }
+        /* Notificações */
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background .15s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #f8fbf6; }
+        .notif-item.nao-lida { background: #f0faf0; }
+        .notif-item.nao-lida:hover { background: #e8f5e9; }
+        .notif-icone {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 1rem;
+        }
         .navbar-user-btn {
             border: 1px solid #dee2e6;
             border-radius: 50px !important;
@@ -108,23 +135,15 @@
                                     <i class="bi bi-box-seam me-1"></i>Meus Produtos
                                 </a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#"
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-clipboard-data me-1"></i>Relatorios
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Produtos" asp-action="GerenciarReservas">
+                                    <i class="bi bi-clipboard-check me-1"></i>Gerenciar Reservas
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Produtos" asp-action="GerenciarReservas">
-                                            <i class="bi bi-clipboard-check text-success me-2"></i>Gerenciar Reservas
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Produtos" asp-action="HistoricoDoacoes">
-                                            <i class="bi bi-clock-history text-primary me-2"></i>Historico de Doacoes
-                                        </a>
-                                    </li>
-                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Produtos" asp-action="HistoricoDoacoes">
+                                    <i class="bi bi-clock-history me-1"></i>Histórico de Doações
+                                </a>
                             </li>
                         }
 
@@ -141,12 +160,12 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Usuarios" asp-action="Index">
-                                    <i class="bi bi-people me-1"></i>Usuarios
+                                    <i class="bi bi-people me-1"></i>Usuários
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Lookup" asp-action="Index">
-                                    <i class="bi bi-sliders me-1"></i>Dominios
+                                    <i class="bi bi-sliders me-1"></i>Domínios
                                 </a>
                             </li>
                         }
@@ -164,6 +183,41 @@
                                     <a class="nav-link px-2" asp-controller="Carrinho" asp-action="Index" title="Meu Carrinho">
                                         <i class="bi bi-cart" style="font-size:1.35rem;"></i>
                                     </a>
+                                </li>
+                            }
+
+                            @* ── Sino de notificações ── *@
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link px-2 position-relative" href="#" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false"
+                                       id="notifBellToggle" title="Notificações"
+                                       data-bs-auto-close="outside">
+                                        <i class="bi bi-bell" style="font-size:1.35rem;" id="notifBellIcon"></i>
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                              id="notifBadge"
+                                              style="font-size:.65rem; min-width:18px; padding:3px 5px; @(notifNaoLidas == 0 ? "display:none;" : "")">
+                                            @(notifNaoLidas > 99 ? "99+" : notifNaoLidas.ToString())
+                                        </span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end p-0 shadow"
+                                         style="width:340px; max-height:440px; overflow-y:auto; border-radius:12px;"
+                                         id="notifDropdown">
+                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                            <span class="fw-semibold small">Notificações</span>
+                                            <button type="button" class="btn btn-link btn-sm text-muted p-0"
+                                                    id="btnMarcarTodasLidas" style="font-size:.8rem;">
+                                                Marcar todas como lidas
+                                            </button>
+                                        </div>
+                                        <div id="notifLista">
+                                            <div class="text-center text-muted py-3 small">
+                                                <div class="spinner-border spinner-border-sm text-success me-1" role="status"></div>
+                                                Carregando...
+                                            </div>
+                                        </div>
+                                    </div>
                                 </li>
                             }
 
@@ -187,12 +241,6 @@
                                     <li>
                                         <a class="dropdown-item" asp-controller="Usuarios" asp-action="MeuPerfil">
                                             <i class="bi bi-gear me-2 text-secondary"></i>Meu Perfil
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Usuarios" asp-action="PerfilPublico"
-                                           asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
-                                            <i class="bi bi-person-badge me-2 text-secondary"></i>Perfil Publico
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider" /></li>
@@ -256,5 +304,148 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Admin"))
+    {
+        <script>
+        (function () {
+            var ANTIFORGERY_TOKEN = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] ?? '';
+
+            var iconesPorTipo = {
+                0: { icon: 'bi-cart-check-fill', bg: '#e8f5e9', cor: '#198754' },   // ReservaPendente
+                1: { icon: 'bi-check-circle-fill', bg: '#e8f5e9', cor: '#198754' },  // ReservaAprovada
+                2: { icon: 'bi-x-circle-fill', bg: '#fdecea', cor: '#dc3545' },      // ReservaRejeitada
+                3: { icon: 'bi-alarm-fill', bg: '#fff3cd', cor: '#856404' },          // LembreteRetirada
+                4: { icon: 'bi-exclamation-triangle-fill', bg: '#fdecea', cor: '#dc3545' } // DoacaoExpirada
+            };
+
+            function carregarNotificacoes() {
+                fetch('/Notificacoes/MinhasJson')
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        atualizarBadge(data.totalNaoLidas);
+                        renderizarLista(data.notificacoes);
+                    })
+                    .catch(function () {
+                        document.getElementById('notifLista').innerHTML =
+                            '<div class="text-center text-muted py-3 small"><i class="bi bi-wifi-off me-1"></i>Erro ao carregar.</div>';
+                    });
+            }
+
+            function atualizarBadge(total) {
+                var badge = document.getElementById('notifBadge');
+                var bell  = document.getElementById('notifBellIcon');
+                if (!badge) return;
+                if (total > 0) {
+                    badge.textContent = total > 99 ? '99+' : total;
+                    badge.style.display = '';
+                    bell.className = 'bi bi-bell-fill text-success';
+                } else {
+                    badge.style.display = 'none';
+                    bell.className = 'bi bi-bell';
+                }
+            }
+
+            function escapeHtml(valor) {
+                var div = document.createElement('div');
+                div.textContent = valor == null ? '' : String(valor);
+                return div.innerHTML;
+            }
+
+            function urlSegura(url) {
+                if (!url) return '#';
+                var valor = String(url).trim();
+                return valor.startsWith('/') && !valor.startsWith('//') ? valor : '#';
+            }
+
+            function renderizarLista(lista) {
+                var lista_el = document.getElementById('notifLista');
+                if (!lista || lista.length === 0) {
+                    lista_el.innerHTML =
+                        '<div class="text-center text-muted py-4 small"><i class="bi bi-bell-slash me-1"></i>Nenhuma notificação.</div>';
+                    return;
+                }
+
+                var html = '';
+                lista.forEach(function (n) {
+                    var cfg = iconesPorTipo[n.tipo] || { icon: 'bi-bell-fill', bg: '#f0f0f0', cor: '#666' };
+                    var href = urlSegura(n.url);
+                    var id = parseInt(n.idNotificacao, 10) || 0;
+                    html +=
+                        '<a class="notif-item ' + (n.lida ? '' : 'nao-lida') + '" ' +
+                           'href="' + href + '" ' +
+                           'data-id="' + id + '" ' +
+                           'onclick="marcarLida(' + id + ', this)">' +
+                            '<div class="notif-icone" style="background:' + cfg.bg + ';color:' + cfg.cor + ';">' +
+                                '<i class="bi ' + cfg.icon + '"></i>' +
+                            '</div>' +
+                            '<div style="min-width:0;">' +
+                                '<div class="fw-semibold" style="font-size:.83rem;">' + escapeHtml(n.titulo) + '</div>' +
+                                '<div class="text-muted" style="font-size:.77rem;line-height:1.4;">' + escapeHtml(n.mensagem) + '</div>' +
+                                '<div style="font-size:.72rem;color:#aaa;margin-top:2px;">' + escapeHtml(n.dataCriacao) + '</div>' +
+                            '</div>' +
+                        '</a>';
+                });
+                lista_el.innerHTML = html;
+            }
+
+            function marcarLida(id, el) {
+                if (el.classList.contains('nao-lida')) {
+                    el.classList.remove('nao-lida');
+                    fetch('/Notificacoes/MarcarLida/' + id, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': ANTIFORGERY_TOKEN }
+                    }).then(function () {
+                        var badge = document.getElementById('notifBadge');
+                        if (badge && badge.style.display !== 'none') {
+                            var atual = parseInt(badge.textContent) || 0;
+                            if (atual > 1) {
+                                badge.textContent = atual - 1;
+                            } else {
+                                badge.style.display = 'none';
+                                document.getElementById('notifBellIcon').className = 'bi bi-bell';
+                            }
+                        }
+                    });
+                }
+            }
+            window.marcarLida = marcarLida;
+
+            // Marcar todas como lidas
+            var btnTodas = document.getElementById('btnMarcarTodasLidas');
+            if (btnTodas) {
+                btnTodas.addEventListener('click', function () {
+                    fetch('/Notificacoes/MarcarTodasLidas', {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': ANTIFORGERY_TOKEN }
+                    }).then(function () {
+                        document.querySelectorAll('.notif-item.nao-lida').forEach(function (el) {
+                            el.classList.remove('nao-lida');
+                        });
+                        var badge = document.getElementById('notifBadge');
+                        if (badge) badge.style.display = 'none';
+                        document.getElementById('notifBellIcon').className = 'bi bi-bell';
+                    });
+                });
+            }
+
+            // Carrega ao abrir o dropdown
+            var bellToggle = document.getElementById('notifBellToggle');
+            if (bellToggle) {
+                bellToggle.addEventListener('show.bs.dropdown', function () {
+                    carregarNotificacoes();
+                });
+            }
+
+            // Polling a cada 60 segundos para atualizar o badge
+            setInterval(function () {
+                fetch('/Notificacoes/MinhasJson')
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) { atualizarBadge(data.totalNaoLidas); })
+                    .catch(function () {});
+            }, 60000);
+        })();
+        </script>
+    }
 </body>
 </html>

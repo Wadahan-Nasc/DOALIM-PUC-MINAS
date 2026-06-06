@@ -16,7 +16,7 @@ namespace Doalim_dev.ViewModels
     public class ResumoReservaViewModel
     {
         public int IdReserva { get; set; }
-        public string NomeProduto { get; set; } 
+        public string NomeProduto { get; set; }
         public string MarcaProduto { get; set; }
         public string CategoriaProduto { get; set; }
         public string UnidadeProduto { get; set; }
@@ -25,6 +25,9 @@ namespace Doalim_dev.ViewModels
         public int QuantidadeDesejada { get; set; }
         public string NomeDoador { get; set; }
         public string StatusReserva { get; set; }
+
+        // Foto do produto em Base64 — preenchida após SaveChanges no controller
+        public string? FotoProduto { get; set; }
 
         // Aviso de itens que não puderam ser reservados
 

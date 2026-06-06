@@ -21,7 +21,9 @@ namespace Doalim_dev.Controllers
             var agora = DateTime.UtcNow;
 
             // DbContext não é thread-safe: queries executadas sequencialmente
-            ViewBag.TotalUsuarios = await _context.Usuarios.CountAsync();
+            // Apenas doadores + beneficiários (Admin excluído)
+            ViewBag.TotalUsuarios = await _context.Usuarios
+                .CountAsync(u => u.TipoUsuario != TipoUsuario.Admin);
 
             ViewBag.ProdutosDisponiveis = await _context.Produtos
                 .CountAsync(p => p.StatusProduto
@@ -35,9 +37,30 @@ namespace Doalim_dev.Controllers
 
             ViewBag.DoacoesReservadas = await _context.Reservas.CountAsync();
 
+            // Reservas efetivamente retiradas pelos beneficiários
+            ViewBag.ReservasRetiradas = await _context.Reservas
+                .CountAsync(r => r.Status == StatusReserva.Retirada);
+
             ViewBag.TotalDoadores = await _context.Usuarios
                 .CountAsync(u => u.TipoUsuario == TipoUsuario.DoadorPF
                               || u.TipoUsuario == TipoUsuario.DoadorPJ);
+
+            // Beneficiários que já retiraram ao menos uma doação
+            ViewBag.TotalBeneficiariosAtendidos = await _context.Reservas
+                .Where(r => r.Status == StatusReserva.Retirada)
+                .Select(r => r.IdBeneficiario)
+                .Distinct()
+                .CountAsync();
+
+            // Total de itens efetivamente retirados pelos beneficiários
+            ViewBag.TotalItensDoados = await _context.Reservas
+                .Where(r => r.Status == StatusReserva.Retirada)
+                .SumAsync(r => (int?)r.QuantidadeReservada) ?? 0;
+
+            // Total de beneficiários ativos na plataforma
+            ViewBag.TotalBeneficiarios = await _context.Usuarios
+                .CountAsync(u => u.TipoUsuario == TipoUsuario.BeneficiarioPF
+                              || u.TipoUsuario == TipoUsuario.BeneficiarioPJ);
 
             return View();
         }

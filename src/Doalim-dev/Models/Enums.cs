@@ -41,4 +41,13 @@ namespace Doalim_dev.Models
         Cancelada = 3,
         Rejeitada = 4
     }
+
+    public enum TipoNotificacao
+    {
+        ReservaPendente  = 0,   // Doador: beneficiário fez uma reserva
+        ReservaAprovada  = 1,   // Beneficiário: doador aprovou
+        ReservaRejeitada = 2,   // Beneficiário: doador rejeitou
+        LembreteRetirada = 3,   // Beneficiário: retirada próxima do vencimento
+        DoacaoExpirada   = 4    // Doador: lote vencido com reserva associada
+    }
 }
