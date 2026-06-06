@@ -463,7 +463,7 @@
         document.getElementById('comprovacaoInput').addEventListener('change', function () {
             var label = document.getElementById('comprovacaoNomeReg');
             if (this.files && this.files[0]) {
-                label.innerHTML = '<i class="bi bi-file-earmark-check me-1"></i>' + this.files[0].name;
+                label.textContent = this.files[0].name;
                 label.style.color = '#198754';
             } else {
                 label.textContent = 'Clique para anexar um documento';

@@ -250,20 +250,28 @@
             var manual = document.getElementById('campoCidadeManual');
             var proximo = document.getElementById('campoBairroProximo');
             if (!manual || !proximo) return;
+            var inputsManuais = manual.querySelectorAll('input');
+            var inputsProximos = proximo.querySelectorAll('input');
             if (ativo) {
                 manual.classList.add('d-none');
                 proximo.classList.remove('d-none');
+                inputsManuais.forEach(function(i){ i.disabled = true; });
+                inputsProximos.forEach(function(i){ i.disabled = false; });
                 // Limpa campos manuais ao ativar o filtro automático
                 manual.querySelectorAll('input').forEach(function(i){ i.value = ''; });
             } else {
                 manual.classList.remove('d-none');
                 proximo.classList.add('d-none');
+                inputsManuais.forEach(function(i){ i.disabled = false; });
+                inputsProximos.forEach(function(i){ i.disabled = true; });
                 // Limpa bairro do modo automático
                 proximo.querySelectorAll('input').forEach(function(i){ i.value = ''; });
             }
         }
 
         // ── Modal de perfil público ───────────────────────────────────────────
+        atualizarFiltroCidade(document.getElementById('toggleCidade')?.checked ?? false);
+
         function abrirPerfilModal(id) {
             var modalEl  = document.getElementById('modalPerfilPublico');
             var modal    = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -273,6 +281,17 @@
             conteudo.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"></div></div>';
             titulo.textContent = 'Carregando...';
             modal.show();
+
+            function escapeHtmlPerfil(valor) {
+                var div = document.createElement('div');
+                div.textContent = valor == null ? '' : String(valor);
+                return div.innerHTML;
+            }
+
+            function urlImagemSegura(valor) {
+                var url = valor == null ? '' : String(valor);
+                return url.startsWith('data:image/') ? url : '';
+            }
 
             fetch('/Usuarios/PerfilPublicoJson?id=' + id)
                 .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
@@ -293,15 +312,15 @@
                     }
 
                     var fotoHtml = d.temFoto
-                        ? '<img src="' + d.fotoUrl + '" class="rounded-circle object-fit-cover flex-shrink-0" style="width:72px;height:72px;" alt="" />'
-                        : '<div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-success fs-4" style="width:72px;height:72px;">' + d.iniciais + '</div>';
+                        ? '<img src="' + urlImagemSegura(d.fotoUrl) + '" class="rounded-circle object-fit-cover flex-shrink-0" style="width:72px;height:72px;" alt="" />'
+                        : '<div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-success fs-4" style="width:72px;height:72px;">' + escapeHtmlPerfil(d.iniciais) + '</div>';
 
                     var verificadoHtml = d.verificado
                         ? '<span class="badge rounded-pill text-success bg-success bg-opacity-10"><i class="bi bi-patch-check-fill me-1"></i>Verificado</span>'
                         : '';
 
                     var bioHtml = (d.bio && d.bio.trim())
-                        ? '<p class="mt-2 mb-0 text-secondary" style="font-size:14px;line-height:1.6;">' + d.bio + '</p>'
+                        ? '<p class="mt-2 mb-0 text-secondary" style="font-size:14px;line-height:1.6;">' + escapeHtmlPerfil(d.bio) + '</p>'
                         : '<p class="mt-2 mb-0 text-muted fst-italic" style="font-size:14px;">Sem bio cadastrada.</p>';
 
                     var avaliacaoHtml = (d.notaMedia && d.totalAvaliacoes > 0)
@@ -314,9 +333,9 @@
                             '<div class="flex-grow-1">' +
                                 '<div class="d-flex flex-wrap align-items-center gap-2 mb-1">' +
                                     verificadoHtml +
-                                    '<span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">' + d.tipoLabel + '</span>' +
+                                    '<span class="badge rounded-pill text-secondary bg-secondary bg-opacity-10">' + escapeHtmlPerfil(d.tipoLabel) + '</span>' +
                                 '</div>' +
-                                '<p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i>Membro desde ' + d.membroDesde + '</p>' +
+                                '<p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i>Membro desde ' + escapeHtmlPerfil(d.membroDesde) + '</p>' +
                                 bioHtml +
                             '</div>' +
                         '</div>' +

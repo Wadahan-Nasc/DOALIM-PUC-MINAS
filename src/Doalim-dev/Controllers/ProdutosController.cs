@@ -645,31 +645,6 @@ namespace Doalim_dev.Controllers
                 || User.IsInRole(TipoUsuario.BeneficiarioPJ.ToString());
         }
 
-        private static string ObterFotoProdutoDataUrl(byte[]? fotoProduto)
-        {
-            if (fotoProduto == null || fotoProduto.Length == 0)
-                return string.Empty;
-
-            var mimeType = "image/jpeg";
-
-            if (fotoProduto.Length >= 8
-                && fotoProduto[0] == 0x89
-                && fotoProduto[1] == 0x50
-                && fotoProduto[2] == 0x4E
-                && fotoProduto[3] == 0x47)
-            {
-                mimeType = "image/png";
-            }
-            else if (fotoProduto.Length >= 4
-                && fotoProduto[0] == 0x3C
-                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
-            {
-                mimeType = "image/svg+xml";
-            }
-
-            return $"data:{mimeType};base64,{Convert.ToBase64String(fotoProduto)}";
-        }
-
         private async Task<List<string>> ObterCategoriasVitrineAsync()
         {
             try

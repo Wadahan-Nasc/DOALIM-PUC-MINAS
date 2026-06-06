@@ -346,6 +346,18 @@
                 }
             }
 
+            function escapeHtml(valor) {
+                var div = document.createElement('div');
+                div.textContent = valor == null ? '' : String(valor);
+                return div.innerHTML;
+            }
+
+            function urlSegura(url) {
+                if (!url) return '#';
+                var valor = String(url).trim();
+                return valor.startsWith('/') && !valor.startsWith('//') ? valor : '#';
+            }
+
             function renderizarLista(lista) {
                 var lista_el = document.getElementById('notifLista');
                 if (!lista || lista.length === 0) {
@@ -357,19 +369,20 @@
                 var html = '';
                 lista.forEach(function (n) {
                     var cfg = iconesPorTipo[n.tipo] || { icon: 'bi-bell-fill', bg: '#f0f0f0', cor: '#666' };
-                    var href = n.url ? n.url : '#';
+                    var href = urlSegura(n.url);
+                    var id = parseInt(n.idNotificacao, 10) || 0;
                     html +=
                         '<a class="notif-item ' + (n.lida ? '' : 'nao-lida') + '" ' +
                            'href="' + href + '" ' +
-                           'data-id="' + n.idNotificacao + '" ' +
-                           'onclick="marcarLida(' + n.idNotificacao + ', this)">' +
+                           'data-id="' + id + '" ' +
+                           'onclick="marcarLida(' + id + ', this)">' +
                             '<div class="notif-icone" style="background:' + cfg.bg + ';color:' + cfg.cor + ';">' +
                                 '<i class="bi ' + cfg.icon + '"></i>' +
                             '</div>' +
                             '<div style="min-width:0;">' +
-                                '<div class="fw-semibold" style="font-size:.83rem;">' + n.titulo + '</div>' +
-                                '<div class="text-muted" style="font-size:.77rem;line-height:1.4;">' + n.mensagem + '</div>' +
-                                '<div style="font-size:.72rem;color:#aaa;margin-top:2px;">' + n.dataCriacao + '</div>' +
+                                '<div class="fw-semibold" style="font-size:.83rem;">' + escapeHtml(n.titulo) + '</div>' +
+                                '<div class="text-muted" style="font-size:.77rem;line-height:1.4;">' + escapeHtml(n.mensagem) + '</div>' +
+                                '<div style="font-size:.72rem;color:#aaa;margin-top:2px;">' + escapeHtml(n.dataCriacao) + '</div>' +
                             '</div>' +
                         '</a>';
                 });

@@ -85,6 +85,12 @@ namespace Doalim_dev.Controllers
             {
                 mime = "image/jpeg";
             }
+            else if (fotoProduto.Length >= 4
+                && fotoProduto[0] == 0x3C
+                && (fotoProduto[1] == 0x73 || fotoProduto[1] == 0x53 || fotoProduto[1] == 0x3F))
+            {
+                mime = "image/svg+xml";
+            }
             else
             {
                 mime = "image/jpeg"; // fallback seguro para a maioria dos uploads
