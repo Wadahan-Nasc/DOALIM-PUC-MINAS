@@ -1,23 +1,4 @@
-# Programação de Funcionalidades (INCLUIR A PROGRAMAÇAÕ DE FUNCIONALIDADE EM PROFUNDIDADE)
-
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Especificação do Projeto</a></span>, <a href="3-Projeto de Interface.md"> Projeto de Interface</a>, <a href="4-Metodologia.md"> Metodologia</a>, <a href="3-Projeto de Interface.md"> Projeto de Interface</a>, <a href="5-Arquitetura da Solução.md"> Arquitetura da Solução</a>
-
-Nesta seção, a implementação do sistema descrita por meio dos requisitos funcionais e/ou não funcionais. Nesta seção, é essencial relacionar os requisitos atendidos com os artefatos criados (código fonte) e com o(s) responsável(is) pelo desenvolvimento de cada artefato a cada etapa. Nesta seção também deverão ser apresentadas, se necessário, as instruções para acesso e verificação da **implementação que deve estar funcional no ambiente de hospedagem, OBRIGATORIAMENTE, a partir da Etapa 03**.
-
-**O que DEVE ser utilizado para o desenvolvimento da aplicação:**
-- Microsoft Visual Studio (IDE de Codificação)
-- HTML e CSS (frontend)
-- Javascript (frontend)
-- C# (backend)
-- MySQL ou SQLServer(Base de Dados)
-- Bootstrap (template responsivo para frontend)
-- Github (documentação e controle de versão)
-
-**O que NÃO PODE ser utilizado:**
-- Template React (e qualquer outro template - exceto o Bootstrap)
-- Qualquer outra liguagem de programação diferente de C#
-
-A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando os artefatos desenvolvidos.
+# Programação de Funcionalidades 
 
 |ID    | Descrição do Requisito  | Artefatos produzidos | Aluno(a) responsável |
 |------|-----------------------------------------|----|----|
@@ -36,6 +17,12 @@ A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando 
 |RF-013| A aplicação deve permitir que doador e receptor acessem o perfil um do outro para validação dos dados públicos.|Migrations\20260531224115_AdicionaBioUsuario.Designer.cs; PerfilPublicoViewModel.cs; Views\Usuarios\MeuPerfil.cshtml; Views\Usuarios\PerfilPublico.cshtml; Views\Usuarios\PerfilPublico.cshtml.cs; Views\Shared\_Layout.cshtml; Models\Usuario.cs | Paulo |
 |RF-014| A aplicação deve permitir que doador e receptor avaliem um ao outro com 1 a 5 estrelas e comentários após a conclusão da retirada.| Avaliacao.cs; Models\AppDbContext.cs; UsuariosController.cs; ProdutosController.cs; ReservasController.cs; Views\Produtos\GerenciarReservas.cshtml; Views\Reservas\MinhasReservas.cshtml; ViewModels\GerenciarReservaDoadorViewModel.cs; | Gabriel/Victor |
 |RF-015| A aplicação deve disponibilizar um chat ou sistema de mensagens interno para comunicação direta e alinhamento entre doador e beneficiário.| Não Implementado | Não Implementado |
+
+# API's utilizadas
+
+- SendGrid: utilizada para dispar e-mail de confirmação de conta e recuperação de senha, com o envio é feito via SendGrid pelo backend em C#. Implementado no EmailServices.cs.
+
+- ViaCEP: utilizada no cadastro de usuário/edição do meu perfil, ao digitar o CEP, a API é consultada e os campos de endereço são preenchidos automaticamente. Implementado no Auth\Registro.cshtml e Usuario\Edit.cshtml.
 
 # Instruções de acesso
 
