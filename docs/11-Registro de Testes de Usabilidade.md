@@ -127,10 +127,10 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 | Confiante | Concluiu | 65 | 8 | Não | - | Encontrou rapidamente a reserva, confirmou a entrega e visualizou o impacto gerado pela doação. |
-| Usuário 2 | Satisfeito | Concluiu | 78 | 10 | Não | - | Navegou entre os detalhes da entrega e compreendeu facilmente as informações de impacto social. |
+| Usuário 1 | Confiante | Concluiu | 65 | 8 | Não | N/A | Encontrou rapidamente a reserva, confirmou a entrega e visualizou o impacto gerado pela doação. |
+| Usuário 2 | Satisfeito | Concluiu | 78 | 10 | Não | N/A | Navegou entre os detalhes da entrega e compreendeu facilmente as informações de impacto social. |
 | Usuário 3 | Neutro | Concluiu | 92 | 12 | Sim | Sim | Clicou inicialmente na reserva errada, mas identificou o erro e conseguiu concluir a entrega corretamente. |
-| Usuário 4 | Confiante | Concluiu | 70 | 9 | Não | - | Considerou o processo intuitivo e gostou da visualização dos dados de impacto após a entrega. |
+| Usuário 4 | Confiante | Concluiu | 70 | 9 | Não | N/A | Considerou o processo intuitivo e gostou da visualização dos dados de impacto após a entrega. |
 | Usuário 5 | Confuso | Concluiu | 115 | 15 | Sim | Sim | Teve dificuldade para localizar a opção de finalizar a entrega, mas conseguiu concluir após explorar a interface. |
 
 ### CTU-14 – Chefe de família buscando ajuda alimentar
