@@ -77,12 +77,12 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT12 – Confirmação da Data de Retirada** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-009 - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas.|
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://drive.google.com/file/d/1YdnHIbmkrIdLgc0bAU_9S7NEMJ0iF8nZ/view?usp=sharing |
 
 | **Caso de Teste** 	| **CT13 – Confirmação da Doação Realizada** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-007 - A aplicação deve permitir que o doador valide a entrega da doação através de um código numérico ou QR Code apresentado pelo receptor no momento da retirada. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://drive.google.com/file/d/16bgjFXPpUia0_0kTAxGv9OKfI92HVw8i/view?usp=sharing |
 
 | **Caso de Teste** 	| **CT14 – Moderação de Usuários** 	|
 |:---:	|:---:	|
@@ -92,7 +92,7 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT15 – Métricas da Plataforma** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-011 - A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos. |
-|Registro de evidência | www.teste.com.br/drive/ct-02 |
+|Registro de evidência | https://drive.google.com/file/d/1A8oK2m_m6vJlsqToZdoBUwd3cfKRi9iN/view?usp=sharing |
 
 | **Caso de Teste** 	| **CT16 – Recebimento de Notificações** 	|
 |:---:	|:---:	|
