@@ -52,7 +52,7 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-006 – A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento. |
 | Objetivo do Teste 	| Verificar se o beneficiário consegue visualizar seu histórico de solicitações de reserva. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de beneficiário <br> - A partir da homepage, clicar em "Minhas Reservas" <br> - Visualizar as informações de cada reserva nos cards correspondentes. - Preencher os filtros de acordo com a necessidade. |
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de beneficiário <br> - A partir da homepage, clicar em "Minhas Reservas" <br> - Visualizar as informações de cada reserva nos cards correspondentes. <br> - Preencher os filtros de acordo com a necessidade. |
 |Critério de Êxito | - Visualizar as informações de cada requisição de reserva são exibidas corretamente. |
 
 | **Caso de Teste** 	| **CT08 – Visualização de histórico - Doador** 	|
