@@ -39,6 +39,8 @@ A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando 
 
 # Instruções de acesso
 
+Segue abaixo o URL de endereço do site hospedado no Azure. Segue também os acessos dos três tipos usuários, que utilizam o site.
+
 URL de acesso
 Link: [doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net](https://doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net/)
 
@@ -54,19 +56,20 @@ Senha: Admin@123
 
 - Beneficiário teste
 
-Email: benef@doalim.com 
+Email: doalim.benefpf01@demo.com
 
-Senha: Benef@123
+Senha: Demo@123
+
+Email: doalim.benefpj01@demo.com 
+
+Senha: Demo@123
 
 - Doador teste
 
-Email: doador@doalim.com 
+Email: doalim.doadorpf01@demo.com 
 
-Senha: Doador@123
+Senha: Demo@123
 
+Email: doalim.doadorpj01@demo.com 
 
-
-Não deixe de informar o link onde a aplicação estiver disponível para acesso (por exemplo: https://adota-pet.herokuapp.com/src/index.html).
-
-Se houver usuário de teste, o login e a senha também deverão ser informados aqui (por exemplo: usuário - admin / senha - admin).
-
+Senha: Demo@123
