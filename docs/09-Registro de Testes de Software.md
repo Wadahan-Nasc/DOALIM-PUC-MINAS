@@ -1,3 +1,4 @@
+
 # Registro de Testes de Software
 
 | **Caso de Teste** 	| **CT01 – Cadastrar perfil** 	|
@@ -166,7 +167,7 @@ https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e
 | **Caso de Teste** 	| **CT26 – Prevenção de double booking** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-005 – A aplicação deve garantir transações no banco de dados e evitar "double booking" (reservas simultâneas da mesma doação). |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/4edb610d-5093-41bd-8f40-68a2f11bf6a6 |
 
 | **Caso de Teste** 	| **CT27 – Compatibilidade entre navegadores** 	|
 |:---:	|:---:	|
