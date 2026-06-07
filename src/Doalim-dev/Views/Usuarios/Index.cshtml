@@ -12,6 +12,67 @@
                                     && u.ArquivoComprovacao != null && u.ArquivoComprovacao.Length > 0);
     var semArquivo = comuns.Count(u => u.ArquivoComprovacao == null || u.ArquivoComprovacao.Length == 0);
     var aprovados  = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Aprovado);
+    var recusados  = comuns.Count(u => u.StatusVerificacao == StatusVerificacao.Rejeitado);
+
+    var gruposUsuarios = new[]
+    {
+        new
+        {
+            Titulo = "Pendentes",
+            Descricao = "Comprovacoes enviadas e aguardando decisao do administrador.",
+            Icone = "bi-hourglass-split",
+            Classe = "admin-group-warning",
+            Usuarios = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin
+                                        && u.StatusVerificacao == StatusVerificacao.Pendente
+                                        && u.ArquivoComprovacao != null
+                                        && u.ArquivoComprovacao.Length > 0)
+                               .OrderBy(u => u.Nome)
+                               .ToList()
+        },
+        new
+        {
+            Titulo = "Aprovados",
+            Descricao = "Usuarios com comprovacao validada e acesso liberado.",
+            Icone = "bi-check-circle",
+            Classe = "admin-group-success",
+            Usuarios = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin
+                                        && u.StatusVerificacao == StatusVerificacao.Aprovado)
+                               .OrderBy(u => u.Nome)
+                               .ToList()
+        },
+        new
+        {
+            Titulo = "Recusados",
+            Descricao = "Comprovacoes rejeitadas que precisam de novo envio ou revisao.",
+            Icone = "bi-x-circle",
+            Classe = "admin-group-danger",
+            Usuarios = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin
+                                        && u.StatusVerificacao == StatusVerificacao.Rejeitado)
+                               .OrderBy(u => u.Nome)
+                               .ToList()
+        },
+        new
+        {
+            Titulo = "Sem arquivo",
+            Descricao = "Usuarios que ainda nao enviaram comprovacao.",
+            Icone = "bi-file-earmark",
+            Classe = "admin-group-neutral",
+            Usuarios = usuarios.Where(u => u.TipoUsuario != TipoUsuario.Admin
+                                        && (u.ArquivoComprovacao == null || u.ArquivoComprovacao.Length == 0))
+                               .OrderBy(u => u.Nome)
+                               .ToList()
+        },
+        new
+        {
+            Titulo = "Administradores",
+            Descricao = "Contas administrativas dispensadas de comprovacao.",
+            Icone = "bi-shield-check",
+            Classe = "admin-group-admin",
+            Usuarios = usuarios.Where(u => u.TipoUsuario == TipoUsuario.Admin)
+                               .OrderBy(u => u.Nome)
+                               .ToList()
+        }
+    };
 }
 
 @functions {
@@ -65,12 +126,16 @@
             <strong>@pendentes</strong>
         </div>
         <div class="admin-metric">
-            <span>Sem arquivo</span>
-            <strong>@semArquivo</strong>
-        </div>
-        <div class="admin-metric">
             <span>Aprovados</span>
             <strong>@aprovados</strong>
+        </div>
+        <div class="admin-metric">
+            <span>Recusados</span>
+            <strong>@recusados</strong>
+        </div>
+        <div class="admin-metric">
+            <span>Sem arquivo</span>
+            <strong>@semArquivo</strong>
         </div>
     </div>
 
@@ -125,16 +190,29 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in usuarios)
+                @foreach (var grupo in gruposUsuarios.Where(g => g.Usuarios.Any()))
                 {
-                    var foto = item.FotoPerfil != null && item.FotoPerfil.Length > 0
-                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.FotoPerfil)}"
-                        : string.Empty;
-                    var mimeDoc   = UsuarioViewHelper.MimeDocumento(item.ArquivoComprovacao);
-                    var documento = item.ArquivoComprovacao != null && item.ArquivoComprovacao.Length > 0
-                        ? $"data:{mimeDoc};base64,{Convert.ToBase64String(item.ArquivoComprovacao)}"
-                        : string.Empty;
-                    var podeAprovar = item.TipoUsuario != TipoUsuario.Admin && !string.IsNullOrWhiteSpace(documento);
+                    <tr class="admin-table-section @grupo.Classe">
+                        <td colspan="5">
+                            <div class="admin-table-section-content">
+                                <div>
+                                    <strong>
+                                        <i class="bi @grupo.Icone"></i>
+                                        @grupo.Titulo
+                                    </strong>
+                                    <span>@grupo.Descricao</span>
+                                </div>
+                                <span class="admin-group-count">@grupo.Usuarios.Count</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    @foreach (var item in grupo.Usuarios)
+                    {
+                        var foto = item.FotoPerfil != null && item.FotoPerfil.Length > 0
+                            ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.FotoPerfil)}"
+                            : string.Empty;
+                        var temDocumento = item.ArquivoComprovacao != null && item.ArquivoComprovacao.Length > 0;
 
                     <tr>
                         <td>
@@ -160,9 +238,11 @@
                             {
                                 <span class="admin-status status-neutral">Dispensado</span>
                             }
-                            else if (!string.IsNullOrWhiteSpace(documento))
+                            else if (temDocumento)
                             {
-                                <a href="@documento" target="_blank" rel="noopener" class="admin-doc-link">
+                                <a asp-action="VerComprovacao"
+                                   asp-route-id="@item.IdUsuario"
+                                   target="_blank" rel="noopener" class="admin-doc-link">
                                     <i class="bi bi-paperclip"></i>
                                     Abrir arquivo
                                 </a>
@@ -181,6 +261,7 @@
                             </div>
                         </td>
                     </tr>
+                    }
                 }
             </tbody>
         </table>

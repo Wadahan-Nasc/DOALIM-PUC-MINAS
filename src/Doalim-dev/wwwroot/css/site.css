@@ -337,7 +337,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .admin-metrics {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 18px;
 }
@@ -502,6 +502,79 @@ h1, h2, h3, h4, h5, h6 {
 .admin-group-header p {
     margin: 0;
     color: #64705f;
+}
+
+.admin-group-header i {
+    margin-right: 8px;
+}
+
+.admin-group-count {
+    display: inline-flex;
+    min-width: 36px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #f6f8f4;
+    color: #34452f;
+    font-weight: 850;
+}
+
+.admin-table-section td {
+    padding: 0 !important;
+    border-top: 0;
+    border-bottom: 1px solid #dce8d6;
+}
+
+.admin-table-section-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 68px;
+    padding: 14px 16px;
+    border-left: 6px solid #d8dfd4;
+    background: #f6f8f4;
+}
+
+.admin-table-section-content strong,
+.admin-table-section-content span {
+    display: block;
+}
+
+.admin-table-section-content strong {
+    color: #23351f;
+    font-size: 1.05rem;
+    font-weight: 850;
+}
+
+.admin-table-section-content span {
+    margin-top: 2px;
+    color: #64705f;
+}
+
+.admin-table-section-content i {
+    margin-right: 8px;
+}
+
+.admin-group-warning .admin-table-section-content {
+    border-left-color: #f9b234;
+    background: #fff8ea;
+}
+
+.admin-group-success .admin-table-section-content {
+    border-left-color: #3a7d2c;
+    background: #f0f8ed;
+}
+
+.admin-group-danger .admin-table-section-content {
+    border-left-color: #d9534f;
+    background: #fff1f1;
+}
+
+.admin-group-admin .admin-table-section-content {
+    border-left-color: #6c757d;
+    background: #f5f6f7;
 }
 
 .admin-empty-state {

@@ -100,25 +100,16 @@ namespace Doalim_dev.Controllers
                 return NotFound();
 
             var arquivo = usuario.ArquivoComprovacao;
+            var mime = DetectarMimeDocumento(arquivo);
+            var extensao = mime switch
+            {
+                "application/pdf" => "pdf",
+                "image/png" => "png",
+                "image/jpeg" => "jpg",
+                _ => "bin"
+            };
 
-            // Detecta MIME pelos magic bytes
-            string mime;
-            if (arquivo.Length >= 4
-                && arquivo[0] == 0x25 && arquivo[1] == 0x50
-                && arquivo[2] == 0x44 && arquivo[3] == 0x46)
-            {
-                mime = "application/pdf";   // %PDF
-            }
-            else if (arquivo.Length >= 4
-                && arquivo[0] == 0x89 && arquivo[1] == 0x50
-                && arquivo[2] == 0x4E && arquivo[3] == 0x47)
-            {
-                mime = "image/png";          // PNG
-            }
-            else
-            {
-                mime = "image/jpeg";         // fallback JPEG
-            }
+            Response.Headers.ContentDisposition = $"inline; filename=\"comprovacao-{id}.{extensao}\"";
 
             return File(arquivo, mime);
         }
@@ -753,6 +744,25 @@ namespace Doalim_dev.Controllers
             using var ms = new MemoryStream();
             await arquivo.CopyToAsync(ms);
             return (ms.ToArray(), null);
+        }
+
+        private static string DetectarMimeDocumento(byte[] arquivo)
+        {
+            if (arquivo.Length >= 4
+                && arquivo[0] == 0x25 && arquivo[1] == 0x50
+                && arquivo[2] == 0x44 && arquivo[3] == 0x46)
+                return "application/pdf";
+
+            if (arquivo.Length >= 4
+                && arquivo[0] == 0x89 && arquivo[1] == 0x50
+                && arquivo[2] == 0x4E && arquivo[3] == 0x47)
+                return "image/png";
+
+            if (arquivo.Length >= 2
+                && arquivo[0] == 0xFF && arquivo[1] == 0xD8)
+                return "image/jpeg";
+
+            return "application/octet-stream";
         }
 
         private async Task PopularMeuPerfilViewBagAsync(int usuarioId)
