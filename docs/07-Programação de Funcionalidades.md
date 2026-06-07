@@ -40,7 +40,7 @@ A tabela a seguir é um exemplo de como ela deverá ser preenchida considerando 
 # Instruções de acesso
 
 URL de acesso
-Link: doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net
+Link: [doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net](https://doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net/)
 
 # Usuários com acessos restritos
 
