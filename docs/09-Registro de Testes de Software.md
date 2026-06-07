@@ -96,17 +96,17 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT16 – Recebimento de Notificações** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-009 - A aplicação deve notificar os usuários sobre aprovação ou recusa de reservas, lembretes de retirada e doações expiradas. |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/12aefef0-0190-4ff8-893e-83326eaed0fd |
 
 | **Caso de Teste** 	| **CT17 – Relatório de Impacto - Doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/d4930db5-d36d-43f8-875f-cf99deb805fd |
 
 | **Caso de Teste** 	| **CT18 – Relatório de Impacto - Beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-010 - A aplicação deve gerar relatórios de impacto exibindo o volume total de produtos doados, volume total de beneficiários atendidos, volume total de reservas retiradas, e quantidade de beneficiários e doadores cadastrados na plataforma. |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/d4930db5-d36d-43f8-875f-cf99deb805fd |
 
 | **Caso de Teste** 	| **CT19 – Acessos ao perfil público do beneficiário** 	|
 |:---:	|:---:	|
@@ -126,7 +126,7 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT22 – Acesso a APIs externas** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-001 - A aplicação deve conseguir acessar API's. |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/df698766-f71a-4d11-a475-87a10fdf49f3 |
 
 | **Caso de Teste** 	| **CT23 – Tecnologias utilizadas no desenvolvimento** 	|
 |:---:	|:---:	|
