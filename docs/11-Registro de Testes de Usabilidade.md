@@ -85,11 +85,11 @@
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   |  |  |  |  |  |  |      
-| Usuário 2   |  |  |  |  |  |  |      
-| Usuário 3   |  |  |  |  |  |  | 
-| Usuário 4   |  |  |  |  |  |  | 
-| Usuário 5   |  |  |  |  |  |  | 
+| Usuário 1   | 40 | 6 | Sim | Nenhum | Confiante. Acessou o perfil público rapidamente e encontrou a opção de avaliação sem dificuldade. |
+| Usuário 2   | 55 | 8 | Sim | Nenhum | Satisfeito. Visualizou as informações do usuário e conseguiu realizar a avaliação com facilidade. |
+| Usuário 3   | 75 | 10 | Sim | Nenhum | Neutro. Leu as informações do perfil antes de avaliar, mas achou o processo compreensível. |
+| Usuário 4   | 65 | 9 | Sim | Clique em área incorreta | Confuso no início. Clicou em uma área do perfil antes de encontrar o botão correto de avaliação. |
+| Usuário 5   | 95 | 13 | Sim | Clique em voltar acidentalmente | Confuso. Voltou para a tela anterior sem querer, mas conseguiu retornar ao perfil e concluir a avaliação. |
 
 ## CTU-10 –  Recebimento e leitura de notificações
 
@@ -127,11 +127,11 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 |  |  |  |  |  |  |  |
-| Usuário 2 |  |  |  |  |  |  |  |
-| Usuário 3 |  |  |  |  |  |  |  |
-| Usuário 4 |  |  |  |  |  |  |  |
-| Usuário 5 |  |  |  |  |  |  |  |
+| Usuário 1 | Confiante | Concluiu | 65 | 8 | Não | - | Encontrou rapidamente a reserva, confirmou a entrega e visualizou o impacto gerado pela doação. |
+| Usuário 2 | Satisfeito | Concluiu | 78 | 10 | Não | - | Navegou entre os detalhes da entrega e compreendeu facilmente as informações de impacto social. |
+| Usuário 3 | Neutro | Concluiu | 92 | 12 | Sim | Sim | Clicou inicialmente na reserva errada, mas identificou o erro e conseguiu concluir a entrega corretamente. |
+| Usuário 4 | Confiante | Concluiu | 70 | 9 | Não | - | Considerou o processo intuitivo e gostou da visualização dos dados de impacto após a entrega. |
+| Usuário 5 | Confuso | Concluiu | 115 | 15 | Sim | Sim | Teve dificuldade para localizar a opção de finalizar a entrega, mas conseguiu concluir após explorar a interface. |
 
 ### CTU-14 – Chefe de família buscando ajuda alimentar
 
