@@ -57,9 +57,9 @@ Para este projeto foram definidos os seguintes casos de testes a serem aplicados
 
 | **Caso de Teste** 	| **CT08 – Visualização de histórico - Doador** 	|
 |:---:	|:---:	|
-|	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. |
+|	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. <br> RF-011 — A aplicação deve gerar histórico das doações, e relatórios de métricas de doações para o doador, com quantidade de produtos doados, quantidade de reservas retiradas, e para o beneficiário com o status das suas reservas, e no histórico exibe o volume total itens recebidos. |
 | Objetivo do Teste 	| Verificar se o doador consegue visualizar seu histórico de produtos cadastrados para doação. |
-| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de doador <br> - A partir da homepage, clicar em "Meus produtos" <br> - Ao clicar em "Gerenciar" de cada item do histórico, visualizar as informações do produto cadastrado para doação <br>|
+| Passos 	| - Acessar o endereço da aplicação através do navegador de preferência <br> - Efetuar o login com a conta de doador <br> - A partir da homepage, clicar em "Meus produtos" <br> - Ao clicar em "Gerenciar" de cada item do histórico, visualizar as informações do produto cadastrado para doação <br> - |
 |Critério de Êxito | - Visualizar as informações de cada produto cadastrado são exibidas corretamente. <br> - Conseguir acessar as páginas de solicitação de reserva vinculadas. |
 
 | **Caso de Teste** 	| **CT09 – Cadastro de Produto** 	|
