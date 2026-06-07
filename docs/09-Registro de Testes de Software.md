@@ -176,22 +176,38 @@ https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e
 | **Caso de Teste** 	| **CT27 – Compatibilidade entre navegadores** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-007 – A aplicação deve ser compatível com os principais navegadores (Chrome, Firefox e Edge). |
-|Registro de evidência |  |
+|Registro de evidência |  | 
+
+[[https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e](https://github.com/user-attachments/assets/4edb610d-5093-41bd-8f40-68a2f11bf6a6)](https://github.com/user-attachments/assets/0350c343-db74-4aec-8eec-6f640020ad38)
+
+ |
 
 | **Caso de Teste** 	| **CT28 – Desempenho da vitrine** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-010 – A aplicação deve ter um tempo de resposta inferior a 5 segundos para buscas e listagens de doações na vitrine em condições normais de tráfego. |
-|Registro de evidência |  |
+|Registro de evidência |  | 
+
+[[https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e](https://github.com/user-attachments/assets/4edb610d-5093-41bd-8f40-68a2f11bf6a6)](https://github.com/user-attachments/assets/1e094183-ab55-45cf-8839-1d12bc25ba3e)
+
+ |
 
 | **Caso de Teste** 	| **CT29 – Acessibilidade básica (WCAG)** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-011 – A aplicação deve seguir diretrizes básicas de acessibilidade (WCAG), possuindo bom contraste de cores e navegação por teclado. |
-|Registro de evidência |  |
+|Registro de evidência |  | 
+
+
+
+ |
 
 | **Caso de Teste** 	| **CT30 – Segurança de senhas e protocolo HTTPS** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-012 – A aplicação deve garantir a segurança dos dados utilizando senhas com hash forte e comunicação via protocolo TLS/HTTPS. |
-|Registro de evidência |  |
+|Registro de evidência |  | 
+
+
+
+ |
 
 ## Relatório de testes de software
 
