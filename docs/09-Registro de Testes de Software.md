@@ -131,7 +131,7 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT23 – Tecnologias utilizadas no desenvolvimento** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-002 - A aplicação deve ser desenvolvida utilizando a linguagem C# no back-end e a tríade JavaScript, HTML e CSS (com framework Bootstrap) no front-end. |
-|Registro de evidência |  |
+|Registro de evidência | https://github.com/user-attachments/assets/86b6fb43-1a20-46a3-8630-0a0284bc0e77 |
 
 | **Caso de Teste** 	| **CT24 – Analisar responsividade da aplicação (Mobile-first)** 	|
 |:---:	|:---:	|
