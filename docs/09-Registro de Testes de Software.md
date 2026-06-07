@@ -33,27 +33,27 @@
 | **Caso de Teste** 	| **CT07 – Visualização de histórico - Beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-006 - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento |
-|Registro de evidência | [![CT07e11](https://img.youtube.com/vi/opH8s5UxpqU.jpg)](https://youtu.be/opH8s5UxpqU) |
+|Registro de evidência | https://github.com/user-attachments/assets/6dc22bf7-f072-4280-a135-64b985900e6e |
 
 | **Caso de Teste** 	| **CT08 – Visualização de histórico - Doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. |
-|Registro de evidência | https://github.com/user-attachments/assets/0538bcf1-190d-40d6-84e5-9d85a45edefb |
+|Registro de evidência | https://github.com/user-attachments/assets/34bc3ca3-86ae-4993-86ba-cd3dcd15b57d |
 
 | **Caso de Teste** 	| **CT09 – Cadastro de Produto** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-004 – A aplicação deve permitir que o doador cadastre itens para doação com as informações dos produtos. RF-012 A aplicação deve permitir ao doador delimitar no item doado a quantidade que cada classe de beneficiário pode retirar do item. |
-|Registro de evidência | https://github.com/user-attachments/assets/cde0fe8a-a0d7-4bad-a74c-5d1ffb3c77dd |
+|Registro de evidência | https://github.com/user-attachments/assets/5108aaa1-0c32-409c-b7ac-a9cb8c444513 |
 
 | **Caso de Teste** 	| **CT10 – Visualizar Vitrine** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-005 - A aplicação deve exibir uma vitrine em tempo real das doações disponíveis, permitindo que o beneficiário possa realizar filtros. |
-|Registro de evidência | ![CT10-Vitrine](https://github.com/user-attachments/assets/1a4d159c-a9e1-4250-ba00-cadd380feddf) |
+|Registro de evidência | https://github.com/user-attachments/assets/4c341564-ae23-4e6a-a03c-3c50a5ce163b |
 
 | **Caso de Teste** 	| **CT11 – Reserva de Produto** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-006 - A aplicação deve permitir que o beneficiário solicite e reserve uma doação, alterando o status do item no sistema para evitar que outra pessoa reserve o mesmo alimento |
-|Registro de evidência | [![CT07e11](https://img.youtube.com/vi/opH8s5UxpqU.jpg)](https://youtu.be/opH8s5UxpqU) |
+|Registro de evidência | https://github.com/user-attachments/assets/05c5c3e0-8bb8-478e-8435-f0cfaeb75a79 |
 
 | **Caso de Teste** 	| **CT12 – Confirmação da Data de Retirada** 	|
 |:---:	|:---:	|
