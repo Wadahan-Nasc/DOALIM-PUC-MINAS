@@ -54,11 +54,11 @@
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   |  |  |  |  |  |  |      
-| Usuário 2   |  |  |  |  |  |  |      
-| Usuário 3   |  |  |  |  |  |  | 
-| Usuário 4   |  |  |  |  |  |  | 
-| Usuário 5   |  |  |  |  |  |  | 
+| Usuário 1   | 30 | 5 | Sim | Nenhum | Confiante. Acessou a notificação e confirmou a retirada sem atritos. |     
+| Usuário 2   | 50 | 7 | Sim | Nenhum | Satisfeito. O componente de calendário facilitou a escolha da data. |   
+| Usuário 3   | 85 | 11 | Sim | Tentou selecionar uma data retroativa. | Neutro. Entendeu o erro após o calendário bloquear o clique em dias anteriores. |
+| Usuário 4   | 55 | 7 | Sim | Nenhum | Satisfeito. Achou o painel intuitivo e o fluxo de notificação claro. |
+| Usuário 5   | 130 | 14 | Sim | Não localizou o botão de confirmação na tela. | Confuso. Só finalizou a tarefa após rolar a página até o final. |
 
 ## CTU-07 –  Validar Entrega com Código
 
