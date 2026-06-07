@@ -178,7 +178,7 @@ https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e
 |	Requisito Associado 	| RNF-007 – A aplicação deve ser compatível com os principais navegadores (Chrome, Firefox e Edge). |
 |Registro de evidência |  | 
 
-[[[https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e](https://github.com/user-attachments/assets/4edb610d-5093-41bd-8f40-68a2f11bf6a6)](https://github.com/user-attachments/assets/0350c343-db74-4aec-8eec-6f640020ad38)](https://github.com/user-attachments/assets/001acaea-da7c-4753-8663-acf3472c4c6c)
+https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e
 
  |
 
