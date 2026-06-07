@@ -64,11 +64,11 @@
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   |  |  |  |  |  |  |      
-| Usuário 2   |  |  |  |  |  |  |      
-| Usuário 3   |  |  |  |  |  |  | 
-| Usuário 4   |  |  |  |  |  |  | 
-| Usuário 5   |  |  |  |  |  |  | 
+| Usuário 1   | 35 | 5 | Sim | Nenhum | Confiante. Acessou a notificação e confirmou a retirada sem atritos. |  |      
+| Usuário 2   | 40 | 6 | Sim | Nenhum | Satisfeito. O componente de calendário facilitou a escolha da data. |  |      
+| Usuário 3   | 120 | 15 | Sim | Tentou selecionar uma data retroativa. | Neutro. Entendeu o erro após o calendário bloquear o clique em dias anteriores. |  | 
+| Usuário 4   | 64 | 8 | Sim | Nenhum | Satisfeito. Achou o painel intuitivo e o fluxo de notificação claro. |  | 
+| Usuário 5   | 130 | 14 | Sim | Não localizou o botão de confirmação na tela. | Confuso. Só finalizou a tarefa após rolar a página até o final. |  | 
 
 
 ## CTU-08 – Moderação de Usuários e Documentos
@@ -95,11 +95,11 @@
 
 | **Usuário**  | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1   |  |  |  |  |  |  |      
-| Usuário 2   |  |  |  |  |  |  |      
-| Usuário 3   |  |  |  |  |  |  | 
-| Usuário 4   |  |  |  |  |  |  | 
-| Usuário 5   |  |  |  |  |  |  | 
+| Usuário 1   | 30 | 5 | Sim | Nenhum | Confiante. Reconheceu o padrão de UI similar a aplicativos de delivery. |  |      
+| Usuário 2   | 50 | 8 | Sim | Nenhum | Satisfeito. Utilizou o campo de texto para deixar um comentário qualitativo. |  |      
+| Usuário 3   | 90 | 11 | Sim | Não visualizou a área para inserção de texto. | Neutro. Atribuiu as estrelas, mas finalizou sem perceber a possibilidade de comentar. |  | 
+| Usuário 4   | 45 | 7 | Sim | Nenhum | Satisfeito. Validou as informações públicas do usuário antes de realizar a avaliação. |  | 
+| Usuário 5   | 130 | 15 | Sim | Tocou na quantidade incorreta de estrelas. | Confuso. A área de toque das estrelas (touch target) no mobile gerou um preenchimento acidental. |  | 
 
 ### Registros baseados em cenários 
 
@@ -137,11 +137,11 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 |  |  |  |  |  |  |  |
-| Usuário 2 |  |  |  |  |  |  |  |
-| Usuário 3 |  |  |  |  |  |  |  |
-| Usuário 4 |  |  |  |  |  |  |  |
-| Usuário 5 |  |  |  |  |  |  |  |
+| Usuário 1 | Confiante | Concluiu | 85 | 10 | Não | N/A | Encontrou a categoria rapidamente usando a barra de pesquisa. |
+| Usuário 2 | Confiante | Concluiu | 110 | 15 | Não | N/A | Usou filtro de distância e solicitou para a ONG sem erros. |
+| Usuário 3 | Neutro | Concluiu | 160 | 18 | Não | N/A | Olhou vários produtos antes de decidir qual reservar. |
+| Usuário 4 | Satisfeito | Concluiu | 95 | 12 | Não | N/A | Fez o processo de solicitação de forma objetiva. |
+| Usuário 5 | Confuso | Concluiu | 215 | 22 | Sim | Sim | Perdeu tempo na rolagem, mas achou o botão de reserva. |
 
 ### CTU-15 – Auditoria e segurança da plataforma
 
