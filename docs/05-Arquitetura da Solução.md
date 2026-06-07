@@ -38,5 +38,7 @@ APIs externas: a definir.
 
 ## Hospedagem
 
-doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net
+URL de acesso
+Link: [doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net](https://doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net/)
+
 
