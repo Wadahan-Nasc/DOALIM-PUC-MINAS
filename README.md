@@ -24,13 +24,24 @@ O objetivo primordial deste projeto é estabelecer um ecossistema digital que mi
 ## Instruções de Instalação, Execução e Acesso
 
 **Acesso rápido (produção)**
-* URL da aplicação: https://seu-dominio.com/caminho
-* Status: online / instável / em manutenção (atualize conforme o caso)
+* URL de acesso
+Link: [doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net](https://doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net/)
+
+* Status: online 
 * Ambiente: produção / homologação
 
 **Usuário(s) de teste (se houver):**
 * Login: admin@doalim.com
 * Senha: Admin@123
+
+* doalim.doadorpf01@demo.com
+* Senha: Demo@123
+* doalim.doadorpj01@demo.com
+* Senha: Demo@123
+* doalim.benefpf01@demo.com
+* Senha: Demo@123
+* doalim.benefpj01@demo.com
+* Senha: Demo@123
 
 # Documentação
 
