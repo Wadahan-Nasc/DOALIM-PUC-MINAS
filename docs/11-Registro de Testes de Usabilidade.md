@@ -167,11 +167,11 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 | Confuso | Concluiu | 310 | 28 | Sim | Sim | Teve dificuldade inicial com os requisitos de complexidade da senha. As dicas na tela guiaram a correção. |
-| Usuário 2 | Neutro | Concluiu | 245 | 20 | Não | n/a | Leu as informações com calma. Achou o botão "Solicitar Reserva" facilmente na vitrine. |
-| Usuário 3 | Estressado | Concluiu | 340 | 35 | Sim | Sim |Aplicou filtros incorretos na vitrine e teve dificuldade para encontrar a opção de "Limpar Filtros", atrasando a busca.|
-| Usuário 4 | Confiante | Concluiu | 200 | 18 | Não | n/a | Mesmo com pouca experiência, achou a interface limpa e clicou direto na foto do alimento de interesse para solicitar a reserva. |
-| Usuário 5 | Estressado | Não concluiu | 400 | 42 | Sim | n/a |Desistiu no momento do cadastro ao não conseguir formatar o telefone corretamente. Ponto de atenção crítico na máscara do input. |
+| Usuário 1 | Confiante | Concluiu | 75 | 10 | Não | N/A | Verificou as abas de denúncias rapidamente. |
+| Usuário 2 | Satisfeito | Concluiu | 90 | 11 | Não | N/A | Analisou métricas gerais com facilidade na Dashboard. |
+| Usuário 3 | Confiante | Concluiu | 95 | 12 | Não | N/A | Aprovou ONG e validou números do sistema em pouco tempo. |
+| Usuário 4 | Neutro | Concluiu | 120 | 15 | Sim | Sim | Clicou na página de perfis, retornou para as aprovações pendentes. |
+| Usuário 5 | Satisfeito | Não concluiu | 105 | 13 | Não | N/A | Gerou a exportação de dados do sistema com sucesso. |
 
 
 ### CTU-18 – Recuperação de senha e reacesso 
