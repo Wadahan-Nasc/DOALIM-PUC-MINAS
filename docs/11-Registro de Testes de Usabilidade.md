@@ -75,11 +75,11 @@
 
 | **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
-| Usuário 1 | 95 | 9 | Sim |Nenhum erro crítico. Demorou um pouco para localizar o botão de baixar documento. | O painel é simples, mas o botão de download poderia estar mais destacado. |
-| Usuário 2 | 70 | 7 | Sim | Nenhum erro. | O processo é objetivo e fácil de entender. A atualização de status ficou clara. |
-| Usuário 3 | 130 | 12 | Sim | Clicou inicialmente no perfil errado e teve dificuldade para encontrar a opção de rejeição. | O processo é objetivo e fácil de entender. A atualização de status ficou clara. |
-| Usuário 4 | 85 | 8 | Sim | Esqueceu de preencher a justificativa ao rejeitar o documento na primeira tentativa. | A mensagem de erro ajudou a entender o que faltava preencher. |
-| Usuário 5 | 110 | 10 | Sim | Teve dúvida se a alteração havia sido salva corretamente. | Seria interessante exibir uma mensagem de confirmação mais visível após salvar. |
+| Usuário 1 | 35 | 5 | Sim | Nenhum | Confiante. Realizou a aprovação do usuário rapidamente pelo painel. |
+| Usuário 2 | 45 | 7 | Sim | Nenhum | Confiante. Baixou o documento, revisou o anexo e efetuou a aprovação. |
+| Usuário 3 | 70 | 9 | Sim | Nenhum | Neutro. Leu os detalhes textuais do cadastro antes de confirmar o aceite. |
+| Usuário 4 | 50 | 8 | Sim | Nenhum | Satisfeito. Considerou simples o fluxo de rejeitar usuário inserindo uma justificativa. |
+| Usuário 5 | 110 | 14 | Sim | Clicou em aprovar por acidente. | Confuso. A proximidade dos botões gerou um clique incorreto, mas conseguiu cancelar. |
 
 ## CTU-09 –  Visualizar Perfil Público e Avaliar Usuário
 
