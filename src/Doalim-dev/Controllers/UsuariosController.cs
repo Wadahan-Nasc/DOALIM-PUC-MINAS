@@ -344,14 +344,14 @@ namespace Doalim_dev.Controllers
 
             if (UsuarioRegras.PrecisaComprovacao(usuario))
             {
-                if (removerComprovacao)
-                {
-                    usuario.ArquivoComprovacao = null;
-                    usuario.StatusVerificacao = StatusVerificacao.Pendente;
-                }
-                else if (comprovacaoValida.conteudo != null)
+                if (comprovacaoValida.conteudo != null)
                 {
                     usuario.ArquivoComprovacao = comprovacaoValida.conteudo;
+                    usuario.StatusVerificacao = StatusVerificacao.Pendente;
+                }
+                else if (removerComprovacao)
+                {
+                    usuario.ArquivoComprovacao = null;
                     usuario.StatusVerificacao = StatusVerificacao.Pendente;
                 }
             }
@@ -379,7 +379,9 @@ namespace Doalim_dev.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = "Perfil atualizado com sucesso.";
+            TempData["Sucesso"] = comprovacaoValida.conteudo != null
+                ? "Comprovação atualizada com sucesso. Aguarde a análise do administrador."
+                : "Perfil atualizado com sucesso.";
             return RedirectToAction(nameof(MeuPerfil));
         }
 
