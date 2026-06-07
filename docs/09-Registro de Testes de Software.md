@@ -3,32 +3,50 @@
 | **Caso de Teste** 	| **CT01 – Cadastrar perfil** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. RF-002 - A aplicação deve exigir o aceite digital obrigatório do "Termo de Responsabilidade" (baseado na Lei 14.016/2020) no momento do cadastro do doador. |
-|Registro de evidência | https://github.com/user-attachments/assets/35e0b4c6-73a3-4498-86c7-97cf567e9dee |
+|Registro de evidência | Etapa 3 https://github.com/user-attachments/assets/35e0b4c6-73a3-4498-86c7-97cf567e9dee - Etapa 4 
+
+https://github.com/user-attachments/assets/3ea3ba81-21c1-4ed2-a395-0987335692ec
+
+ |
 
 | **Caso de Teste** 	| **CT02 – Efetuar Login** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência | https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869 |
+|Registro de evidência | Etapa 3 https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869  - Etapa 4 
+
+https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
+
+|
 
 | **Caso de Teste** 	| **CT03 – Efetuar Logout** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência | https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869 |
+|Registro de evidência | Etapa 3 https://github.com/user-attachments/assets/ba11266b-d752-4563-8ba4-37368858f869  - Etapa 4 
+
+https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
+
+|
 
 | **Caso de Teste** 	| **CT04 – Recuperar Senha** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-001 - A aplicação deve permitir que usuários do tipo Doador e Beneficiário realizem cadastro, login, logout e recuperação de senha. |
-|Registro de evidência |https://github.com/user-attachments/assets/9ed9e6e5-18e8-4744-bcfc-6c5854633f13 |
+|Registro de evidência |https://github.com/user-attachments/assets/9ed9e6e5-18e8-4744-bcfc-6c5854633f13  - Etapa 4 
+
+https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
+
+|
 
 | **Caso de Teste** 	| **CT05 – Edição de Perfil** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
-|Registro de evidência | https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3 |
+|Registro de evidência |Etapa 3 https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3  - Etapa 4 https://github.com/user-attachments/assets/bdcf2c59-4057-4d64-ab29-4fbf965b1d96
+||
 
 | **Caso de Teste** 	| **CT06 – Envio de documentos para verificação** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	|RF-003 - A aplicação deve permitir que o usuário gerencie seu perfil, incluindo edição de dados e envio de documentos para verificação do administrador. |
-|Registro de evidência | https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3 |
+|Registro de evidência |Etapa 3 https://github.com/user-attachments/assets/03d0f0f8-33bc-40c1-9367-62bb3c09bbf3   - Etapa 4 https://github.com/user-attachments/assets/bdcf2c59-4057-4d64-ab29-4fbf965b1d96
+|
 
 | **Caso de Teste** 	| **CT07 – Visualização de histórico - Beneficiário** 	|
 |:---:	|:---:	|
