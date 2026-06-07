@@ -4,21 +4,21 @@
 
 | **Usuário**   | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|--------------------|---------------------------------|-----------------|------------------------|------------------------------|
-| Usuário 1    |   210 |             13|     Sim| Nenhum erro foi cometido.|Demorou um pouco pra prencher o cadastro, mas finalizou normal.|                     |      
-| Usuário 2    |   100|             12|     Sim| Nenhum erro foi cometido.|Finalizou o cadastro normal.|                     |      
-| Usuário 3    |190|20|Sim| Erro o campo de CPF/CNPJ.|Não sabia que precisava selecionar tipo de usuário, para habilitar o campo CPF, mas conseguiu concluir após explorar a tela.|                     |  
-| Usuário 4    |   90|             11|     Sim| Nenhum erro foi cometido.|Finalizou o cadastro normal, com o aceite do termo de responsabilidade.  |                     | 
-| Usuário 5    |   95|             11|     Sim| Nenhum erro foi cometido.| Finalizou o cadastro normal. |                     | 
+| Usuário 1    |45|10|Sim|Nenhum erro foi cometido.|Confiante. Preenchimento rápido, mas marcou o termo sem ler os detalhes.                     |      
+| Usuário 2    |95|12|Sim|Nenhum erro foi cometido.|Neutro. Leu as descrições dos campos com calma antes de avançar.|                     |      
+| Usuário 3    |180|18|Sim|Tentativa de avanço sem preencher campo obrigatório.|Confuso inicialmente. O aviso de erro ajudou a corrigir e finalizar.|                     |  
+| Usuário 4    |60|11|Sim|Nenhum erro foi cometido.|Satisfeito. Achou o formulário limpo e direto ao ponto.|                     | 
+| Usuário 5    |320|25|Não|Travou na formatação exigida para a senha.|Estressado. Abandonou o cadastro devido à dificuldade com os requisitos da senha.|                     | 
 
 ## CTU-02 – Edição de perfil e envio de documentos
 
 | **Usuário** | **Tempo Total (seg)** | **Quantidade de cliques** | **Tarefa foi concluída?** (Sim/Não) | **Erros Cometidos** | **Feedback do Usuário** |
 |-------------|----------------------|--------------------------|--------------------------------------|---------------------|--------------------------|
-| Usuário 1 | 185 | 16 | Sim | Dificuldade para localizar botão de salvar e anexar documento | Achou o processo um pouco confuso no início, mas conseguiu concluir após explorar a tela. |
-| Usuário 2 | 72 | 9 | Sim | Nenhum erro relevante | Considerou a funcionalidade simples e intuitiva. |
-| Usuário 3 | 260 | 22 | Sim | Tentou anexar documento no local incorreto e não encontrou confirmação de envio | Relatou dificuldade para entender os ícones e pediu letras maiores e instruções mais claras. |
-| Usuário 4 | 64 | 8 | Sim | Nenhum erro relevante | Processo rápido e objetivo, sem dificuldades durante o teste. |
-| Usuário 5 | 78 | 10 | Sim | Pequena demora para localizar a área de upload do documento | Interface agradável e funcional, mas sugeriu deixar a área de envio de arquivos mais destacada visualmente. |
+| Usuário 1 | 50 | 8 | Sim |  Nenhum erro relevante. | Confiante. Realizou o upload do documento sem hesitação. |
+| Usuário 2 | 85 | 10| Sim | Nenhum erro relevante. | Satisfeito. Validou o preview do documento antes de salvar. |
+| Usuário 3 | 140 | 15 | Sim | Clicou no ícone de foto em vez de arquivo. | Neutro. Percebeu o engano rapidamente e anexou o arquivo correto. |
+| Usuário 4 | 65 | 9| Sim | Nenhum erro relevante. | Confiante. Fluxo rápido e sem atritos operacionais. |
+| Usuário 5 | 210 | 20 | Sim | Dificuldade em localizar o arquivo no aparelho. | Confuso. Perdeu tempo navegando na galeria do celular. |
 
 ## CTU-03 – Cadastro de Produto para Doação 
 
