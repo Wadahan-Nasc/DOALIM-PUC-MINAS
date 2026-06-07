@@ -111,17 +111,29 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT19 – Acessos ao perfil público do beneficiário** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-013 - A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
-|Registro de evidência |  |
+|Registro de evidência | 
+
+https://github.com/user-attachments/assets/e5a7ccd7-3838-40d4-b8ec-40092058bea0
+
+ |
 
 | **Caso de Teste** 	| **CT20 – Acessos ao perfil público do doador** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-013 - A aplicação deve permitir que doador e receptor acessem o perfil um do outro para visualização dos dados públicos. |
-|Registro de evidência |  |
+|Registro de evidência | 
+
+https://github.com/user-attachments/assets/34c04ff8-d72b-4101-8b94-9d21f9871513
+
+ |
 
 | **Caso de Teste** 	| **CT21 – Avaliação de Usuário (Doador/Beneficiário)** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RF-014 - A aplicação deve permitir que doador e beneficiário avaliem um ao outro com 1 a 5 estrelas após a conclusão da retirada. |
-|Registro de evidência |  |
+|Registro de evidência | 
+
+https://github.com/user-attachments/assets/9447d21b-fc0d-4a19-9a51-fe084e827143
+
+ |
 
 | **Caso de Teste** 	| **CT22 – Acesso a APIs externas** 	|
 |:---:	|:---:	|
@@ -136,12 +148,20 @@ https://github.com/user-attachments/assets/2b11eacd-7624-4397-8ef9-fdc3b0cce5f5
 | **Caso de Teste** 	| **CT24 – Analisar responsividade da aplicação (Mobile-first)** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-004 - A aplicação deve possuir uma interface "mobile-first", sendo responsiva e adaptável a telas de celulares, considerando que muitos receptores usarão o sistema via smartphone. |
-|Registro de evidência |  |
+|Registro de evidência | 
+
+https://github.com/user-attachments/assets/b084d891-38a2-42df-b515-5ccde3d11a0d
+
+ |
 
 | **Caso de Teste** 	| **CT25 – Banco de dados utilizando SQL Server** 	|
 |:---:	|:---:	|
 |	Requisito Associado 	| RNF-008 - A aplicação deve utilizar o Microsoft SQL Server para armazenamento de dados. |
-|Registro de evidência |  |
+|Registro de evidência | 
+
+https://github.com/user-attachments/assets/87a659cc-3244-4981-ab15-1cda72a4bc8e
+
+ |
 
 | **Caso de Teste** 	| **CT26 – Prevenção de double booking** 	|
 |:---:	|:---:	|
