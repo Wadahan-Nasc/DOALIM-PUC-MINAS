@@ -147,21 +147,21 @@
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 |  |  |  |  |  |  |  |
-| Usuário 2 |  |  |  |  |  |  |  |
-| Usuário 3 |  |  |  |  |  |  |  |
-| Usuário 4 |  |  |  |  |  |  |  |
-| Usuário 5 |  |  |  |  |  |  |  |
+| Usuário 1 | Confiante | Concluiu | 90 | 12 | Não | N/A | Clicou na notificação, gerou código e aprovou entrega. |
+| Usuário 2 | Satisfeito | Concluiu | 115 | 15 | Não | N/A | Achou o fluxo de validação da ONG excelente. |
+| Usuário 3 | Neutro |  | Concluiu | 180 | 20 | Sim | Sim | Esqueceu de preencher a data de retirada no calendário. Corrigiu. |
+| Usuário 4 | Confiante | Concluiu | 140 | 18 | Não | N/A | Fluxo perfeito. Validou código e já puxou o relatório de impacto. |
+| Usuário 5 | Confuso | Concluiu | 230 | 24 | Sim | Sim | Digitou código de entrega errado na primeira tentativa. |
 
 ### CTU-16 – Processo de conclusão da doação e feedback final
 
 | **Usuário**   | **Resposta emocional**   | **Execução**  | **Tempo (seg)**  |  **Ações/Cliques**  | **Cometeu erro?** | **Se recuperou do erro?**  | **Observações** | 
 | :--------: | :--------: |  :--------: |  :--------: | :--------: | :--------: | :--------: | :--------: |
-| Usuário 1 |  |  |  |  |  |  |  |
-| Usuário 2 |  |  |  |  |  |  |  |
-| Usuário 3 |  |  |  |  |  |  |  |
-| Usuário 4 |  |  |  |  |  |  |  |
-| Usuário 5 |  |  |  |  |  |  |  |
+| Usuário 1 | Confiante | Concluiu | 100 | 12 | Não | N/A | Processo de busca e reserva pelo celular foi eficiente. |
+| Usuário 2 | Neutro | Concluiu | 145 | 15 | Não | N/A | Leu com atenção os dados do doador para saber onde buscar. |
+| Usuário 3 | Neutro | Concluiu | 210 | 22 | Sim | Sim | Perdeu-se no mobile, achou a reserva usando o menu sanduíche. |
+| Usuário 4 | Satisfeito | Concluiu | 120 | 14 | Não | N/A | Verificou o status da reserva e anotou o código gerado. |
+| Usuário 5 | Estressado | Concluiu | 310 | 28 | Sim | Sim | Teve dificuldade com o touch em botões pequenos, mas finalizou. |
 
 ### CTU-17 – Primeiro acesso de usuário com baixo letramento digital 
 
