@@ -38,5 +38,5 @@ APIs externas: a definir.
 
 ## Hospedagem
 
-Hospedagem e o lançamento da plataforma ainda não foi feita.
+doalim-hahvdseqbrefcmcm.brazilsouth-01.azurewebsites.net
 
